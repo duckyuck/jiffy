@@ -1,8 +1,7 @@
-(ns jiffy.temporal.unsupported-temporal-type-exception
-  (:require [jiffy.dev.wip :refer [wip]]
-            [jiffy.date-time-exception :as DateTimeException]))
-
-(defrecord UnsupportedTemporalTypeException [])
+(ns jiffy.temporal.unsupported-temporal-type-exception)
 
 ;; FIXME: no implementation found from inherited class class java.time.DateTimeException
-
+(defn UnsupportedTemporalTypeException
+  ([s] (UnsupportedTemporalTypeException s nil nil))
+  ([s m] (UnsupportedTemporalTypeException s m nil))
+  ([s m e] (ex-info s (or m {}))))

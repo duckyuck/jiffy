@@ -29,8 +29,10 @@
   (millis [this] (-millis this))
   (instant [this] (-instant this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L160
-(defn systemUTC [] (wip ::systemUTC))
+(defmulti -system-utc identity)
+
+(defn systemUTC []
+  (-system-utc :system-utc))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L183
 (defn systemDefaultZone [] (wip ::systemDefaultZone))

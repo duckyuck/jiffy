@@ -1,9 +1,10 @@
 (ns jiffy.local-time
-  (:require [jiffy.dev.wip :refer [wip]]
-            [jiffy.time-comparable :as TimeComparable]
-            [jiffy.temporal.temporal :as Temporal]
+  (:require [jiffy.clock :as Clock]
+            [jiffy.dev.wip :refer [wip]]
             [jiffy.temporal.temporal-accessor :as TemporalAccessor]
-            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]))
+            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]
+            [jiffy.temporal.temporal :as Temporal]
+            [jiffy.time-comparable :as TimeComparable]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java
 (defprotocol ILocalTime
@@ -214,13 +215,19 @@
   TemporalAdjuster/ITemporalAdjuster
   (adjustInto [this temporal] (-adjust-into this temporal)))
 
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L359
+(defn ofInstant [instant zone] (wip ::ofInstant))
+
 (defn now
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L247
-  ([] (wip ::now))
+  ([] (now (Clock/systemDefaultZone)))
 
   ;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L263
-  ([now--overloaded-param] (wip ::now)))
+  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L263
+  ([zone-or-clock]
+   (case (type zone-or-clock)
+     ZoneId (now (Clock/system zone-or-clock))
+     Clock (ofInstant (Clock/instant zone-or-clock)
+                      (Clock/getZone zone-or-clock)))))
 
 (defn of
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L295
@@ -231,9 +238,6 @@
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L338
   ([hour minute second nano-of-second] (wip ::of)))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L359
-(defn ofInstant [instant zone] (wip ::ofInstant))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L379
 (defn ofSecondOfDay [second-of-day] (wip ::ofSecondOfDay))
@@ -263,41 +267,16 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L145
 (def NOON ::NOON--not-implemented)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L163
-(def HOURS_PER_DAY ::HOURS_PER_DAY--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L167
-(def MINUTES_PER_HOUR ::MINUTES_PER_HOUR--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L171
-(def MINUTES_PER_DAY ::MINUTES_PER_DAY--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L175
-(def SECONDS_PER_MINUTE ::SECONDS_PER_MINUTE--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L179
-(def SECONDS_PER_HOUR ::SECONDS_PER_HOUR--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L183
-(def SECONDS_PER_DAY ::SECONDS_PER_DAY--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L187
-(def MILLIS_PER_DAY ::MILLIS_PER_DAY--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L191
-(def MICROS_PER_DAY ::MICROS_PER_DAY--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L195
-(def NANOS_PER_MILLI ::NANOS_PER_MILLI--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L199
-(def NANOS_PER_SECOND ::NANOS_PER_SECOND--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L203
-(def NANOS_PER_MINUTE ::NANOS_PER_MINUTE--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L207
-(def NANOS_PER_HOUR ::NANOS_PER_HOUR--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L211
-(def NANOS_PER_DAY ::NANOS_PER_DAY--not-implemented)
+(def HOURS_PER_DAY 24)
+(def MINUTES_PER_HOUR 60)
+(def MINUTES_PER_DAY (* MINUTES_PER_HOUR HOURS_PER_DAY))
+(def SECONDS_PER_MINUTE 60)
+(def SECONDS_PER_HOUR (* SECONDS_PER_MINUTE MINUTES_PER_HOUR))
+(def SECONDS_PER_DAY (* SECONDS_PER_HOUR HOURS_PER_DAY))
+(def MILLIS_PER_DAY (* SECONDS_PER_DAY 1000))
+(def MICROS_PER_DAY (* SECONDS_PER_DAY 1000000))
+(def NANOS_PER_MILLI 1000000)
+(def NANOS_PER_SECOND 1000000000)
+(def NANOS_PER_MINUTE (* NANOS_PER_SECOND SECONDS_PER_MINUTE))
+(def NANOS_PER_HOUR (* NANOS_PER_MINUTE MINUTES_PER_HOUR))
+(def NANOS_PER_DAY (* NANOS_PER_HOUR HOURS_PER_DAY))
