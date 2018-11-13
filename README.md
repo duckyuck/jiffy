@@ -1,6 +1,6 @@
 # jiffy
 
-Jiffy is a port of Java Time to Clojurescript. As far as possibble it aims at being at parity with Java API.
+Jiffy is a port of Java Time to Clojurescript. As far as possible it aims at being at parity with Java API.
 
 Jiffy is currently work in progress!
 
@@ -24,10 +24,11 @@ What's left is replacing the function bodies with actual working, beautiful Cloj
 
 ### Stop the rambling. I wanna contribute already!
 
+0. Install [Clojure CLI](https://clojure.org/guides/getting_started) and launch a Clojurescript REPL via `clj -m figwheel.main -b dev -r`
 1. Pick any function in this repository missing an implementation (preferrably in the `jiffy` and `jiffy.temporal` namespaces)
 2. Navigate to the corresponding Java implementation by following the link above the function decleration.
 3. Type corresponding Clojurescript that compiles!
-4. Repeat!
+4. Repeat steps 1 - 4.
 
 Have a look at the `jiffy.instant` namespace. It contains a complete port of the `java.time.Instant`.
 
