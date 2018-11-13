@@ -196,7 +196,8 @@
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L703
   ([this field new-value]
-   (if (instance? field ChronoField/IChronoField)
+   (if-not (instance? field ChronoField/IChronoField)
+     (TemporalField/adjustInto field this new-value)
      (do
        (ChronoField/checkValidValue field new-value)
        (condp = field
@@ -220,7 +221,9 @@
          INSTANT_SECONDS
          (if (= new-value (:seconds this))
            this
-           (create-instant new-value (:nanos this))))))))
+           (create-instant new-value (:nanos this)))
+
+         (throw (UnsupportedTemporalTypeException (str "Unsupported field: " field) {:instant this :field field})))))))
 
 (defn -plus
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L786
@@ -289,7 +292,7 @@
           HOURS (-> (secondsUntil this end) (/ SECONDS_PER_HOUR))
           HALF_DAYS (-> (secondsUntil this end) (/ (* 12 SECONDS_PER_HOUR)))
           DAYS (-> (secondsUntil this end) (/ SECONDS_PER_DAY))
-          (throw (UnsupportedTemporalTypeException (str "Unsupported unit: " unit) {:instant instant :unit unit})))
+          (throw (UnsupportedTemporalTypeException (str "Unsupported unit: " unit) {:instant this :unit unit})))
       (TemporalUnit/between unit this end))))
 
 
