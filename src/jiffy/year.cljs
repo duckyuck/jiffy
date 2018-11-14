@@ -1,9 +1,9 @@
 (ns jiffy.year
   (:require [jiffy.dev.wip :refer [wip]]
-            [jiffy.time-comparable :as TimeComparable]
-            [jiffy.temporal.temporal :as Temporal]
             [jiffy.temporal.temporal-accessor :as TemporalAccessor]
-            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]))
+            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]
+            [jiffy.temporal.temporal :as Temporal]
+            [jiffy.time-comparable :as TimeComparable]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java
 (defprotocol IYear
@@ -174,8 +174,5 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L315
 (defn isLeap [year] (wip ::isLeap))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L141
-(def MIN_VALUE ::MIN_VALUE--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L145
-(def MAX_VALUE ::MAX_VALUE--not-implemented)
+(def MIN_VALUE -999999999)
+(def MAX_VALUE 999999999)
