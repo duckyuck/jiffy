@@ -73,14 +73,16 @@
       (> (Duration/getSeconds unit-dur) SECONDS_PER_DAY)
       (throw (UnsupportedTemporalTypeException "Unit is too large to be used for truncation" {:instant this :unit unit}))
 
-      (-> (NANOS_PER_DAY) (mod dur) zero? not)
+      (-> NANOS_PER_DAY (mod dur) zero? not)
       (throw (UnsupportedTemporalTypeException "Unit must divide into a standard day without remainder" {:instant this :unit unit}))
 
       :else
       (let [nod (-> (mod (:seconds this) SECONDS_PER_DAY)
                     (* NANOS_PER_SECOND)
                     (+ (:nanos this)))
-            result (* (math/floor-div nod dur) dur)]
+            result (-> nod
+                       (math/floor-div dur)
+                       (* dur))]
         (plusNanos this (- result nod))))))
 
 (defn ofEpochSecond
