@@ -198,7 +198,7 @@
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L703
   ([this field new-value]
-   (if-not (instance? field ChronoField/IChronoField)
+   (if-not (instance? ChronoField/IChronoField field)
      (TemporalField/adjustInto field this new-value)
      (do
        (ChronoField/checkValidValue field new-value)
@@ -234,7 +234,7 @@
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L849
   ([this amount-to-add unit]
-   (if (instance? unit ChronoUnit/IChronoUnit)
+   (if (instance? ChronoUnit/IChronoUnit unit)
      (condp = unit
        NANOS (plusNanos this amount-to-add)
        MICROS (--plus this (/ amount-to-add 1000000) (* (mod amount-to-add 1000000) 1000))
@@ -284,7 +284,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1142
 (defn -until [this end-exclusive unit]
   (let [end (from end-exclusive)]
-    (if (instance? unit ChronoUnit/IChronoUnit)
+    (if (instance? ChronoUnit/IChronoUnit unit)
       (condp (= unit)
           NANOS (nanosUntil this end)
           MICROS (-> (nanosUntil this end) (/ 1000))
@@ -312,12 +312,12 @@
   (until [this end-exclusive unit] (-until this end-exclusive unit)))
 
 (defn --is-supported-field [this field]
-  (if (instance? field ChronoField/IChronoField)
+  (if (instance? ChronoField/IChronoField field)
     (some? (some #(= field %) [INSTANT_SECONDS NANO_OF_SECOND MICRO_OF_SECOND MILLI_OF_SECOND]))
     (and field (TemporalField/isSupportedBy field this))))
 
 (defn --is-supported-unit [this unit]
-  (if (instance? unit ChronoUnit/IChronoUnit)
+  (if (instance? ChronoUnit/IChronoUnit unit)
     (or (TemporalUnit/isTimeBased unit) (= unit DAYS))
     (and unit (TemporalUnit/isSupportedBy unit this))))
 
@@ -326,10 +326,10 @@
 ;; TODO: clean up dispatch via multimethods
 (defn -is-supported [this field-or-unit]
   (cond
-    (instance? field-or-unit TemporalField/ITemporalField)
+    (instance? TemporalField/ITemporalField field-or-unit)
     (--is-supported-field this  field-or-unit)
 
-    (instance? field-or-unit TemporalUnit/ITemporalUnit)
+    (instance? TemporalUnit/ITemporalUnit field-or-unit)
     (--is-supported-unit this field-or-unit)
 
     :else
@@ -341,7 +341,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L558
 (defn -get [this field]
-  (if (instance? field ChronoField/IChronoField)
+  (if (instance? ChronoField/IChronoField field)
     (condp = field
       NANO_OF_SECOND (:nanos this)
       MICRO_OF_SECOND (/ (:nanos this) 1000)
@@ -354,7 +354,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L594
 (defn -get-long [this field]
-  (if (instance? field ChronoField/IChronoField)
+  (if (instance? ChronoField/IChronoField field)
     (condp = field
       NANO_OF_SECOND (:nanos this)
       MICRO_OF_SECOND (/ (:nanos this) 1000)
@@ -408,7 +408,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L367
 (defn from [temporal]
-  (if (instance? temporal IInstant)
+  (if (instance? IInstant temporal)
     temporal
     (try
       (ofEpochSecond
