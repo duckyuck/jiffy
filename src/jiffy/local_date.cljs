@@ -1,10 +1,10 @@
 (ns jiffy.local-date
-  (:require [jiffy.dev.wip :refer [wip]]
-            [jiffy.time-comparable :as TimeComparable]
-            [jiffy.chrono.chrono-local-date :as ChronoLocalDate]
-            [jiffy.temporal.temporal :as Temporal]
+  (:require [jiffy.chrono.chrono-local-date :as ChronoLocalDate]
+            [jiffy.dev.wip :refer [wip]]
             [jiffy.temporal.temporal-accessor :as TemporalAccessor]
-            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]))
+            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]
+            [jiffy.temporal.temporal :as Temporal]
+            [jiffy.time-comparable :as TimeComparable]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java
 (defprotocol ILocalDate
@@ -183,14 +183,14 @@
 (defn -get-era [this] (wip ::-get-era))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1704
-(defn -until [this end-date-exclusive] (wip ::-until))
+(defn -until-chrono [this end-date-exclusive] (wip ::-until))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1814
 (defn -format [this formatter] (wip ::-format))
 
 ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1830
-(defn -at-time [this at-time--overloaded-param] (wip ::-at-time))
+(defn -at-time-chrono [this at-time--overloaded-param] (wip ::-at-time))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L2053
 (defn -is-after [this other] (wip ::-is-after))
@@ -209,9 +209,9 @@
   (toEpochDay [this] (-to-epoch-day this))
   (getChronology [this] (-get-chronology this))
   (getEra [this] (-get-era this))
-  (until [this end-date-exclusive] (-until this end-date-exclusive))
+  (until [this end-date-exclusive] (-until-chrono this end-date-exclusive))
   (format [this formatter] (-format this formatter))
-  (atTime [this at-time--overloaded-param] (-at-time this at-time--overloaded-param))
+  (atTime [this at-time--overloaded-param] (-at-time-chrono this at-time--overloaded-param))
   (isAfter [this other] (-is-after this other))
   (isBefore [this other] (-is-before this other))
   (isEqual [this other] (-is-equal this other)))

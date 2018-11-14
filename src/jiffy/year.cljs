@@ -3,7 +3,8 @@
             [jiffy.temporal.temporal-accessor :as TemporalAccessor]
             [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]
             [jiffy.temporal.temporal :as Temporal]
-            [jiffy.time-comparable :as TimeComparable]))
+            [jiffy.time-comparable :as TimeComparable]
+            [jiffy.year-impl :as impl]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java
 (defprotocol IYear
@@ -172,7 +173,8 @@
   ([text formatter] (wip ::parse)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L315
-(defn isLeap [year] (wip ::isLeap))
+;; TODO: this method is renamed from `isLeap` to `isLeap?` due to name colision with `IYear/isLeap`
+(defn isLeap? [year] (wip ::isLeap))
 
-(def MIN_VALUE -999999999)
-(def MAX_VALUE 999999999)
+(def MIN_VALUE impl/MIN_VALUE)
+(def MAX_VALUE impl/MAX_VALUE)

@@ -1,11 +1,11 @@
 (ns jiffy.chrono.minguo-date
-  (:require [jiffy.dev.wip :refer [wip]]
-            [jiffy.time-comparable :as TimeComparable]
-            [jiffy.chrono.chrono-local-date :as ChronoLocalDate]
+  (:require [jiffy.chrono.chrono-local-date :as ChronoLocalDate]
             [jiffy.chrono.chrono-local-date-impl :as ChronoLocalDateImpl]
-            [jiffy.temporal.temporal :as Temporal]
+            [jiffy.dev.wip :refer [wip]]
             [jiffy.temporal.temporal-accessor :as TemporalAccessor]
-            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]))
+            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]
+            [jiffy.temporal.temporal :as Temporal]
+            [jiffy.time-comparable :as TimeComparable]))
 
 (defrecord MinguoDate [])
 
@@ -74,7 +74,7 @@
   (minusDays [this days-to-subtract] (-minus-days this days-to-subtract)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java
-(defn -until [this until--unknown-param-name-1 until--unknown-param-name-2] (wip ::-until))
+(defn -until-temporal [this until--unknown-param-name-1 until--unknown-param-name-2] (wip ::-until))
 
 (defn -with
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L346
@@ -99,7 +99,7 @@
 
 (extend-type MinguoDate
   Temporal/ITemporal
-  (until [this until--unknown-param-name-1 until--unknown-param-name-2] (-until this until--unknown-param-name-1 until--unknown-param-name-2))
+  (until [this until--unknown-param-name-1 until--unknown-param-name-2] (-until-temporal this until--unknown-param-name-1 until--unknown-param-name-2))
   (with
     ([this adjuster] (-with this adjuster))
     ([this field new-value] (-with this field new-value)))

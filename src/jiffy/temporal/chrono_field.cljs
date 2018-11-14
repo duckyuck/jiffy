@@ -1,8 +1,10 @@
 (ns jiffy.temporal.chrono-field
-  (:require [jiffy.math :as math]
+  (:require [jiffy.dev.wip :refer [wip]]
+            [jiffy.math :as math]
             [jiffy.temporal.chrono-unit :refer [DAYS HALF_DAYS HOURS MICROS MILLIS MINUTES NANOS SECONDS WEEKS FOREVER MONTHS YEARS ERAS]]
+            [jiffy.temporal.temporal-field :as TemporalField]
             [jiffy.temporal.value-range :as ValueRange]
-            [jiffy.year :as Year]))
+            [jiffy.year-impl :as Year]))
 
 (defprotocol IChronoField
   (checkValidValue [this value])
@@ -43,3 +45,63 @@
 (def ERA (create "Era" ERAS FOREVER (ValueRange/of 0 1) "era"))
 (def INSTANT_SECONDS (create "InstantSeconds" SECONDS FOREVER (ValueRange/of math/long-min-value math/long-max-value)))
 (def OFFSET_SECONDS (create "OffsetSeconds" SECONDS FOREVER (ValueRange/of (* -18 3600) (* 18 3600))))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L716
+(defn -check-valid-value [this value] (wip ::-check-valid-value))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L735
+(defn -check-valid-int-value [this value] (wip ::-check-valid-int-value))
+
+(extend-type ChronoField
+  IChronoField
+  (checkValidValue [this value] (-check-valid-value this value))
+  (checkValidIntValue [this value] (-check-valid-int-value this value)))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L629
+(defn -get-display-name [this locale] (wip ::-get-display-name))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L645
+(defn -get-base-unit [this] (wip ::-get-base-unit))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L650
+(defn -get-range-unit [this] (wip ::-get-range-unit))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L672
+(defn -range [this] (wip ::-range))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L685
+(defn -is-date-based [this] (wip ::-is-date-based))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L697
+(defn -is-time-based [this] (wip ::-is-time-based))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L741
+(defn -is-supported-by [this temporal] (wip ::-is-supported-by))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L746
+(defn -range-refined-by [this temporal] (wip ::-range-refined-by))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L751
+(defn -get-from [this temporal] (wip ::-get-from))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L757
+(defn -adjust-into [this temporal new-value] (wip ::-adjust-into))
+
+(extend-type ChronoField
+  TemporalField/ITemporalField
+  (getDisplayName [this locale] (-get-display-name this locale))
+  (getBaseUnit [this] (-get-base-unit this))
+  (getRangeUnit [this] (-get-range-unit this))
+  (range [this] (-range this))
+  (isDateBased [this] (-is-date-based this))
+  (isTimeBased [this] (-is-time-based this))
+  (isSupportedBy [this temporal] (-is-supported-by this temporal))
+  (rangeRefinedBy [this temporal] (-range-refined-by this temporal))
+  (getFrom [this temporal] (-get-from this temporal))
+  (adjustInto [this temporal new-value] (-adjust-into this temporal new-value)))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
+(defn values [] (wip ::values))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
+(defn valueOf [value-of--unknown-param-name] (wip ::valueOf))
