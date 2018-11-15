@@ -1,7 +1,7 @@
 (ns jiffy.duration
   (:require [jiffy.big-decimal :as big-decimal]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.duration-impl :refer [create] :as impl]
+            [jiffy.duration-impl :refer [create #?@(:cljs [Duration])] :as impl]
             [jiffy.local-time :refer [NANOS_PER_SECOND NANOS_PER_DAY SECONDS_PER_DAY SECONDS_PER_MINUTE SECONDS_PER_HOUR SECONDS_PER_MINUTE NANOS_PER_MILLI MINUTES_PER_HOUR]]
             [jiffy.math :as math]
             [jiffy.temporal.chrono-field :as ChronoField :refer [NANO_OF_SECOND]]
@@ -11,7 +11,8 @@
             [jiffy.temporal.temporal :as Temporal]
             [jiffy.temporal.temporal-unit :as TemporalUnit]
             [jiffy.temporal.unsupported-temporal-type-exception :refer [unsupported-temporal-type-exception]]
-            [jiffy.time-comparable :as TimeComparable]))
+            [jiffy.time-comparable :as TimeComparable])
+  #?(:clj (:import [jiffy.duration_impl Duration])))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java
 (defprotocol IDuration
@@ -347,7 +348,7 @@
                         (* dur))]
         (plusNanos this (- result nod))))))
 
-(extend-type impl/Duration
+(extend-type Duration
   IDuration
   (isZero [this] (-is-zero this))
   (isNegative [this] (-is-negative this))
@@ -399,7 +400,7 @@
       cmp
       (- (:nanos this) (:nanos other-duration)))))
 
-(extend-type impl/Duration
+(extend-type Duration
   TimeComparable/ITimeComparable
   (compareTo [this compare-to--overloaded-param] (-compare-to this compare-to--overloaded-param)))
 
@@ -434,7 +435,7 @@
     (not (zero? (:nanos this)))
     (minus (:seconds this) NANOS)))
 
-(extend-type impl/Duration
+(extend-type Duration
   TemporalAmount/ITemporalAmount
   (get [this unit] (-get this unit))
   (getUnits [this] (-get-units this))
@@ -487,16 +488,17 @@
 (defn between [start-inclusive end-exclusive]
   (try
     (-> start-inclusive (Temporal/until end-exclusive NANOS) ofNanos)
-    (catch :default e
-      (let [secs (-> start-inclusive (Temporal/until end-exclusive SECONDS))
-            [secs nanos] (try
-                           (let [n (- (TemporalAccessor/getLong end-exclusive NANO_OF_SECOND)
-                                      (TemporalAccessor/getLong start-inclusive NANO_OF_SECOND))
-                                 s (cond-> secs
-                                     (and (pos? secs) (neg? n))
-                                     inc
-                                     (and (neg? secs) (pos? n))
-                                     dec)]
-                             [s n])
-                           (catch :default e [secs 0]))]
-        (ofSeconds secs nanos)))))
+    (catch #?@(:clj (Exception e) :cljs (:default e))
+        (let [secs (-> start-inclusive (Temporal/until end-exclusive SECONDS))
+              [secs nanos] (try
+                             (let [n (- (TemporalAccessor/getLong end-exclusive NANO_OF_SECOND)
+                                        (TemporalAccessor/getLong start-inclusive NANO_OF_SECOND))
+                                   s (cond-> secs
+                                       (and (pos? secs) (neg? n))
+                                       inc
+                                       (and (neg? secs) (pos? n))
+                                       dec)]
+                               [s n])
+                             #?(:clj (catch Exception e [secs 0])
+                                :cljs (catch :default e [secs 0])))]
+          (ofSeconds secs nanos)))))

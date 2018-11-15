@@ -13,7 +13,8 @@
     (->SystemClock zone)))
 
 (defn -millis [this]
-  (.getTime (js/Date.)))
+  #?(:clj (java.lang.System/currentTimeMillis)
+     :cljs (.getTime (js/Date.))))
 
 (defn -instant [this]
   (Instant/ofEpochMilli (-millis this)))

@@ -1,8 +1,9 @@
 (ns jiffy.math)
 
 ;; TODO: find proper value for min and max
-(def long-max-value 999999999999999999999999999)
-(def long-min-value -999999999999999999999999999)
+
+(def long-max-value 9223372036854775807)
+(def long-min-value -9223372036854775808)
 
 ;; TODO: check correctness
 

@@ -1,6 +1,6 @@
 # jiffy
 
-Jiffy is a port of Java Time to Clojurescript. Jiffy aims at being at parity with Java API.
+Jiffy is a port of Java Time to Clojurescript and Clojure. Jiffy aims at being at parity with Java API.
 
 Jiffy is currently work in progress!
 

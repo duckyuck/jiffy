@@ -1,4 +1,5 @@
 (ns jiffy.offset-time
+  (:refer-clojure :exclude [format])
   (:require [jiffy.dev.wip :refer [wip]]
             [jiffy.time-comparable :as TimeComparable]
             [jiffy.temporal.temporal :as Temporal]

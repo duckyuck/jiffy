@@ -1,4 +1,4 @@
-(ns java-time-clj.main
+(ns jiffy.dev.main
   (:require jiffy.big-decimal
             jiffy.chrono.abstract-chronology
             jiffy.chrono.chrono-local-date
@@ -171,7 +171,7 @@
   jiffy.zone-region/keep-me
   jiffy.zoned-date-time/keep-me)
 
-(enable-console-print!)
+#?(:cljs (enable-console-print!))
 
 (comment
 

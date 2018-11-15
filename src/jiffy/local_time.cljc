@@ -1,4 +1,5 @@
 (ns jiffy.local-time
+  (:refer-clojure :exclude [format])
   (:require [jiffy.clock :as Clock]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.local-time-impl :as impl]

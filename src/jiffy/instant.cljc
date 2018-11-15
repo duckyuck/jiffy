@@ -50,7 +50,7 @@
     (zero? (bit-or seconds nano-of-second))
     EPOCH
 
-    (not (< MIN_SECOND seconds MAX_SECOND))
+    (or (< seconds MIN_SECOND) (> seconds MAX_SECOND))
     (throw (date-time-exception "Instant exceeds minimum or maximum instant"
                                 {:max-second MAX_SECOND
                                  :min-second MIN_SECOND
@@ -414,7 +414,7 @@
       (ofEpochSecond
        (TemporalAccessor/getLong temporal ChronoField/INSTANT_SECONDS)
        (TemporalAccessor/get temporal ChronoField/NANO_OF_SECOND))
-      (catch js/Error e
+      (catch #?@(:clj (Exception e) :cljs (:default e))
         (throw (date-time-exception (str "Unable to obtain Instant from TemporalAccessor: "
                                          temporal " of type " (type temporal))
                                     {:temporal temporal

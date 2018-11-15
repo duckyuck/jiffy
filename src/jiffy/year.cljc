@@ -1,4 +1,5 @@
 (ns jiffy.year
+  (:refer-clojure :exclude [format])
   (:require [jiffy.dev.wip :refer [wip]]
             [jiffy.temporal.temporal-accessor :as TemporalAccessor]
             [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]

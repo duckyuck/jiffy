@@ -8,4 +8,8 @@
 (defn date-time-exception
   ([message] (date-time-exception message {}))
   ([message data] (date-time-exception message data nil))
-  ([message data cause] (->DateTimeException message data cause)))
+  ([message data cause]
+   #?(:clj (if cause
+             (java.time.DateTimeException. (str message data) cause)
+             (java.time.DateTimeException. (str message data)))
+      :cljs (->DateTimeException message data cause))))
