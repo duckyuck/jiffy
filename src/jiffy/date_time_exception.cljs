@@ -8,4 +8,4 @@
 (defn date-time-exception
   ([message] (date-time-exception message {}))
   ([message data] (date-time-exception message data nil))
-  ([message data cause] (->DateTimeExceptionImpl message data cause)))
+  ([message data cause] (->DateTimeException message data cause)))
