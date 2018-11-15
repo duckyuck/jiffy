@@ -51,10 +51,10 @@
     EPOCH
 
     (not (< MIN_SECOND seconds MAX_SECOND))
-    (throw (DateTimeException "Instant exceeds minimum or maximum instant"
-                              {:max-second MAX_SECOND
-                               :min-second MIN_SECOND
-                               :seconds seconds}))
+    (throw (date-time-exception "Instant exceeds minimum or maximum instant"
+                                {:max-second MAX_SECOND
+                                 :min-second MIN_SECOND
+                                 :seconds seconds}))
 
     :else
     (->Instant seconds nano-of-second)))
@@ -415,11 +415,11 @@
        (TemporalAccessor/getLong temporal ChronoField/INSTANT_SECONDS)
        (TemporalAccessor/get temporal ChronoField/NANO_OF_SECOND))
       (catch js/Error e
-        (throw (DateTimeException (str "Unable to obtain Instant from TemporalAccessor: "
-                                       temporal " of type " (type temporal))
-                                  {:temporal temporal
-                                   :type (type temporal)}
-                                  e))))))
+        (throw (date-time-exception (str "Unable to obtain Instant from TemporalAccessor: "
+                                         temporal " of type " (type temporal))
+                                    {:temporal temporal
+                                     :type (type temporal)}
+                                    e))))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L394
 (defn parse [text]
