@@ -1,6 +1,7 @@
 (ns jiffy.local-time
   (:require [jiffy.clock :as Clock]
             [jiffy.dev.wip :refer [wip]]
+            [jiffy.local-time-impl :as impl]
             [jiffy.temporal.temporal-accessor :as TemporalAccessor]
             [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]
             [jiffy.temporal.temporal :as Temporal]
@@ -267,16 +268,16 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L145
 (def NOON ::NOON--not-implemented)
 
-(def HOURS_PER_DAY 24)
-(def MINUTES_PER_HOUR 60)
-(def MINUTES_PER_DAY (* MINUTES_PER_HOUR HOURS_PER_DAY))
-(def SECONDS_PER_MINUTE 60)
-(def SECONDS_PER_HOUR (* SECONDS_PER_MINUTE MINUTES_PER_HOUR))
-(def SECONDS_PER_DAY (* SECONDS_PER_HOUR HOURS_PER_DAY))
-(def MILLIS_PER_DAY (* SECONDS_PER_DAY 1000))
-(def MICROS_PER_DAY (* SECONDS_PER_DAY 1000000))
-(def NANOS_PER_MILLI 1000000)
-(def NANOS_PER_SECOND 1000000000)
-(def NANOS_PER_MINUTE (* NANOS_PER_SECOND SECONDS_PER_MINUTE))
-(def NANOS_PER_HOUR (* NANOS_PER_MINUTE MINUTES_PER_HOUR))
-(def NANOS_PER_DAY (* NANOS_PER_HOUR HOURS_PER_DAY))
+(def HOURS_PER_DAY impl/HOURS_PER_DAY)
+(def MINUTES_PER_HOUR impl/MINUTES_PER_HOUR)
+(def MINUTES_PER_DAY impl/MINUTES_PER_DAY)
+(def SECONDS_PER_MINUTE impl/SECONDS_PER_MINUTE)
+(def SECONDS_PER_HOUR impl/SECONDS_PER_HOUR)
+(def SECONDS_PER_DAY impl/SECONDS_PER_DAY)
+(def MILLIS_PER_DAY impl/MILLIS_PER_DAY)
+(def MICROS_PER_DAY impl/MICROS_PER_DAY)
+(def NANOS_PER_MILLI impl/NANOS_PER_MILLI)
+(def NANOS_PER_SECOND impl/NANOS_PER_SECOND)
+(def NANOS_PER_MINUTE impl/NANOS_PER_MINUTE)
+(def NANOS_PER_HOUR impl/NANOS_PER_HOUR)
+(def NANOS_PER_DAY impl/NANOS_PER_DAY)

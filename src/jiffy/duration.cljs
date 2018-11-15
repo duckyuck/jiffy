@@ -1,6 +1,7 @@
 (ns jiffy.duration
   (:require [jiffy.big-decimal :as big-decimal]
             [jiffy.dev.wip :refer [wip]]
+            [jiffy.duration-impl :refer [create] :as impl]
             [jiffy.local-time :refer [NANOS_PER_SECOND NANOS_PER_DAY SECONDS_PER_DAY SECONDS_PER_MINUTE SECONDS_PER_HOUR SECONDS_PER_MINUTE NANOS_PER_MILLI MINUTES_PER_HOUR]]
             [jiffy.math :as math]
             [jiffy.temporal.chrono-field :as ChronoField :refer [NANO_OF_SECOND]]
@@ -52,19 +53,10 @@
   (toNanosPart [this])
   (truncatedTo [this unit]))
 
-(defrecord Duration [seconds nano-of-second])
-
-(def ZERO (->Duration 0 0))
+(def ZERO impl/ZERO)
 
 (def -get-seconds :seconds)
 (def -get-nano :nanos)
-
-(defn- create
-  ([big-decimal-seconds] (wip ::create--not-implemented))
-  ([seconds nano-adjustment]
-   (if (zero? (bit-or seconds nano-adjustment))
-     ZERO
-     (->Duration seconds nano-adjustment))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L592
 (defn -is-zero [this]
@@ -83,15 +75,9 @@
   (ChronoField/checkValidIntValue NANO_OF_SECOND nano-of-second)
   (create (:seconds this) nano-of-second))
 
-(defn ofSeconds
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L223
-  ([seconds]
-   (create seconds 0))
-
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L246
-  ([seconds nano-adjustment]
-   (create (math/add-exact seconds (math/floor-div nano-adjustment NANOS_PER_SECOND))
-           (int (math/floor-mod nano-adjustment NANOS_PER_SECOND)))))
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L223
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L246
+(def ofSeconds #'impl/ofSeconds)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L825
 (defn- --plus [this seconds-to-add nanos-to-add]
@@ -340,7 +326,7 @@
       (and (= unit ChronoUnit/SECONDS)
            (or (>= (:seconds this) 0)
                (== (:nanos this) 0)))
-      (->Duration (:seconds this) 0)
+      (impl/->Duration (:seconds this) 0)
 
       (= unit ChronoUnit/NANOS)
       this
@@ -361,7 +347,7 @@
                         (* dur))]
         (plusNanos this (- result nod))))))
 
-(extend-type Duration
+(extend-type impl/Duration
   IDuration
   (isZero [this] (-is-zero this))
   (isNegative [this] (-is-negative this))
@@ -413,7 +399,7 @@
       cmp
       (- (:nanos this) (:nanos other-duration)))))
 
-(extend-type Duration
+(extend-type impl/Duration
   TimeComparable/ITimeComparable
   (compareTo [this compare-to--overloaded-param] (-compare-to this compare-to--overloaded-param)))
 
@@ -448,7 +434,7 @@
     (not (zero? (:nanos this)))
     (minus (:seconds this) NANOS)))
 
-(extend-type Duration
+(extend-type impl/Duration
   TemporalAmount/ITemporalAmount
   (get [this unit] (-get this unit))
   (getUnits [this] (-get-units this))
@@ -475,11 +461,7 @@
     (create secs (* mos 1000000))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L280
-(defn ofNanos [nanos]
-  (let [nos (int (mod nanos NANOS_PER_SECOND))
-        secs (cond-> (/ nanos NANOS_PER_SECOND) (neg? nos) dec)
-        nos (cond-> nos neg? (+ NANOS_PER_SECOND))]
-    (create secs nos)))
+(def ofNanos impl/ofNanos)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L309
 (defn of [amount unit]
