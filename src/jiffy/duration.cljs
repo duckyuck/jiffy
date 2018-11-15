@@ -487,10 +487,9 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L334
 (defn from [amount]
-  (reduce #(plus (TemporalAmount/get amount %) %)
+  (reduce #(plus %1 (TemporalAmount/get amount %2) %2)
           ZERO
           (TemporalAmount/getUnits amount)))
-
 
 (def PATTERN (delay (re-pattern (str "(?i)([-+]?)P(?:([-+]?[0-9]+)D)?(T(?:([-+]?[0-9]+)H)?(?:([-+]?[0-9]+)M)?(?:([-+]?[0-9]+)(?:[.,]([0-9]{0,9}))?S)?)?"))));
 
