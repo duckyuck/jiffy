@@ -3,7 +3,7 @@
   (:require [jiffy.dev.wip :refer [wip]]
             [jiffy.temporal.chrono-field :as ChronoField]
             [jiffy.temporal.temporal-field :as TemporalField]
-            [jiffy.temporal.unsupported-temporal-type-exception :refer [UnsupportedTemporalTypeException]]))
+            [jiffy.temporal.unsupported-temporal-type-exception :refer [unsupported-temporal-type-exception]]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalAccessor.java
 (defprotocol ITemporalAccessor
@@ -18,7 +18,7 @@
   (if (instance? ChronoField/IChronoField field)
     (if (isSupported this field)
       (range this field)
-      (throw (UnsupportedTemporalTypeException (str "Unsupported field: " field))))
+      (throw (unsupported-temporal-type-exception (str "Unsupported field: " field))))
     (TemporalField/rangeRefinedBy field this)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalAccessor.java#L217

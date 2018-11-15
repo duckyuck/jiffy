@@ -9,7 +9,7 @@
             [jiffy.temporal.temporal-amount :as TemporalAmount]
             [jiffy.temporal.temporal :as Temporal]
             [jiffy.temporal.temporal-unit :as TemporalUnit]
-            [jiffy.temporal.unsupported-temporal-type-exception :refer [UnsupportedTemporalTypeException]]
+            [jiffy.temporal.unsupported-temporal-type-exception :refer [unsupported-temporal-type-exception]]
             [jiffy.time-comparable :as TimeComparable]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java
@@ -116,7 +116,7 @@
      (--plus this (math/multiply-exact amount-to-add SECONDS_PER_DAY) 0)
 
      (TemporalUnit/isDurationEstimated unit)
-     (throw (UnsupportedTemporalTypeException "Unit must not have an estimated duration" {:duration this :unit unit}))
+     (throw (unsupported-temporal-type-exception "Unit must not have an estimated duration" {:duration this :unit unit}))
 
      (zero? amount-to-add)
      this
@@ -346,10 +346,10 @@
       this
 
       (> (getSeconds unit-dur) SECONDS_PER_DAY)
-      (throw (UnsupportedTemporalTypeException "Unit is too large to be used for truncation" {:duration this :unit unit}))
+      (throw (unsupported-temporal-type-exception "Unit is too large to be used for truncation" {:duration this :unit unit}))
 
       (-> NANOS_PER_DAY (mod dur) zero? not)
-      (throw (UnsupportedTemporalTypeException "Unit must divide into a standard day without remainder" {:duration this :unit unit}))
+      (throw (unsupported-temporal-type-exception "Unit must divide into a standard day without remainder" {:duration this :unit unit}))
 
       :else
       (let [nod (-> (:seconds this)
@@ -422,7 +422,7 @@
   (condp = unit
     SECONDS (:seconds this)
     NANOS (:nanos this)
-    (throw (UnsupportedTemporalTypeException (str "Unsupported unit: " unit) {:duration this :unit unit}))))
+    (throw (unsupported-temporal-type-exception (str "Unsupported unit: " unit) {:duration this :unit unit}))))
 
 (def UNITS (delay [SECONDS NANOS]))
 
