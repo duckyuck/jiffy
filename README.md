@@ -1,6 +1,6 @@
 # jiffy
 
-Jiffy is a port of Java Time to Clojurescript. As far as possible it aims at being at parity with Java API.
+Jiffy is a port of Java Time to Clojurescript. Jiffy aims at being at parity with Java API.
 
 Jiffy is currently work in progress!
 
@@ -28,9 +28,13 @@ What's left is replacing the function bodies with actual working, beautiful Cloj
 1. Pick any function in this repository missing an implementation (preferrably in the `jiffy` and `jiffy.temporal` namespaces)
 2. Navigate to the corresponding Java implementation by following the link above the function decleration.
 3. Type corresponding Clojurescript that compiles!
-4. Repeat steps 1 - 4.
+4. Repeat steps 1 - 4 until exhaustion
+5. Submit pull request
 
-Have a look at the `jiffy.instant` namespace. It contains a complete port of the `java.time.Instant`.
+Have a look at the `jiffy.instant` namespace. It contains a complete port of OpenJDK's `java.time.Instant`.
+
+This port is based on OpenJDK 11+28 (of august 22. 2018). The complete source code can be found [here](https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time).
+Please make use this version as reference for your porting efforts.
 
 ### I'm not able to run my code without some other parts of the code throwing an exception
 
@@ -45,3 +49,5 @@ Testing will be accomplished in two parts;
 
 Feel free to start porting tests, but my main concern at the moment is mechnically porting the Java Time implementation; we won't
 be able to exercise any base API until the vital parts are in place.
+
+OpenJDK's test classes can be found [here](https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/test/jdk/java/time)
