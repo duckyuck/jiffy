@@ -1,5 +1,7 @@
 (ns jiffy.clock
-  (:require [jiffy.dev.wip :refer [wip]]))
+  (:require [jiffy.dev.wip :refer [wip]]
+            [jiffy.instant-impl :as Instant]
+            [jiffy.zone-offset :as ZoneOffset]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java
 (defprotocol IClock
@@ -29,11 +31,6 @@
   (millis [this] (-millis this))
   (instant [this] (-instant this)))
 
-(defmulti -system-utc identity)
-
-(defn systemUTC []
-  (-system-utc :system-utc))
-
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L183
 (defn systemDefaultZone [] (wip ::systemDefaultZone))
 
@@ -57,3 +54,40 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L374
 (defn offset [base-clock offset-duration] (wip ::offset))
+
+
+;; Clock.SystemClock
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L481
+
+(defrecord SystemClock [zone])
+
+(def -get-zone :zone)
+
+(defn -with-zone [this zone]
+  (if (= (:zone this) zone)
+    this
+    (->SystemClock zone)))
+
+(defn -millis [this]
+  #?(:clj (java.lang.System/currentTimeMillis)
+     :cljs (.getTime (js/Date.))))
+
+(defn -instant [this]
+  (Instant/ofEpochMilli (-millis this)))
+
+(extend-type SystemClock
+  IClock
+  (getZone [this] (-get-zone this))
+  (withZone [this zone] (-with-zone this zone))
+  (millis [this] (-millis this))
+  (instant [this] (-instant this)))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L485
+;; TODO: use ZoneOffset/UTC
+(def UTC (->SystemClock nil
+                        ;; (ZoneOffset/UTC)
+                        ))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L160
+(def systemUTC (constantly UTC))

@@ -20,7 +20,9 @@
             [jiffy.temporal.unsupported-temporal-type-exception :refer [unsupported-temporal-type-exception]]
             [jiffy.temporal.value-range :as ValueRange]
             [jiffy.time-comparable :as TimeComparable]
-            [jiffy.zoned-date-time :as ZonedDateTime]))
+            [jiffy.zoned-date-time :as ZonedDateTime]
+            [jiffy.instant-impl :refer [create #?@(:cljs [Instant])] :as impl])
+  #?(:clj (:import [jiffy.instant_impl Instant])))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java
 (defprotocol IInstant
@@ -39,25 +41,9 @@
   (isAfter [this other-instant])
   (isBefore [this other-instant]))
 
-(defrecord Instant [seconds nanos])
-
-(def EPOCH (->Instant 0 0))
-(def MAX_SECOND 31556889864403199)
-(def MIN_SECOND -31557014167219200)
-
-(defn create-instant [seconds nano-of-second]
-  (cond
-    (zero? (bit-or seconds nano-of-second))
-    EPOCH
-
-    (or (< seconds MIN_SECOND) (> seconds MAX_SECOND))
-    (throw (date-time-exception "Instant exceeds minimum or maximum instant"
-                                {:max-second MAX_SECOND
-                                 :min-second MIN_SECOND
-                                 :seconds seconds}))
-
-    :else
-    (->Instant seconds nano-of-second)))
+(def EPOCH impl/EPOCH)
+(def MAX_SECOND impl/MAX_SECOND)
+(def MIN_SECOND impl/MIN_SECOND)
 
 (def -get-epoch-second :seconds)
 (def -get-nano :nanos)
@@ -88,11 +74,11 @@
 (defn ofEpochSecond
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L303
   ([epoch-second]
-   (create-instant epoch-second 0))
+   (create epoch-second 0))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L327
   ([epoch-second nano-adjustment]
-   (create-instant
+   (create
     (math/add-exact epoch-second (math/floor-div nano-adjustment NANOS_PER_SECOND))
     (math/floor-mod nano-adjustment NANOS_PER_SECOND))))
 
@@ -207,23 +193,23 @@
          (let [val (* new-value 1000000)]
            (if (= val (:nanos this))
              this
-             (create-instant (:seconds this) val)))
+             (create (:seconds this) val)))
 
          MICRO_OF_SECOND
          (let [val (* new-value 1000)]
            (if (= val (:nanos this))
              this
-             (create-instant (:seconds this) val)))
+             (create (:seconds this) val)))
 
          NANO_OF_SECOND
          (if (= new-value (:nanos this))
            this
-           (create-instant (:seconds this) new-value))
+           (create (:seconds this) new-value))
 
          INSTANT_SECONDS
          (if (= new-value (:seconds this))
            this
-           (create-instant new-value (:nanos this)))
+           (create new-value (:nanos this)))
 
          (throw (unsupported-temporal-type-exception (str "Unsupported field: " field) {:instant this :field field})))))))
 
@@ -401,10 +387,7 @@
   ([clock] (Clock/instant clock)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L343
-(defn ofEpochMilli [epoch-milli]
-  (create-instant (math/floor-div epoch-milli 1000)
-                  (int (* (math/floor-mod epoch-milli 1000)
-                          1000000))))
+(def ofEpochMilli #'impl/ofEpochMilli)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L367
 (defn from [temporal]
