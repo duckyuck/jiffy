@@ -14,7 +14,7 @@
   (checkValidValue [this value field])
   (checkValidIntValue [this value field]))
 
-(defrecord ValueRange [])
+(defrecord ValueRange [min-smallest min-largest max-smallest max-largest])
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L203
 (defn -is-fixed [this] (wip ::-is-fixed))
@@ -61,10 +61,27 @@
 
 (defn of
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L125
-  ([min max] (wip ::of))
+  ([min max]
+   (if (> min max)
+     ;; throw new IllegalArgumentException
+     (throw (ex-info "Minimum value must be less than maximum value" {:min min :max max}))
+     (->ValueRange min min max max)))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L146
-  ([min max-smallest max-largest] (wip ::of))
+  ([min max-smallest max-largest]
+   (of min min max-smallest max-largest))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L165
-  ([min-smallest min-largest max-smallest max-largest] (wip ::of)))
+  ([min-smallest min-largest max-smallest max-largest]
+   (cond
+     (> min-smallest min-largest)
+     (throw (ex-info "Smallest minimum value must be less than largest minimum value" {:min-smallest min-smallest :min-largest min-largest :max-smallest max-smallest :max-largest max-largest}))
+
+     (> max-smallest max-largest)
+     (throw (ex-info "Smallest maximum value must be less than largest maximum value" {:min-smallest min-smallest :min-largest min-largest :max-smallest max-smallest :max-largest max-largest}))
+
+     (> min-largest max-largest)
+     (throw (ex-info "Minimum value must be less than maximum value" {:min-smallest min-smallest :min-largest min-largest :max-smallest max-smallest :max-largest max-largest}))
+
+     :else
+     (->ValueRange min-smallest min-largest max-smallest max-largest))))
