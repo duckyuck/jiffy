@@ -15,7 +15,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalAccessor.java#L169
 (defn -range [this field]
-  (if (instance? ChronoField/IChronoField field)
+  (if (satisfies? ChronoField/IChronoField field)
     (if (isSupported this field)
       (range this field)
       (throw (unsupported-temporal-type-exception (str "Unsupported field: " field))))

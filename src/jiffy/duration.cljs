@@ -121,7 +121,7 @@
      (zero? amount-to-add)
      this
 
-     (instance? ChronoUnit/IChronoUnit unit)
+     (satisfies? ChronoUnit/IChronoUnit unit)
      (condp = unit
        NANOS (plusNanos this amount-to-add)
        MICROS (-> this
@@ -251,7 +251,7 @@
 ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L989
 (defn -divided-by [this divisor]
-  (if (instance? IDuration divisor)
+  (if (satisfies? IDuration divisor)
     (--divided-by-duration this divisor)
     (--divided-by-long this divisor)))
 
