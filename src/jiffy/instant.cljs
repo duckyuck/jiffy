@@ -102,7 +102,7 @@
     (ofEpochSecond
      (-> (:seconds this)
          (math/add-exact seconds-to-add)
-         (math/add-exact (/ nanos-to-add NANOS_PER_SECOND)))
+         (math/add-exact (long (/ nanos-to-add NANOS_PER_SECOND))))
      (+ (:nanos this) (mod nanos-to-add NANOS_PER_SECOND)))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L877
@@ -111,7 +111,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L891
 (defn -plus-millis [this millis-to-add]
-  (--plus this (/ millis-to-add 1000) (* (mod millis-to-add 1000) 1000000)))
+  (--plus this (long (/ millis-to-add 1000)) (* (mod millis-to-add 1000) 1000000)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L905
 (defn -plus-nanos [this nanos-to-add]
