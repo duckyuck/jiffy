@@ -24,7 +24,7 @@ What's left is replacing the function bodies with actual working, beautiful Cloj
 
 ### Stop the rambling. I wanna contribute already!
 
-0. Install [Clojure CLI](https://clojure.org/guides/getting_started) and launch a Clojurescript REPL via `clj -m figwheel.main -b dev -r`
+0. Install [Clojure CLI](https://clojure.org/guides/getting_started) and launch a Clojurescript REPL via `clj -A:dev`
 1. Have a look at the [contribution guideline](CONTRIBUTING.md).
 2. Pick any function in this repository missing an implementation (preferrably in the `jiffy` and `jiffy.temporal` namespaces)
 3. Navigate to the corresponding java.time implementation by following the link above the function decleration.
