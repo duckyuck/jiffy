@@ -39,7 +39,7 @@ Please make use this version as reference for your porting efforts.
 
 ### I'm not able to run my code without some other parts of the code throwing an exception
 
-Yeah, that's rather unfortunate, but your contribution makes is one step closer to have actual running code.
+Yeah, that's rather unfortunate, but your contribution takes us one step closer to have actual running code.
 
 ### What about testing?
 
