@@ -55,3 +55,7 @@ The catch-statement should be ported like this;
   (ZoneId/getRules)
   (catch ZoneRulesException ex))
 ```
+
+Exception classes thrown in java.time, but defined in java.lang and elsewhere (e.g. `IllegalStateException`), are also ported to
+Jiffy. These exceptions also reside in the `jiffy.exception` namespace, although they have "Java" as a prefix to their name,
+e.g. `jiffy.exception/JavaIllegalStateException`.

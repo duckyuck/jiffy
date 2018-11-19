@@ -57,7 +57,16 @@
                                       (assoc data ::kind kind)
                                       cause)))
 
+(def JavaThrowable ::JavaThrowable)
+
+(def JavaException ::JavaException)
+(derive Exception JavaThrowable)
+
+(def JavaRuntimeException ::JavaRuntimeException)
+(derive JavaRuntimeException JavaException)
+
 (def DateTimeException ::DateTimeException)
+(derive DateTimeException JavaRuntimeException)
 
 (def UnsupportedTemporalTypeException ::UnsupportedTemporalTypeException)
 (derive UnsupportedTemporalTypeException DateTimeException)
@@ -69,6 +78,22 @@
 (derive DateTimeParseException DateTimeException)
 
 (def JavaArithmeticException ::JavaArithmeticException)
+(derive JavaArithmeticException JavaRuntimeException)
+
+(def JavaClassCastException ::JavaClassCastException)
+(derive JavaClassCastException JavaRuntimeException)
+
+(def JavaIllegalArgumentException ::JavaIllegalArgumentException)
+(derive JavaIllegalArgumentException JavaRuntimeException)
+
+(def JavaIllegalStateException ::JavaIllegalStateException)
+(derive JavaIllegalStateException JavaRuntimeException)
+
+(def JavaParseException ::JavaParseException)
+(derive JavaParseException JavaException)
+
+(def JavaIndexOutOfBoundsException ::JavaIndexOutOfBoundsException)
+(derive JavaIndexOutOfBoundsException JavaRuntimeException)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeParseException.java#L125
 (defn getParsedString [this] (wip ::getParsedString))
