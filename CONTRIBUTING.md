@@ -45,7 +45,7 @@ try {
 First we'll need to require the `try*`-macro as well as the exception type from `jiffy.exception`;
 
 ```clj
-[jiffy.exception :refer [ZoneRulesException #?@(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
+[jiffy.exception :refer [ZoneRulesException #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
 ```
 
 The catch-statement should be ported like this;
