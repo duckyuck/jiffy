@@ -26,14 +26,13 @@
             jiffy.chrono.thai-buddhist-date
             jiffy.chrono.thai-buddhist-era
             jiffy.clock
-            jiffy.date-time-exception
             jiffy.day-of-week
             jiffy.dev.wip
             [jiffy.duration :as Duration]
+            [jiffy.exception :refer [ex #?@(:clj [try*])] #?@(:cljs [:refer-macros [try*]])]
             jiffy.format.date-time-formatter
             jiffy.format.date-time-formatter-builder
             jiffy.format.date-time-parse-context
-            jiffy.format.date-time-parse-exception
             jiffy.format.date-time-print-context
             jiffy.format.date-time-text-provider
             jiffy.format.decimal-style
@@ -52,7 +51,6 @@
             jiffy.offset-date-time
             jiffy.offset-time
             jiffy.period
-            jiffy.system-clock
             [jiffy.temporal.chrono-field :as ChronoField]
             jiffy.temporal.chrono-unit
             jiffy.temporal.iso-fields
@@ -66,7 +64,6 @@
             jiffy.temporal.temporal-queries
             jiffy.temporal.temporal-query
             jiffy.temporal.temporal-unit
-            jiffy.temporal.unsupported-temporal-type-exception
             jiffy.temporal.value-range
             jiffy.temporal.week-fields
             jiffy.time-comparable
@@ -81,9 +78,7 @@
             jiffy.zone.zone-offset-transition
             jiffy.zone.zone-offset-transition-rule
             jiffy.zone.zone-rules
-            jiffy.zone.zone-rules-exception
             jiffy.zone.zone-rules-provider))
-
 
 (comment
   jiffy.big-decimal/keep-me
@@ -113,14 +108,13 @@
   jiffy.chrono.thai-buddhist-date/keep-me
   jiffy.chrono.thai-buddhist-era/keep-me
   jiffy.clock/keep-me
-  jiffy.date-time-exception/keep-me
   jiffy.day-of-week/keep-me
   jiffy.dev.wip/keep-me
   jiffy.duration/keep-me
+  jiffy.exception/keep-me
   jiffy.format.date-time-formatter
   jiffy.format.date-time-formatter-builder/keep-me
   jiffy.format.date-time-parse-context/keep-me
-  jiffy.format.date-time-parse-exception/keep-me
   jiffy.format.date-time-print-context/keep-me
   jiffy.format.date-time-text-provider/keep-me
   jiffy.format.decimal-style/keep-me
@@ -139,7 +133,6 @@
   jiffy.offset-date-time/keep-me
   jiffy.offset-time/keep-me
   jiffy.period/keep-me
-  jiffy.system-clock/keep-me
   jiffy.temporal.chrono-field/keep-me
   jiffy.temporal.chrono-unit/keep-me
   jiffy.temporal.iso-fields/keep-me
@@ -153,7 +146,6 @@
   jiffy.temporal.temporal-queries/keep-me
   jiffy.temporal.temporal-query/keep-me
   jiffy.temporal.temporal-unit/keep-me
-  jiffy.temporal.unsupported-temporal-type-exception/keep-me
   jiffy.temporal.value-range/keep-me
   jiffy.temporal.week-fields/keep-me
   jiffy.time-comparable/keep-me
@@ -164,7 +156,6 @@
   jiffy.zone.zone-offset-transition/keep-me
   jiffy.zone.zone-offset-transition-rule/keep-me
   jiffy.zone.zone-rules/keep-me
-  jiffy.zone.zone-rules-exception/keep-me
   jiffy.zone.zone-rules-provider/keep-me
   jiffy.zone-id/keep-me
   jiffy.zone-offset/keep-me
@@ -176,12 +167,18 @@
 (comment
 
   (def i1 (Instant/now))
+  i1
+
   (def i2 (-> i1
               (Instant/plusSeconds 30)
               (Instant/plusMillis 2500)))
+  i2
+
   (def d1 (Duration/between i1 i2))
 
-  (Duration/toHoursPart d1)
+  d1
+
+  (Duration/toHours d1)
 
 )
 

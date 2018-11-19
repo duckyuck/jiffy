@@ -2,6 +2,7 @@
   (:require [jiffy.big-decimal :as big-decimal]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.duration-impl :refer [create #?@(:cljs [Duration])] :as impl]
+            [jiffy.exception :refer [DateTimeParseException JavaArithmeticException UnsupportedTemporalTypeException ex #?@(:clj [try*])] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.local-time :refer [NANOS_PER_SECOND NANOS_PER_DAY SECONDS_PER_DAY SECONDS_PER_MINUTE SECONDS_PER_HOUR SECONDS_PER_MINUTE NANOS_PER_MILLI MINUTES_PER_HOUR]]
             [jiffy.math :as math]
             [jiffy.temporal.chrono-field :as ChronoField :refer [NANO_OF_SECOND]]
@@ -10,7 +11,6 @@
             [jiffy.temporal.temporal-amount :as TemporalAmount]
             [jiffy.temporal.temporal :as Temporal]
             [jiffy.temporal.temporal-unit :as TemporalUnit]
-            [jiffy.temporal.unsupported-temporal-type-exception :refer [unsupported-temporal-type-exception]]
             [jiffy.time-comparable :as TimeComparable])
   #?(:clj (:import [jiffy.duration_impl Duration])))
 
@@ -103,7 +103,7 @@
      (--plus this (math/multiply-exact amount-to-add SECONDS_PER_DAY) 0)
 
      (TemporalUnit/isDurationEstimated unit)
-     (throw (unsupported-temporal-type-exception "Unit must not have an estimated duration" {:duration this :unit unit}))
+     (throw (ex UnsupportedTemporalTypeException "Unit must not have an estimated duration" {:duration this :unit unit}))
 
      (zero? amount-to-add)
      this
@@ -226,7 +226,7 @@
 
 (defn --divided-by-long [this divisor]
   (condp = divisor
-    0 (throw (ex-info "Cannot divide by zero" {:duration this :divisor divisor}))
+    0 (throw (ex JavaArithmeticException "Cannot divide by zero" {:duration this :divisor divisor}))
     1 this
     (create (big-decimal/divide (to-big-decimal-seconds this) (big-decimal/value-of divisor) :rounding.mode/down))))
 
@@ -333,10 +333,10 @@
       this
 
       (> (getSeconds unit-dur) SECONDS_PER_DAY)
-      (throw (unsupported-temporal-type-exception "Unit is too large to be used for truncation" {:duration this :unit unit}))
+      (throw (ex UnsupportedTemporalTypeException "Unit is too large to be used for truncation" {:duration this :unit unit}))
 
       (-> NANOS_PER_DAY (mod dur) zero? not)
-      (throw (unsupported-temporal-type-exception "Unit must divide into a standard day without remainder" {:duration this :unit unit}))
+      (throw (ex UnsupportedTemporalTypeException "Unit must divide into a standard day without remainder" {:duration this :unit unit}))
 
       :else
       (let [nod (-> (:seconds this)
@@ -409,7 +409,7 @@
   (condp = unit
     SECONDS (:seconds this)
     NANOS (:nanos this)
-    (throw (unsupported-temporal-type-exception (str "Unsupported unit: " unit) {:duration this :unit unit}))))
+    (throw (ex UnsupportedTemporalTypeException (str "Unsupported unit: " unit) {:duration this :unit unit}))))
 
 (def UNITS (delay [SECONDS NANOS]))
 
@@ -481,24 +481,23 @@
   (wip ::parse--not-implemented)
   (let [matches (re-matches @PATTERN text)]
     (if-not matches
-      (throw (ex-info "Text cannot be parsed to a Duration" {:text text}))
+      (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text text}))
       matches)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L486
 (defn between [start-inclusive end-exclusive]
-  (try
+  (try*
     (-> start-inclusive (Temporal/until end-exclusive NANOS) ofNanos)
-    (catch #?@(:clj (Exception e) :cljs (:default e))
+    (catch :default e
         (let [secs (-> start-inclusive (Temporal/until end-exclusive SECONDS))
-              [secs nanos] (try
-                             (let [n (- (TemporalAccessor/getLong end-exclusive NANO_OF_SECOND)
-                                        (TemporalAccessor/getLong start-inclusive NANO_OF_SECOND))
-                                   s (cond-> secs
-                                       (and (pos? secs) (neg? n))
-                                       inc
-                                       (and (neg? secs) (pos? n))
-                                       dec)]
-                               [s n])
-                             #?(:clj (catch Exception e [secs 0])
-                                :cljs (catch :default e [secs 0])))]
+              [secs nanos] (try*
+                            (let [n (- (TemporalAccessor/getLong end-exclusive NANO_OF_SECOND)
+                                       (TemporalAccessor/getLong start-inclusive NANO_OF_SECOND))
+                                  s (cond-> secs
+                                      (and (pos? secs) (neg? n))
+                                      inc
+                                      (and (neg? secs) (pos? n))
+                                      dec)]
+                              [s n])
+                            (catch :default e [secs 0]))]
           (ofSeconds secs nanos)))))

@@ -1,8 +1,8 @@
 (ns jiffy.instant
   (:require [jiffy.clock :as Clock]
-            [jiffy.date-time-exception :refer [date-time-exception]]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.duration :as Duration]
+            [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?@(:clj [try*])] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.format.date-time-formatter :as DateTimeFormatter]
             [jiffy.local-time :refer [NANOS_PER_DAY NANOS_PER_SECOND SECONDS_PER_DAY SECONDS_PER_HOUR SECONDS_PER_MINUTE]]
             [jiffy.math :as math]
@@ -17,7 +17,6 @@
             [jiffy.temporal.temporal-queries :as TemporalQueries]
             [jiffy.temporal.temporal-query :as TemporalQuery]
             [jiffy.temporal.temporal-unit :as TemporalUnit]
-            [jiffy.temporal.unsupported-temporal-type-exception :refer [unsupported-temporal-type-exception]]
             [jiffy.temporal.value-range :as ValueRange]
             [jiffy.time-comparable :as TimeComparable]
             [jiffy.zoned-date-time :as ZonedDateTime]
@@ -57,10 +56,10 @@
       this
 
       (> (Duration/getSeconds unit-dur) SECONDS_PER_DAY)
-      (throw (unsupported-temporal-type-exception "Unit is too large to be used for truncation" {:instant this :unit unit}))
+      (throw (ex UnsupportedTemporalTypeException "Unit is too large to be used for truncation" {:instant this :unit unit}))
 
       (-> NANOS_PER_DAY (mod dur) zero? not)
-      (throw (unsupported-temporal-type-exception "Unit must divide into a standard day without remainder" {:instant this :unit unit}))
+      (throw (ex UnsupportedTemporalTypeException "Unit must divide into a standard day without remainder" {:instant this :unit unit}))
 
       :else
       (let [nod (-> (mod (:seconds this) SECONDS_PER_DAY)
@@ -211,7 +210,7 @@
            this
            (create new-value (:nanos this)))
 
-         (throw (unsupported-temporal-type-exception (str "Unsupported field: " field) {:instant this :field field})))))))
+         (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:instant this :field field})))))))
 
 (defn -plus
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L786
@@ -230,7 +229,7 @@
        HOURS (plusSeconds this (math/multiply-exact amount-to-add SECONDS_PER_HOUR))
        HALF_DAYS (plusSeconds this (math/multiply-exact amount-to-add (/ SECONDS_PER_DAY 2)))
        DAYS (plusSeconds this (math/multiply-exact amount-to-add SECONDS_PER_DAY))
-       (throw (unsupported-temporal-type-exception (str "Unsupported unit: " unit))))
+       (throw (ex UnsupportedTemporalTypeException (str "Unsupported unit: " unit))))
      (TemporalUnit/addTo unit this amount-to-add))))
 
 (defn -minus
@@ -280,7 +279,7 @@
           HOURS (-> (secondsUntil this end) (/ SECONDS_PER_HOUR))
           HALF_DAYS (-> (secondsUntil this end) (/ (* 12 SECONDS_PER_HOUR)))
           DAYS (-> (secondsUntil this end) (/ SECONDS_PER_DAY))
-          (throw (unsupported-temporal-type-exception (str "Unsupported unit: " unit) {:instant this :unit unit})))
+          (throw (ex UnsupportedTemporalTypeException (str "Unsupported unit: " unit) {:instant this :unit unit})))
       (TemporalUnit/between unit this end))))
 
 
@@ -332,7 +331,7 @@
       NANO_OF_SECOND (:nanos this)
       MICRO_OF_SECOND (/ (:nanos this) 1000)
       MILLI_OF_SECOND (/ (:nanos this) 1000000)
-      (throw (unsupported-temporal-type-exception (str "Unsupported field: " field) {:instant this :field field})))
+      (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:instant this :field field})))
     (ValueRange/checkValidIntValue
      (-range this field)
      (TemporalField/getFrom field this)
@@ -346,7 +345,7 @@
       MICRO_OF_SECOND (/ (:nanos this) 1000)
       MILLI_OF_SECOND (/ (:nanos this) 1000000)
       INSTANT_SECONDS (:seconds this)
-      (throw (unsupported-temporal-type-exception (str "Unsupported field: " field) {:instant this :field field})))
+      (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:instant this :field field})))
     (TemporalField/getFrom field this)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1054
@@ -393,16 +392,17 @@
 (defn from [temporal]
   (if (satisfies? IInstant temporal)
     temporal
-    (try
+    (try*
       (ofEpochSecond
        (TemporalAccessor/getLong temporal ChronoField/INSTANT_SECONDS)
        (TemporalAccessor/get temporal ChronoField/NANO_OF_SECOND))
-      (catch #?@(:clj (Exception e) :cljs (:default e))
-        (throw (date-time-exception (str "Unable to obtain Instant from TemporalAccessor: "
-                                         temporal " of type " (type temporal))
-                                    {:temporal temporal
-                                     :type (type temporal)}
-                                    e))))))
+      (catch :default e
+        (throw (ex DateTimeException
+                   (str "Unable to obtain Instant from TemporalAccessor: "
+                        temporal " of type " (type temporal))
+                   {:temporal temporal
+                    :type (type temporal)}
+                   e))))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L394
 (defn parse [text]

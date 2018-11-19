@@ -1,5 +1,5 @@
 (ns jiffy.instant-impl
-  (:require [jiffy.date-time-exception :refer [date-time-exception]]
+  (:require [jiffy.exception :refer [ex DateTimeException]]
             [jiffy.math :as math]))
 
 (defrecord Instant [seconds nanos])
@@ -14,10 +14,11 @@
     EPOCH
 
     (or (< seconds MIN_SECOND) (> seconds MAX_SECOND))
-    (throw (date-time-exception "Instant exceeds minimum or maximum instant"
-                                {:max-second MAX_SECOND
-                                 :min-second MIN_SECOND
-                                 :seconds seconds}))
+    (throw (ex DateTimeException
+               "Instant exceeds minimum or maximum instant"
+               {:max-second MAX_SECOND
+                :min-second MIN_SECOND
+                :seconds seconds}))
 
     :else
     (->Instant seconds nano-of-second)))
