@@ -2,7 +2,7 @@
   (:require [jiffy.clock :as Clock]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.duration :as Duration]
-            [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?@(:clj [try*])] #?@(:cljs [:refer-macros [try*]])]
+            [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.format.date-time-formatter :as DateTimeFormatter]
             [jiffy.local-time :refer [NANOS_PER_DAY NANOS_PER_SECOND SECONDS_PER_DAY SECONDS_PER_HOUR SECONDS_PER_MINUTE]]
             [jiffy.math :as math]

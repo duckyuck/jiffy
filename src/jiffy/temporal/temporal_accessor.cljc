@@ -3,7 +3,7 @@
   (:require [jiffy.dev.wip :refer [wip]]
             [jiffy.temporal.chrono-field :as ChronoField]
             [jiffy.temporal.temporal-field :as TemporalField]
-            [jiffy.exception :refer [UnsupportedTemporalTypeException ex #?@(:clj [try*])] #?@(:cljs [:refer-macros [try*]])]))
+            [jiffy.exception :refer [UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalAccessor.java
 (defprotocol ITemporalAccessor

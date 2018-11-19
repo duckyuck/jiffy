@@ -2,7 +2,7 @@
   (:require [jiffy.big-decimal :as big-decimal]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.duration-impl :refer [create #?@(:cljs [Duration])] :as impl]
-            [jiffy.exception :refer [DateTimeParseException JavaArithmeticException UnsupportedTemporalTypeException ex #?@(:clj [try*])] #?@(:cljs [:refer-macros [try*]])]
+            [jiffy.exception :refer [DateTimeParseException JavaArithmeticException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.local-time :refer [NANOS_PER_SECOND NANOS_PER_DAY SECONDS_PER_DAY SECONDS_PER_MINUTE SECONDS_PER_HOUR SECONDS_PER_MINUTE NANOS_PER_MILLI MINUTES_PER_HOUR]]
             [jiffy.math :as math]
             [jiffy.temporal.chrono-field :as ChronoField :refer [NANO_OF_SECOND]]
