@@ -13,23 +13,23 @@
 (defrecord Clock [])
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L399
-(defn -get-zone [this] (wip ::-get-zone))
+(defn -get-zone-clock [this] (wip ::-get-zone-clock))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L411
-(defn -with-zone [this zone] (wip ::-with-zone))
+(defn -with-zone-clock [this zone] (wip ::-with-zone-clock))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L431
-(defn -millis [this] (wip ::-millis))
+(defn -millis-clock [this] (wip ::-millis-clock))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L444
-(defn -instant [this] (wip ::-instant))
+(defn -instant-clock [this] (wip ::-instant-clock))
 
 (extend-type Clock
   IClock
-  (getZone [this] (-get-zone this))
-  (withZone [this zone] (-with-zone this zone))
-  (millis [this] (-millis this))
-  (instant [this] (-instant this)))
+  (getZone [this] (-get-zone-clock this))
+  (withZone [this zone] (-with-zone-clock this zone))
+  (millis [this] (-millis-clock this))
+  (instant [this] (-instant-clock this)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L183
 (defn systemDefaultZone [] (wip ::systemDefaultZone))
@@ -50,7 +50,7 @@
 (defn tick [base-clock tick-duration] (wip ::tick))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L348
-(defn fixed [fixed-instant zone] (wip ::fixed))
+(defn fixed [fixed-instant-clock zone] (wip ::fixed))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L374
 (defn offset [base-clock offset-duration] (wip ::offset))
@@ -62,26 +62,26 @@
 
 (defrecord SystemClock [zone])
 
-(def -get-zone :zone)
+(def -get-zone-system-clock :zone)
 
-(defn -with-zone [this zone]
+(defn -with-zone-system-clock [this zone]
   (if (= (:zone this) zone)
     this
     (->SystemClock zone)))
 
-(defn -millis [this]
+(defn -millis-system-clock [this]
   #?(:clj (java.lang.System/currentTimeMillis)
      :cljs (.getTime (js/Date.))))
 
-(defn -instant [this]
-  (Instant/ofEpochMilli (-millis this)))
+(defn -instant-system-clock [this]
+  (Instant/ofEpochMilli (-millis-system-clock this)))
 
 (extend-type SystemClock
   IClock
-  (getZone [this] (-get-zone this))
-  (withZone [this zone] (-with-zone this zone))
-  (millis [this] (-millis this))
-  (instant [this] (-instant this)))
+  (getZone [this] (-get-zone-system-clock this))
+  (withZone [this zone] (-with-zone-system-clock this zone))
+  (millis [this] (-millis-system-clock this))
+  (instant [this] (-instant-system-clock this)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L485
 ;; TODO: use ZoneOffset/UTC
