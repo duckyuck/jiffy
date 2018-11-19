@@ -29,7 +29,7 @@
             jiffy.day-of-week
             jiffy.dev.wip
             [jiffy.duration :as Duration]
-            [jiffy.exception :refer [ex #?@(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
+            [jiffy.exception :refer [ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             jiffy.format.date-time-formatter
             jiffy.format.date-time-formatter-builder
             jiffy.format.date-time-parse-context
@@ -164,6 +164,8 @@
 
 #?(:cljs (enable-console-print!))
 
+(defn dummy [] ::ok)
+
 (comment
 
   (def i1 (Instant/now))
@@ -180,5 +182,5 @@
 
   (Duration/toHours d1)
 
-)
+  )
 
