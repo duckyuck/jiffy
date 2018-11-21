@@ -1,14 +1,10 @@
 (ns jiffy.exception-test
   (:require [clojure.test :refer [deftest testing is]]
-            [jiffy.exception :refer [ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]))
+            [jiffy.exception :refer [ex ex-msg #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]))
 
 (def Foo ::foo)
 (def Bar ::bar)
 (derive Bar Foo)
-
-(defn ex-msg [e]
-  #?(:clj (.getMessage e)
-     :cljs (ex-message e)))
 
 (deftest try-test
   (testing "simple case"

@@ -1,6 +1,7 @@
 (ns jiffy.exception
   (:require [clojure.spec.alpha :as s]
-            [jiffy.dev.wip :refer [wip]]))
+            [jiffy.dev.wip :refer [wip]]
+            [jiffy.conversion :refer [same?]]))
 
 (s/def ::catch-expr
   (s/cat :catch #(= 'catch %)
@@ -11,16 +12,14 @@
 (s/def ::try-exprs (s/+ (s/or :catch ::catch-expr
                               :body-expr any?)))
 
-(defn cljs-env?
-  "Given an &env from a macro, tells whether it is expanding into CLJS."
-  [env]
+(defn cljs-env? [env]
   (boolean (:ns env)))
 
-(defn gen-catch [env catch-exprs]
+(defn gen-catch [cljs? catch-exprs]
   (if-not (seq catch-exprs)
     []
     (let [caught-sym (gensym)]
-      `(catch ~(if (cljs-env? env) :default 'Throwable) ~caught-sym
+      `(catch ~(if cljs? :default 'Throwable) ~caught-sym
          (letfn [(~'matches? [t# thrown#]
                   (or (isa? t# (type thrown#))
                       (and (keyword? t#)
@@ -48,7 +47,7 @@
                          (map second))]
     `(try
        ~@try-body
-       ~(gen-catch &env catch-exprs))))
+       ~(gen-catch (cljs-env? &env) catch-exprs))))
 
 (defn ex
   ([kind message] (ex kind message {} nil))
@@ -56,6 +55,10 @@
   ([kind message data cause] (ex-info message
                                       (assoc data ::kind kind)
                                       cause)))
+
+(defn ex-msg [e]
+  #?(:clj (.getMessage e)
+     :cljs (ex-message e)))
 
 (def JavaThrowable ::JavaThrowable)
 
@@ -100,3 +103,10 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeParseException.java#L134
 (defn getErrorIndex [this] (wip ::getErrorIndex))
+
+#?(:clj
+   (let [kind->class {JavaArithmeticException java.lang.ArithmeticException}]
+     (defmethod same? clojure.lang.ExceptionInfo
+       [ex java-object]
+       (= (kind->class (::kind (ex-data ex)))
+          (type java-object)))))
