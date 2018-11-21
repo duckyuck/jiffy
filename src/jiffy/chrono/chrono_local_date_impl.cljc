@@ -1,10 +1,16 @@
 (ns jiffy.chrono.chrono-local-date-impl
-  (:require [jiffy.dev.wip :refer [wip]]
-            [jiffy.time-comparable :as TimeComparable]
+  (:require [clojure.spec.alpha :as s]
             [jiffy.chrono.chrono-local-date :as ChronoLocalDate]
+            [jiffy.chrono.chronology :as Chronology]
+            [jiffy.dev.wip :refer [wip]]
+            [jiffy.specs :as j]
             [jiffy.temporal.temporal :as Temporal]
             [jiffy.temporal.temporal-accessor :as TemporalAccessor]
-            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]))
+            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]
+            [jiffy.temporal.temporal-amount :as TemporalAmount]
+            [jiffy.temporal.temporal-field :as TemporalField]
+            [jiffy.temporal.temporal-unit :as TemporalUnit]
+            [jiffy.time-comparable :as TimeComparable]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java
 (defprotocol IChronoLocalDateImpl
@@ -19,29 +25,52 @@
 
 (defrecord ChronoLocalDateImpl [])
 
+(s/def ::create-args ::j/wip)
+(defn create [])
+(s/def ::chrono-local-date-impl (j/constructor-spec ChronoLocalDateImpl create ::create-args))
+(s/fdef create :args ::create-args :ret ::chrono-local-date-impl)
+
+(defmacro args [& x] `(s/tuple ::chrono-local-date-impl ~@x))
+
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L243
+(s/def ::plus-years-args (args ::j/long))
 (defn -plus-years [this years-to-add] (wip ::-plus-years))
+(s/fdef -plus-years :args ::plus-years-args :ret ::ChronoLocalDate/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L259
+(s/def ::plus-months-args (args ::j/long))
 (defn -plus-months [this months-to-add] (wip ::-plus-months))
+(s/fdef -plus-months :args ::plus-months-args :ret ::ChronoLocalDate/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L276
+(s/def ::plus-weeks-args (args ::j/long))
 (defn -plus-weeks [this weeks-to-add] (wip ::-plus-weeks))
+(s/fdef -plus-weeks :args ::plus-weeks-args :ret ::ChronoLocalDate/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L291
+(s/def ::plus-days-args (args ::j/long))
 (defn -plus-days [this days-to-add] (wip ::-plus-days))
+(s/fdef -plus-days :args ::plus-days-args :ret ::ChronoLocalDate/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L311
+(s/def ::minus-years-args (args ::j/long))
 (defn -minus-years [this years-to-subtract] (wip ::-minus-years))
+(s/fdef -minus-years :args ::minus-years-args :ret ::ChronoLocalDate/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L332
+(s/def ::minus-months-args (args ::j/long))
 (defn -minus-months [this months-to-subtract] (wip ::-minus-months))
+(s/fdef -minus-months :args ::minus-months-args :ret ::ChronoLocalDate/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L352
+(s/def ::minus-weeks-args (args ::j/long))
 (defn -minus-weeks [this weeks-to-subtract] (wip ::-minus-weeks))
+(s/fdef -minus-weeks :args ::minus-weeks-args :ret ::ChronoLocalDate/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L370
+(s/def ::minus-days-args (args ::j/long))
 (defn -minus-days [this days-to-subtract] (wip ::-minus-days))
+(s/fdef -minus-days :args ::minus-days-args :ret ::ChronoLocalDate/chrono-local-date)
 
 (extend-type ChronoLocalDateImpl
   IChronoLocalDateImpl
@@ -58,29 +87,37 @@
 
 ;; FIXME: no implementation found from inherited class interface java.time.chrono.ChronoLocalDate
 
+(s/def ::with-args (args ::j/wip))
 (defn -with
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L178
   ([this adjuster] (wip ::-with))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L184
   ([this field value] (wip ::-with)))
+(s/fdef -with :args ::with-args :ret ::Temporal/temporal)
 
+(s/def ::plus-args (args ::j/wip))
 (defn -plus
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L191
   ([this amount] (wip ::-plus))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L198
   ([this amount-to-add unit] (wip ::-plus)))
+(s/fdef -plus :args ::plus-args :ret ::Temporal/temporal)
 
+(s/def ::minus-args (args ::j/wip))
 (defn -minus
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L218
   ([this amount] (wip ::-minus))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L224
   ([this amount-to-subtract unit] (wip ::-minus)))
+(s/fdef -minus :args ::minus-args :ret ::ChronoLocalDate/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L376
+(s/def ::until-args (args ::Temporal/temporal ::TemporalUnit/temporal-unit))
 (defn -until [this end-exclusive unit] (wip ::-until))
+(s/fdef -until :args ::until-args :ret ::j/long)
 
 (extend-type ChronoLocalDateImpl
   Temporal/ITemporal
@@ -100,4 +137,6 @@
 ;; FIXME: no implementation found from inherited class interface java.time.temporal.TemporalAdjuster
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java#L160
+(s/def ::ensure-valid-args (args ::Chronology/chronology ::Temporal/temporal))
 (defn ensureValid [chrono temporal] (wip ::ensureValid))
+(s/fdef ensureValid :args ::ensure-valid-args :ret ::ChronoLocalDate/chrono-local-date)

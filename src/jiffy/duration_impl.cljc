@@ -1,5 +1,8 @@
 (ns jiffy.duration-impl
   (:require [jiffy.dev.wip :refer [wip]]
+            [clojure.spec.alpha :as s]
+            [jiffy.specs :as j]
+            [jiffy.dev.wip :refer [wip]]
             [jiffy.local-time-impl :refer [NANOS_PER_SECOND NANOS_PER_DAY SECONDS_PER_DAY SECONDS_PER_MINUTE SECONDS_PER_HOUR SECONDS_PER_MINUTE NANOS_PER_MILLI MINUTES_PER_HOUR]]
             [jiffy.math :as math]))
 
@@ -7,12 +10,15 @@
 
 (def ZERO (->Duration 0 0))
 
+(s/def ::create-args ::j/wip)
 (defn create
-  ([big-decimal-seconds] (wip ::create--not-implemented))
+  ([big-decimal-seconds] (wip ::create))
   ([seconds nano-adjustment]
    (if (zero? (bit-or seconds nano-adjustment))
      ZERO
      (->Duration seconds nano-adjustment))))
+(s/def ::duration (j/constructor-spec Duration create ::create-args))
+(s/fdef create :args ::create-args :ret ::duration)
 
 (defn ofSeconds
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L223

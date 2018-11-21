@@ -1,7 +1,7 @@
 (ns jiffy.exception
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.conversion :refer [same?]]))
+            #?(:clj [jiffy.conversion :refer [same?]])))
 
 (s/def ::catch-expr
   (s/cat :catch #(= 'catch %)
@@ -63,7 +63,7 @@
 (def JavaThrowable ::JavaThrowable)
 
 (def JavaException ::JavaException)
-(derive Exception JavaThrowable)
+(derive JavaException JavaThrowable)
 
 (def JavaRuntimeException ::JavaRuntimeException)
 (derive JavaRuntimeException JavaException)

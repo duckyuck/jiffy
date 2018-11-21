@@ -1,21 +1,45 @@
 (ns jiffy.chrono.minguo-chronology
-  (:require [jiffy.dev.wip :refer [wip]]
-            [jiffy.time-comparable :as TimeComparable]
+  (:require [clojure.spec.alpha :as s]
             [jiffy.chrono.abstract-chronology :as AbstractChronology]
-            [jiffy.chrono.chronology :as Chronology]))
-
-(defrecord MinguoChronology [])
+            [jiffy.chrono.chrono-local-date :as ChronoLocalDate]
+            [jiffy.chrono.chrono-local-date-time :as ChronoLocalDateTime]
+            [jiffy.chrono.chrono-zoned-date-time :as ChronoZonedDateTime]
+            [jiffy.chrono.chronology :as Chronology]
+            [jiffy.chrono.era :as Era]
+            [jiffy.chrono.minguo-chronology-impl :refer [create #?@(:cljs [MinguoChronology])] :as impl]
+            [jiffy.chrono.minguo-date :as MinguoDate]
+            [jiffy.chrono.minguo-era :as MinguoEra]
+            [jiffy.clock :as Clock]
+            [jiffy.dev.wip :refer [wip]]
+            [jiffy.format.resolver-style :as ResolverStyle]
+            [jiffy.instant :as Instant]
+            [jiffy.specs :as j]
+            [jiffy.temporal.chrono-field :as ChronoField]
+            [jiffy.temporal.temporal-accessor :as TemporalAccessor]
+            [jiffy.temporal.value-range :as ValueRange]
+            [jiffy.time-comparable :as TimeComparable]
+            [jiffy.zone-id :as ZoneId])
+  #?(:clj (:import [jiffy.chrono.minguo_chronology_impl MinguoChronology])))
 
 ;; FIXME: no implementation found from inherited class interface java.lang.Comparable
 
 ;; FIXME: no implementation found from inherited class class java.time.chrono.AbstractChronology
 
+(s/def ::minguo-chronology ::impl/minguo-chronology)
+
+(defmacro args [& x] `(s/tuple ::minguo-chronology ~@x))
+
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L140
+(s/def ::get-id-args (args))
 (defn -get-id [this] (wip ::-get-id))
+(s/fdef -get-id :args ::get-id-args :ret string?)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L157
+(s/def ::get-calendar-type-args (args))
 (defn -get-calendar-type [this] (wip ::-get-calendar-type))
+(s/fdef -get-calendar-type :args ::get-calendar-type-args :ret string?)
 
+(s/def ::date-args (args ::j/wip))
 (defn -date
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L252
   ([this temporal] (wip ::-date))
@@ -25,17 +49,23 @@
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L175
   ([this era year-of-era month day-of-month] (wip ::-date)))
+(s/fdef -date :args ::date-args :ret ::ChronoLocalDate/chrono-local-date)
 
+(s/def ::date-year-day-args (args ::j/wip))
 (defn -date-year-day
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L220
   ([this proleptic-year day-of-year] (wip ::-date-year-day))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L206
   ([this era year-of-era day-of-year] (wip ::-date-year-day)))
+(s/fdef -date-year-day :args ::date-year-day-args :ret ::ChronoLocalDate/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L232
+(s/def ::date-epoch-day-args (args ::j/long))
 (defn -date-epoch-day [this epoch-day] (wip ::-date-epoch-day))
+(s/fdef -date-epoch-day :args ::date-epoch-day-args :ret ::ChronoLocalDate/chrono-local-date)
 
+(s/def ::date-now-args (args ::j/wip))
 (defn -date-now
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L237
   ([this] (wip ::-date-now))
@@ -43,34 +73,51 @@
   ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L242
   ([this date-now--overloaded-param] (wip ::-date-now)))
+(s/fdef -date-now :args ::date-now-args :ret ::MinguoDate/minguo-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L261
+(s/def ::local-date-time-args (args ::TemporalAccessor/temporal-accessor))
 (defn -local-date-time [this temporal] (wip ::-local-date-time))
+(s/fdef -local-date-time :args ::local-date-time-args :ret ::ChronoLocalDateTime/chrono-local-date-time)
 
+(s/def ::zoned-date-time-args (args ::j/wip))
 (defn -zoned-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L267
   ([this temporal] (wip ::-zoned-date-time))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L273
   ([this instant zone] (wip ::-zoned-date-time)))
+(s/fdef -zoned-date-time :args ::zoned-date-time-args :ret ::ChronoZonedDateTime/chrono-zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L289
+(s/def ::is-leap-year-args (args ::j/long))
 (defn -is-leap-year [this proleptic-year] (wip ::-is-leap-year))
+(s/fdef -is-leap-year :args ::is-leap-year-args :ret ::j/boolean)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L294
+(s/def ::proleptic-year-args (args ::Era/era ::j/int))
 (defn -proleptic-year [this era year-of-era] (wip ::-proleptic-year))
+(s/fdef -proleptic-year :args ::proleptic-year-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L302
+(s/def ::era-of-args (args ::j/int))
 (defn -era-of [this era-value] (wip ::-era-of))
+(s/fdef -era-of :args ::era-of-args :ret ::Era/era)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L307
+(s/def ::eras-args (args))
 (defn -eras [this] (wip ::-eras))
+(s/fdef -eras :args ::eras-args :ret ::j/wip)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L313
+(s/def ::range-args (args ::ChronoField/chrono-field))
 (defn -range [this field] (wip ::-range))
+(s/fdef -range :args ::range-args :ret ::ValueRange/value-range)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoChronology.java#L333
+(s/def ::resolve-date-args (args ::j/wip ::ResolverStyle/resolver-style))
 (defn -resolve-date [this field-values resolver-style] (wip ::-resolve-date))
+(s/fdef -resolve-date :args ::resolve-date-args :ret ::ChronoLocalDate/chrono-local-date)
 
 (extend-type MinguoChronology
   Chronology/IChronology

@@ -2,6 +2,12 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]))
 
+(s/def ::int int?)
+(s/def ::long int?)
+(s/def ::boolean boolean?)
+(s/def ::char char?)
+(s/def ::void nil?)
+
 ;; TODO:
 ;; These specs are currently only used for generating data used in API
 ;; parity tests, and they are limited in ways to accomodate for testing.
@@ -17,3 +23,6 @@
 (defn constructor-spec [record-type constructor param-spec]
   (s/with-gen #(instance? record-type %)
     (fn [] (gen/fmap #(apply constructor %) (s/gen param-spec)))))
+
+;; Placeholder for incomplete specs
+(s/def ::wip (s/and keyword? #(= % ::wip)))

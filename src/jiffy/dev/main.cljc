@@ -180,7 +180,7 @@
 
   d1
 
-  (Duration/toHours d1)
+  (Duration/toMinutes d1)
 
   )
 
