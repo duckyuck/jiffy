@@ -6,7 +6,7 @@
             [jiffy.local-time-impl :refer [NANOS_PER_SECOND NANOS_PER_DAY SECONDS_PER_DAY SECONDS_PER_MINUTE SECONDS_PER_HOUR SECONDS_PER_MINUTE NANOS_PER_MILLI MINUTES_PER_HOUR]]
             [jiffy.math :as math]))
 
-(defrecord Duration [seconds nano-of-second])
+(defrecord Duration [seconds nanos])
 
 (def ZERO (->Duration 0 0))
 
