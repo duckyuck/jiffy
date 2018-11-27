@@ -55,6 +55,8 @@
   (condp = (symbol (namespace jiffy-method))
     'jiffy.instant 'java.time.Instant
     'jiffy.temporal.value-range 'java.time.temporal.ValueRange
+    'jiffy.zoned-date-time 'java.time.ZonedDateTime
+    'jiffy.chrono.chrono-zoned-date-time 'java.time.chrono.ChronoZonedDateTime
     (throw (ex-info "Unable to resolve java class of jiffy method " jiffy-method {}))))
 
 (defn gen-test-name [f]
