@@ -9,7 +9,7 @@
 
 (defprotocol IChronoUnit)
 
-(defrecord ChronoUnit [name estimated-duration]
+(defrecord ChronoUnit [name duration]
   IChronoUnit)
 
 (s/def ::create-args (s/tuple string? ::Duration/duration))
