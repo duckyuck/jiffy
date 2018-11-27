@@ -21,7 +21,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoUnit.java#L210
 (s/def ::get-duration-args (args))
-(defn -get-duration [this] (wip ::-get-duration))
+(defn -get-duration [this] (:duration this))
 (s/fdef -get-duration :args ::get-duration-args :ret ::Duration/duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoUnit.java#L226
