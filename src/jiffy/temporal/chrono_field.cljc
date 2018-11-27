@@ -18,6 +18,9 @@
 
 (defrecord ChronoField [ordinal enum-name name base-unit range-unit range display-name-key])
 
+(defn chrono-field? [o]
+  (instance? ChronoField o))
+
 (s/def ::create-args ::j/wip)
 (defn create
   ([ordinal enum-name name base-unit range-unit range]
