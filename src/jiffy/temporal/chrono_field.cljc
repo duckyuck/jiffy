@@ -31,7 +31,8 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L716
 (s/def ::check-valid-value-args (args ::j/long))
-(defn -check-valid-value [this value] (wip ::-check-valid-value))
+(defn -check-valid-value [this value]
+  (ValueRange/checkValidValue (TemporalField/range this) value this))
 (s/fdef -check-valid-value :args ::check-valid-value-args :ret ::j/long)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L735
