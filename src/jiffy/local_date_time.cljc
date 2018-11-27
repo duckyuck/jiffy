@@ -443,22 +443,8 @@
   ([now--overloaded-param] (wip ::now)))
 (s/fdef now :args ::now-args :ret ::local-date-time)
 
-(s/def ::of-args (args ::j/wip))
-(defn of
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L373
-  ([date time] (wip ::of))
-
-  ;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L235
-  ([of--overloaded-param-1 of--overloaded-param-2 of--overloaded-param-3 of--overloaded-param-4 of--overloaded-param-5] (wip ::of))
-
-  ;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L260
-  ([of--overloaded-param-1 of--overloaded-param-2 of--overloaded-param-3 of--overloaded-param-4 of--overloaded-param-5 of--overloaded-param-6] (wip ::of))
-
-  ;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L285
-  ([of--overloaded-param-1 of--overloaded-param-2 of--overloaded-param-3 of--overloaded-param-4 of--overloaded-param-5 of--overloaded-param-6 of--overloaded-param-7] (wip ::of)))
+(s/def ::of-args ::impl/of-args)
+(def of #'impl/of)
 (s/fdef of :args ::of-args :ret ::local-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L393
