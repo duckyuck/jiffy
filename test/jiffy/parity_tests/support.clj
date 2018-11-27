@@ -72,8 +72,8 @@
 
 (defmacro gen-protocol-method-prop [protocol-ns f]
   `(prop/for-all
-    [args# (s/gen ~(get-spec f))]
-    (same? (invoke-jiffy ~(symbol (str protocol-ns) (name f)) args#)
+    [args# (s/gen ~(get-spec (symbol (str protocol-ns) (name f))))]
+    (same? (invoke-jiffy ~f args#)
            (invoke-java '~(symbol (str (jiffy-fn->java-class f))
                                   (name f))
                         (map jiffy->java args#)
