@@ -29,10 +29,13 @@
        (map str/lower-case)
        (str/join "-")))
 
+(defmacro trycatch [& exprs]
+  `(try* ~@exprs (catch :default e# e#)))
+
 (defmacro same? [call-jiffy-form call-java-form]
   `(conversion/same?
-    (try* ~call-jiffy-form (catch :default e# e#))
-    (try* ~call-java-form (catch :default e# e#))))
+    (trycatch ~call-jiffy-form)
+    (trycatch ~call-java-form)))
 
 (defn invoke-java [f args {:keys [static?]}]
   (let [obj (when-not static? (first args))
@@ -41,13 +44,18 @@
                     (filter #(-> % .getName (= method-name)))
                     (filter #(-> % .getParameterCount (= (count (if static? args (rest args))))))
                     first)]
-    (if static?
-      (.invoke method obj (into-array Object args))
-      (.invoke method obj (into-array Object (rest args))))))
+    (try
+      (if static?
+        (.invoke method obj (into-array Object args))
+        (.invoke method obj (into-array Object (rest args))))
+      (catch java.lang.reflect.InvocationTargetException ite
+          (throw (.getCause ite))))))
 
 (defn jiffy-fn->java-class [jiffy-method]
-  (case (symbol (namespace jiffy-method))
-    'jiffy.instant 'java.time.Instant))
+  (condp = (symbol (namespace jiffy-method))
+    'jiffy.instant 'java.time.Instant
+    'jiffy.temporal.value-range 'java.time.temporal.ValueRange
+    (throw (ex-info "Unable to resolve java class of jiffy method " jiffy-method {}))))
 
 (defn gen-test-name [f]
   (symbol (str (str/replace (namespace f) #"\." "-")
@@ -62,11 +70,12 @@
 (defn invoke-jiffy [f args]
   (apply f args))
 
-(defn gen-protocol-method-prop [protocol-ns f]
+(defmacro gen-protocol-method-prop [protocol-ns f]
   `(prop/for-all
     [args# (s/gen ~(get-spec f))]
     (same? (invoke-jiffy ~(symbol (str protocol-ns) (name f)) args#)
-           (invoke-java '~(symbol (str (jiffy-fn->java-class f)) (name f))
+           (invoke-java '~(symbol (str (jiffy-fn->java-class f))
+                                  (name f))
                         (map jiffy->java args#)
                         {:static? false}))))
 
@@ -78,13 +87,13 @@
                         (map jiffy->java args#)
                         {:static? true}))))
 
-(def default-num-tests 10000)
+(def default-num-tests 1000)
 
 (defmacro test-proto-fn [protocol-ns f & [num-tests]]
   `(do
      (require '~(symbol (namespace f)))
      (defspec ~(gen-test-name f) ~(or num-tests default-num-tests)
-       ~(gen-protocol-method-prop protocol-ns f))))
+       (gen-protocol-method-prop ~protocol-ns ~f))))
 
 (defmacro test-static-fn [jiffy-fn java-fn & [num-tests]]
   `(do

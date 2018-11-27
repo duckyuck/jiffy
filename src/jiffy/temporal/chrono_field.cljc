@@ -1,22 +1,29 @@
 (ns jiffy.temporal.chrono-field
   (:require [clojure.spec.alpha :as s]
+            [jiffy.temporal.chrono-unit :as unit]
+            #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
             [jiffy.dev.wip :refer [wip]]
+            [jiffy.math :as math]
             [jiffy.specs :as j]
-            ;; [jiffy.temporal.temporal :as Temporal]
             [jiffy.temporal.temporal-accessor :as TemporalAccessor]
             [jiffy.temporal.temporal-field :as TemporalField]
             [jiffy.temporal.temporal-unit :as TemporalUnit]
-            [jiffy.temporal.value-range :as ValueRange]))
+            [jiffy.temporal.value-range :as ValueRange]
+            [jiffy.year-impl :as Year]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
 (defprotocol IChronoField
   (checkValidValue [this value])
   (checkValidIntValue [this value]))
 
-(defrecord ChronoField [])
+(defrecord ChronoField [ordinal enum-name name base-unit range-unit range display-name-key])
 
 (s/def ::create-args ::j/wip)
-(defn create [])
+(defn create
+  ([ordinal enum-name name base-unit range-unit range]
+   (create ordinal enum-name name base-unit range-unit range nil))
+  ([ordinal enum-name name base-unit range-unit range display-name-key]
+   (->ChronoField ordinal enum-name name base-unit range-unit range display-name-key)))
 (s/def ::chrono-field (j/constructor-spec ChronoField create ::create-args))
 (s/fdef create :args ::create-args :ret ::chrono-field)
 
@@ -29,7 +36,8 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L735
 (s/def ::check-valid-int-value-args (args ::j/long))
-(defn -check-valid-int-value [this value] (wip ::-check-valid-int-value))
+(defn -check-valid-int-value [this value]
+  (ValueRange/checkValidIntValue (TemporalField/range this) value this))
 (s/fdef -check-valid-int-value :args ::check-valid-int-value-args :ret ::j/int)
 
 (extend-type ChronoField
@@ -54,7 +62,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L672
 (s/def ::range-args (args))
-(defn -range [this] (wip ::-range))
+(defn -range [this] (:range this))
 (s/fdef -range :args ::range-args :ret ::ValueRange/value-range)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L685
@@ -100,101 +108,76 @@
   (getFrom [this temporal] (-get-from this temporal))
   (adjustInto [this temporal new-value] (-adjust-into this temporal new-value)))
 
+
+(let [ordinal (atom -1)]
+  (defn next-ordinal []
+    (swap! ordinal inc)))
+
+(def enums (atom {}))
+
+(defmacro defenum [sym & args]
+  `(do
+     (def ~sym (create ~(next-ordinal) ~(str sym) ~@args))
+     (swap! enums assoc ~(str sym) ~sym)))
+
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(defn values [] (wip ::values))
+(defn values [] (vals @enums))
 (s/fdef values :ret ::j/wip)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
 (s/def ::value-of-args (args string?))
-(defn valueOf [value-of--unknown-param-name] (wip ::valueOf))
+(defn valueOf [enum-name] (@enums enum-name))
 (s/fdef valueOf :args ::value-of-args :ret ::chrono-field)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def MILLI_OF_SECOND ::MILLI_OF_SECOND--not-implemented)
+(defenum NANO_OF_SECOND "NanoOfSecond" unit/NANOS unit/SECONDS (ValueRange/of 0 999999999))
+(defenum NANO_OF_DAY "NanoOfDay" unit/NANOS unit/DAYS (ValueRange/of 0 (- (* 86400 1000000000) 1)))
+(defenum MICRO_OF_SECOND "MicroOfSecond" unit/MICROS unit/SECONDS (ValueRange/of 0 999999))
+(defenum MICRO_OF_DAY "MicroOfDay" unit/MICROS unit/DAYS (ValueRange/of 0 (- (* 86400 1000000) 1)))
+(defenum MILLI_OF_SECOND "MilliOfSecond" unit/MILLIS unit/SECONDS (ValueRange/of 0 999))
+(defenum MILLI_OF_DAY "MilliOfDay" unit/MILLIS unit/DAYS (ValueRange/of 0 (- (* 86400 1000) 1)))
+(defenum SECOND_OF_MINUTE "SecondOfMinute" unit/SECONDS unit/MINUTES (ValueRange/of 0 59) "second")
+(defenum SECOND_OF_DAY "SecondOfDay" unit/SECONDS unit/DAYS (ValueRange/of 0 (- 86400 1)))
+(defenum MINUTE_OF_HOUR "MinuteOfHour" unit/MINUTES unit/HOURS (ValueRange/of 0 59) "minute")
+(defenum MINUTE_OF_DAY "MinuteOfDay" unit/MINUTES unit/DAYS (ValueRange/of 0 (- (* 24 60) 1)))
+(defenum HOUR_OF_AMPM "HourOfAmPm" unit/HOURS unit/HALF_DAYS (ValueRange/of 0 11))
+(defenum CLOCK_HOUR_OF_AMPM "ClockHourOfAmPm" unit/HOURS unit/HALF_DAYS (ValueRange/of 1 12))
+(defenum HOUR_OF_DAY "HourOfDay" unit/HOURS unit/DAYS (ValueRange/of 0 23) "hour")
+(defenum CLOCK_HOUR_OF_DAY "ClockHourOfDay" unit/HOURS unit/DAYS (ValueRange/of 1 24))
+(defenum AMPM_OF_DAY "AmPmOfDay" unit/HALF_DAYS unit/DAYS (ValueRange/of 0 1) "dayperiod")
+(defenum DAY_OF_WEEK "DayOfWeek" unit/DAYS unit/WEEKS (ValueRange/of 1 7) "weekday")
+(defenum ALIGNED_DAY_OF_WEEK_IN_MONTH "AlignedDayOfWeekInMonth" unit/DAYS unit/WEEKS (ValueRange/of 1 7))
+(defenum ALIGNED_DAY_OF_WEEK_IN_YEAR "AlignedDayOfWeekInYear" unit/DAYS unit/WEEKS (ValueRange/of 1 7))
+(defenum DAY_OF_MONTH "DayOfMonth" unit/DAYS unit/MONTHS (ValueRange/of 1 28 31) "day")
+(defenum DAY_OF_YEAR "DayOfYear" unit/DAYS unit/YEARS (ValueRange/of 1 365 366))
+(defenum EPOCH_DAY "EpochDay" unit/DAYS unit/FOREVER (ValueRange/of -365243219162 365241780471))
+(defenum ALIGNED_WEEK_OF_MONTH "AlignedWeekOfMonth" unit/WEEKS unit/MONTHS (ValueRange/of 1 4 5))
+(defenum ALIGNED_WEEK_OF_YEAR "AlignedWeekOfYear" unit/WEEKS unit/YEARS (ValueRange/of 1 53))
+(defenum MONTH_OF_YEAR "MonthOfYear" unit/MONTHS unit/YEARS (ValueRange/of 1 12) "month")
+(defenum PROLEPTIC_MONTH "ProlepticMonth" unit/MONTHS unit/FOREVER (ValueRange/of (* Year/MIN_VALUE 12) (+ (* Year/MAX_VALUE 12) 11)))
+(defenum YEAR_OF_ERA "YearOfEra" unit/YEARS unit/FOREVER (ValueRange/of 1 Year/MAX_VALUE (+ Year/MAX_VALUE 1)))
+(defenum YEAR "Year" unit/YEARS unit/FOREVER (ValueRange/of Year/MIN_VALUE Year/MAX_VALUE) "year")
+(defenum ERA "Era" unit/ERAS unit/FOREVER (ValueRange/of 0 1) "era")
+(defenum INSTANT_SECONDS "InstantSeconds" unit/SECONDS unit/FOREVER (ValueRange/of math/long-min-value math/long-max-value))
+(defenum OFFSET_SECONDS "OffsetSeconds" unit/SECONDS unit/FOREVER (ValueRange/of (* -18 3600) (* 18 3600)));
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def YEAR_OF_ERA ::YEAR_OF_ERA--not-implemented)
+#?(:clj
+   (defmethod jiffy->java ChronoField [chrono-field]
+     (java.time.temporal.ChronoField/valueOf (:enum-name chrono-field))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def CLOCK_HOUR_OF_DAY ::CLOCK_HOUR_OF_DAY--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def ERA ::ERA--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def INSTANT_SECONDS ::INSTANT_SECONDS--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def AMPM_OF_DAY ::AMPM_OF_DAY--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def OFFSET_SECONDS ::OFFSET_SECONDS--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def NANO_OF_SECOND ::NANO_OF_SECOND--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def NANO_OF_DAY ::NANO_OF_DAY--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def ALIGNED_DAY_OF_WEEK_IN_MONTH ::ALIGNED_DAY_OF_WEEK_IN_MONTH--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def MONTH_OF_YEAR ::MONTH_OF_YEAR--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def HOUR_OF_AMPM ::HOUR_OF_AMPM--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def YEAR ::YEAR--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def MICRO_OF_SECOND ::MICRO_OF_SECOND--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def ALIGNED_WEEK_OF_YEAR ::ALIGNED_WEEK_OF_YEAR--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def PROLEPTIC_MONTH ::PROLEPTIC_MONTH--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def DAY_OF_MONTH ::DAY_OF_MONTH--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def SECOND_OF_MINUTE ::SECOND_OF_MINUTE--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def SECOND_OF_DAY ::SECOND_OF_DAY--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def EPOCH_DAY ::EPOCH_DAY--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def DAY_OF_YEAR ::DAY_OF_YEAR--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def ALIGNED_WEEK_OF_MONTH ::ALIGNED_WEEK_OF_MONTH--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def DAY_OF_WEEK ::DAY_OF_WEEK--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def CLOCK_HOUR_OF_AMPM ::CLOCK_HOUR_OF_AMPM--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def MINUTE_OF_DAY ::MINUTE_OF_DAY--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def ALIGNED_DAY_OF_WEEK_IN_YEAR ::ALIGNED_DAY_OF_WEEK_IN_YEAR--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def MINUTE_OF_HOUR ::MINUTE_OF_HOUR--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def HOUR_OF_DAY ::HOUR_OF_DAY--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def MILLI_OF_DAY ::MILLI_OF_DAY--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(def MICRO_OF_DAY ::MICRO_OF_DAY--not-implemented)
+#?(:clj
+   (defmethod same? ChronoField
+     [jiffy-object java-object]
+     (= (map #(% jiffy-object) [:ordinal
+                                :enum-name
+                                :name
+                                :base-unit
+                                :range-unit
+                                :range
+                                :display-name-key])
+        (map #(% java-object) [(memfn ordinal)
+                               (memfn name)
+                               (memfn getName)
+                               (memfn getBaseUnit)
+                               (memfn getRangeUnit)
+                               (memfn getRange)
+                               (memfn getDisplayNameKey)]))))

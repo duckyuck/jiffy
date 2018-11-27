@@ -51,16 +51,6 @@
 
 (s/def ::instant ::impl/instant)
 
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L617
-(s/def ::get-epoch-second-args (args))
-(defn -get-epoch-second [this] (:seconds this))
-(s/fdef -get-epoch-second :args ::get-epoch-second-args :ret ::j/long)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L617
-(s/def ::get-nano-args (args))
-(defn -get-nano [this]  (:nanos this))
-(s/fdef -get-nano :args ::get-nano-args :ret ::j/long)
 (defmacro args [& x] `(s/tuple ::instant ~@x))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L747
@@ -187,10 +177,14 @@
   (neg? (TimeComparable/compareTo this other-instant)))
 (s/fdef -is-before :args ::is-before-args :ret ::j/boolean)
 
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L617
+(s/def ::get-epoch-second-args ::impl/get-epoch-second-args)
+(s/def ::get-nano-args ::impl/get-nano-args)
+
 (extend-type Instant
   IInstant
-  (getEpochSecond [this] (-get-epoch-second this))
-  (getNano [this] (-get-nano this))
+  (getEpochSecond [this] (impl/-get-epoch-second this))
+  (getNano [this] (impl/-get-nano this))
   (truncatedTo [this unit] (-truncated-to this unit))
   (plusSeconds [this seconds-to-add] (-plus-seconds this seconds-to-add))
   (plusMillis [this millis-to-add] (-plus-millis this millis-to-add))

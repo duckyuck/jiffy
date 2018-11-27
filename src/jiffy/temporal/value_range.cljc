@@ -1,5 +1,6 @@
 (ns jiffy.temporal.value-range
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
             [jiffy.specs :as j]
             [jiffy.exception :refer [DateTimeException JavaIllegalArgumentException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.temporal.temporal-field :as TemporalField]
@@ -20,8 +21,47 @@
 
 (defrecord ValueRange [min-smallest min-largest max-smallest max-largest])
 
-(s/def ::create-args (s/tuple ::j/long ::j/long ::j/long ::j/long))
-(defn create [])
+(s/def ::create-args
+  (s/or :arity-2 (s/and (s/cat :min ::j/long
+                               :max ::j/long)
+                        #(<= (:min %) (:max %)))
+        :arity-3 (s/and (s/cat :min ::j/long
+                               :max-smallest ::j/long
+                               :max-largest ::j/long)
+                        #(<= (:max-smallest %) (:max-largest %))
+                        #(<= (:min %) (:max-largest %)))
+        :arity-4 (s/and (s/cat :min-smallest ::j/long
+                               :min-largest ::j/long
+                               :max-smallest ::j/long
+                               :max-largest ::j/long)
+                        #(<= (:min-smallest %) (:min-largest %))
+                        #(<= (:max-smallest %) (:max-largest %))
+                        #(<= (:min-largest %) (:max-largest %)))))
+(defn create
+  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L125
+  ([min max]
+   (if (> min max)
+     (throw (ex JavaIllegalArgumentException "Minimum value must be less than maximum value" {:min min :max max}))
+     (create min min max max)))
+
+  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L146
+  ([min max-smallest max-largest]
+   (create min min max-smallest max-largest))
+
+  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L165
+  ([min-smallest min-largest max-smallest max-largest]
+   (cond
+     (> min-smallest min-largest)
+     (throw (ex JavaIllegalArgumentException "Smallest minimum value must be less than largest minimum value" {:min-smallest min-smallest :min-largest min-largest :max-smallest max-smallest :max-largest max-largest}))
+
+     (> max-smallest max-largest)
+     (throw (ex JavaIllegalArgumentException "Smallest maximum value must be less than largest maximum value" {:min-smallest min-smallest :min-largest min-largest :max-smallest max-smallest :max-largest max-largest}))
+
+     (> min-largest max-largest)
+     (throw (ex JavaIllegalArgumentException "Minimum value must be less than maximum value" {:min-smallest min-smallest :min-largest min-largest :max-smallest max-smallest :max-largest max-largest}))
+
+     :else
+     (->ValueRange min-smallest min-largest max-smallest max-largest))))
 (s/def ::value-range (j/constructor-spec ValueRange create ::create-args))
 (s/fdef create :args ::create-args :ret ::value-range)
 
@@ -71,10 +111,13 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L294
 (s/def ::is-valid-int-value-args (args ::j/long))
 (defn -is-valid-int-value [this value]
-  (and (-is-int-value this value)
+  (and (-is-int-value this)
        (-is-valid-value this value)))
 (s/fdef -is-valid-int-value :args ::is-valid-int-value-args :ret ::j/boolean)
 
+;; TODO: improve error message:
+;; Jiffy example: "Invalid value for -1 (valid values jiffy.temporal.value_range.ValueRange@55c26df2): jiffy.temporal.chrono_field.ChronoField@7858bcad"
+;; Java example: "Invalid value for NanoOfSecond (valid values 0 - -1/0): -1"
 (defn --gen-invalid-field-message [this field value]
   (if field
     (str "Invalid value for " field " (valid values " this "): " value)
@@ -109,30 +152,22 @@
   (checkValidValue [this value field] (-check-valid-value this value field))
   (checkValidIntValue [this value field] (-check-valid-int-value this value field)))
 
-(s/def ::of-args (s/tuple ::j/long ::j/long (s/? ::j/long) (s/? ::j/long)))
-(defn of
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L125
-  ([min max]
-   (if (> min max)
-     (throw (ex JavaIllegalArgumentException "Minimum value must be less than maximum value" {:min min :max max}))
-     (create min min max max)))
-
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L146
-  ([min max-smallest max-largest]
-   (of min min max-smallest max-largest))
-
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L165
-  ([min-smallest min-largest max-smallest max-largest]
-   (cond
-     (> min-smallest min-largest)
-     (throw (ex JavaIllegalArgumentException "Smallest minimum value must be less than largest minimum value" {:min-smallest min-smallest :min-largest min-largest :max-smallest max-smallest :max-largest max-largest}))
-
-     (> max-smallest max-largest)
-     (throw (ex JavaIllegalArgumentException "Smallest maximum value must be less than largest maximum value" {:min-smallest min-smallest :min-largest min-largest :max-smallest max-smallest :max-largest max-largest}))
-
-     (> min-largest max-largest)
-     (throw (ex JavaIllegalArgumentException "Minimum value must be less than maximum value" {:min-smallest min-smallest :min-largest min-largest :max-smallest max-smallest :max-largest max-largest}))
-
-     :else
-     (create min-smallest min-largest max-smallest max-largest))))
+(s/def ::of-args ::create-args)
+(defn of [& args] (apply create args))
 (s/fdef of :args ::of-args :ret ::value-range)
+
+#?(:clj
+   (defmethod jiffy->java ValueRange [{:keys [min-smallest min-largest max-smallest max-largest]}]
+     (java.time.temporal.ValueRange/of min-smallest min-largest max-smallest max-largest)))
+
+#?(:clj
+   (defmethod same? ValueRange
+     [jiffy-object java-object]
+     (= (map #(% jiffy-object) [:min-smallest
+                                :min-largest
+                                :max-smallest
+                                :max-largest])
+        (map #(% java-object) [(memfn getMinimum)
+                               (memfn getLargestMinimum)
+                               (memfn getSmallestMaximum)
+                               (memfn getMaximum)]))))

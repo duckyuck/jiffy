@@ -105,7 +105,20 @@
 (defn getErrorIndex [this] (wip ::getErrorIndex))
 
 #?(:clj
-   (let [kind->class {JavaArithmeticException java.lang.ArithmeticException}]
+   (let [kind->class {JavaException java.lang.Exception
+                      JavaRuntimeException java.lang.RuntimeException
+                      DateTimeException java.time.DateTimeException
+                      UnsupportedTemporalTypeException java.time.temporal.UnsupportedTemporalTypeException
+                      ZoneRulesException java.time.zone.ZoneRulesException
+                      DateTimeParseException java.time.format.DateTimeParseException
+                      JavaArithmeticException java.lang.ArithmeticException
+                      JavaClassCastException java.lang.ClassCastException
+                      JavaIllegalArgumentException java.lang.IllegalArgumentException
+                      JavaIllegalStateException java.lang.IllegalStateException
+                      JavaParseException java.text.ParseException
+                      JavaIndexOutOfBoundsException java.lang.IndexOutOfBoundsException
+                      JavaThrowable java.lang.Throwable}]
+     ;; TODO: include exception message in check. needs polishing of exception error messages
      (defmethod same? clojure.lang.ExceptionInfo
        [ex java-object]
        (= (kind->class (::kind (ex-data ex)))
