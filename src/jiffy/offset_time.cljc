@@ -330,13 +330,8 @@
   ([now--overloaded-param] (wip ::now)))
 (s/fdef now :args ::now-args :ret ::offset-time)
 
-(s/def ::of-args (args ::j/wip))
-(defn of
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L212
-  ([time offset] (wip ::of))
-
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L235
-  ([hour minute second nano-of-second offset] (wip ::of)))
+(s/def ::of-args ::impl/of-args)
+(def of #'impl/of)
 (s/fdef of :args ::of-args :ret ::offset-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L255
