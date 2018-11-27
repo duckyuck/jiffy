@@ -15,7 +15,7 @@ constructs for java.time's classes, interface, static methods and fields are alr
 
 * For every class file in the java.time, Jiffy has a corresponding namespace. E.g. `jiffy.instant` corresponds to `java.time.Instant`.
 * For every interface in java.time, Jiffy has a corresponding protocol. The name of the protocol is named after the corresponding
-java.time interface with one tiny exception; Jiffy's protocols are prefixed with the letter 'I', e.g. `ITemporal` (see Differences for rationale)
+java.time interface with one tiny exception; Jiffy's protocols are prefixed with the letter 'I', e.g. `ITemporal`.
 * For every public static methods and fields in java.time, Jiffy has a corresponding function.
 * For every (concrete) class in java.time, Jiffy has it's corresponding record.
 * For every public method in java.time, Jiffy has it's corresponding function.
