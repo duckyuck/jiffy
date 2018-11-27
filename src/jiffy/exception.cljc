@@ -68,6 +68,9 @@
 (def JavaRuntimeException ::JavaRuntimeException)
 (derive JavaRuntimeException JavaException)
 
+(def JavaNullPointerException ::JavaNullPointerException)
+(derive JavaNullPointerException JavaRuntimeException)
+
 (def DateTimeException ::DateTimeException)
 (derive DateTimeException JavaRuntimeException)
 
@@ -107,6 +110,7 @@
 #?(:clj
    (let [kind->class {JavaException java.lang.Exception
                       JavaRuntimeException java.lang.RuntimeException
+                      JavaNullPointerException java.lang.NullPointerException
                       DateTimeException java.time.DateTimeException
                       UnsupportedTemporalTypeException java.time.temporal.UnsupportedTemporalTypeException
                       ZoneRulesException java.time.zone.ZoneRulesException
