@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
             [jiffy.exception :refer [DateTimeException ex]]
+            [jiffy.local-time-impl :refer [NANOS_PER_SECOND]]
             [jiffy.math :as math]
             [jiffy.specs :as j]))
 
@@ -46,6 +47,19 @@
   (create (math/floor-div epoch-milli 1000)
           (int (* (math/floor-mod epoch-milli 1000)
                   1000000))))
+
+(s/def ::of-epoch-second-args (s/cat :epoch-second ::j/second :nano-adjustment (s/? ::j/nano)))
+(defn ofEpochSecond
+  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L303
+  ([epoch-second]
+   (create epoch-second 0))
+
+  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L327
+  ([epoch-second nano-adjustment]
+   (create
+    (math/add-exact epoch-second (math/floor-div nano-adjustment NANOS_PER_SECOND))
+    (math/floor-mod nano-adjustment NANOS_PER_SECOND))))
+(s/fdef ofEpochSecond :args ::of-epoch-second-args :ret ::instant)
 
 #?(:clj
    (defmethod jiffy->java Instant [{:keys [seconds nanos]}]
