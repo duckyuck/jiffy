@@ -102,12 +102,12 @@
 
 (def default-num-tests 1000)
 
-(defmacro test-proto-fn [protocol-ns f & [num-tests]]
+(defmacro test-proto-fn [impl-ns proto-fn & [num-tests]]
   `(do
-     (require '~(symbol (namespace f)))
-     (require '~(symbol protocol-ns))
-     (defspec ~(gen-test-name f) ~(or num-tests default-num-tests)
-       (gen-protocol-method-prop ~protocol-ns ~f))))
+     (require '~(symbol (namespace proto-fn)))
+     (require '~(symbol impl-ns))
+     (defspec ~(gen-test-name proto-fn) ~(or num-tests default-num-tests)
+       (gen-protocol-method-prop ~impl-ns ~proto-fn))))
 
 (defmacro test-static-fn [jiffy-fn & [num-tests]]
   `(do
@@ -115,20 +115,20 @@
      (defspec ~(gen-test-name jiffy-fn) ~(or num-tests default-num-tests)
        (gen-static-method-prop ~jiffy-fn))))
 
-(defmacro test-proto-fn! [protocol-ns f & [num-tests]]
+(defmacro test-proto-fn! [impl-ns proto-fn & [num-tests]]
   `(do
-     (require '~(symbol (namespace f)))
-     (require '~(symbol protocol-ns))
+     (require '~(symbol (namespace proto-fn)))
+     (require '~(symbol impl-ns))
      (let [results#
-           (for [args# (gen/sample (s/gen ~(get-spec (symbol (str protocol-ns) (name f)))) ~num-tests)]
-             (let [jiffy-result# (invoke-jiffy ~f args#)
+           (for [args# (gen/sample (s/gen ~(get-spec (symbol (str impl-ns) (name proto-fn)))) ~num-tests)]
+             (let [jiffy-result# (invoke-jiffy ~proto-fn args#)
                    java-args# (mapv jiffy->java args#)
                    result# {:failed/jiffy-args args#
                             :failed/jiffy-result jiffy-result#
                             :failed/java-args java-args#}
                    java-result# (try
-                                  (invoke-java '~(symbol (str (jiffy-fn->java-class f))
-                                                         (name f))
+                                  (invoke-java '~(symbol (jiffy-ns->java-class (namespace proto-fn))
+                                                         (name proto-fn))
                                                java-args#
                                                {:static? false})
                                   (catch Exception e#
