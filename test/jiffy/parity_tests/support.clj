@@ -91,11 +91,12 @@
                         (map jiffy->java args#)
                         {:static? false}))))
 
-(defn gen-static-method-prop [jiffy-fn java-fn]
+(defmacro gen-static-method-prop [jiffy-fn]
   `(prop/for-all
     [args# (s/gen ~(get-spec jiffy-fn))]
     (same? (invoke-jiffy ~jiffy-fn args#)
-           (invoke-java '~java-fn
+           (invoke-java '~(symbol (jiffy-ns->java-class (namespace jiffy-fn))
+                                  (name jiffy-fn))
                         (map jiffy->java args#)
                         {:static? true}))))
 
@@ -108,8 +109,8 @@
      (defspec ~(gen-test-name f) ~(or num-tests default-num-tests)
        (gen-protocol-method-prop ~protocol-ns ~f))))
 
-(defmacro test-static-fn [jiffy-fn java-fn & [num-tests]]
+(defmacro test-static-fn [jiffy-fn & [num-tests]]
   `(do
      (require '~(symbol (namespace jiffy-fn)))
      (defspec ~(gen-test-name jiffy-fn) ~(or num-tests default-num-tests)
-       ~(gen-static-method-prop jiffy-fn java-fn))))
+       (gen-static-method-prop ~jiffy-fn))))

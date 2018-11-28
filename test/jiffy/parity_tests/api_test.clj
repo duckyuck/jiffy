@@ -21,10 +21,8 @@
 (test-proto-fn jiffy.instant jiffy.instant/minusMillis)
 (test-proto-fn jiffy.instant jiffy.instant/minusNanos)
 (test-proto-fn jiffy.instant jiffy.instant/toEpochMilli)
+
 ;; (test-proto-fn jiffy.instant jiffy.instant/atOffset)
-
-
-
 ;; (test-proto-fn jiffy.instant jiffy.instant/atZone)
 ;; (test-proto-fn jiffy.instant jiffy.instant/isAfter)
 ;; (test-proto-fn jiffy.instant jiffy.instant/isBefore)
@@ -39,12 +37,11 @@
 ;; (test-proto-fn jiffy.temporal.temporal-accessor jiffy.instant/getLong)
 ;; (test-proto-fn jiffy.temporal.temporal-accessor jiffy.instant/query)
 ;; (test-proto-fn jiffy.temporal.temporal-adjuster jiffy.instant/adjustInto)
-;; (test-static-fn jiffy.instant/ofEpochSecond java.time.Instant/ofEpochSecond)
-;; (test-static-fn jiffy.instant/now jiffy.instant.Instant/now)
-;; (test-static-fn jiffy.instant/ofEpochMilli jiffy.instant.Instant/ofEpochMilli)
-;;(test-static-fn jiffy.instant/from jiffy.instant.Instant/from)
-
-;;(test-static-fn jiffy.local-date/ofEpochDay java.time.LocalDate/ofEpochDay)
+;; (test-static-fn jiffy.instant/ofEpochSecond)
+;; (test-static-fn jiffy.instant/now)
+;; (test-static-fn jiffy.instant/ofEpochMilli)
+;; (test-static-fn jiffy.instant/from)
+;; (test-static-fn jiffy.local-date/ofEpochDay)
 
 
 ;; jiffy.temporal.value-range
@@ -64,7 +61,7 @@
 (test-proto-fn jiffy.temporal.value-range jiffy.temporal.value-range/isValidIntValue)
 (test-proto-fn jiffy.temporal.value-range jiffy.temporal.value-range/checkValidValue)
 (test-proto-fn jiffy.temporal.value-range jiffy.temporal.value-range/checkValidIntValue)
-(test-static-fn jiffy.temporal.value-range/of java.time.temporal.ValueRange/of)
+(test-static-fn jiffy.temporal.value-range/of)
 
 ;; TODO: report bug
 (deftest java-toEpochMilli-bug
