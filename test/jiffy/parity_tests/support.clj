@@ -18,16 +18,21 @@
        (partition-by second)
        (map (partial map first))))
 
-(defn split-at-java-case [s]
-  (->> s
+(defn kebab-case [s]
+  (->> (str s)
        (partition-between #(and (Character/isLowerCase %1)
                                 (Character/isUpperCase %2)))
-       (map #(apply str %))))
-
-(defn kebab-case [s]
-  (->> (split-at-java-case (str s))
+       (map #(apply str %))
        (map str/lower-case)
        (str/join "-")))
+
+(defn camel-case [s]
+  (->> (str s)
+       (partition-by #(= % \-))
+       (map #(apply str %))
+       (remove #(str/starts-with? % "-"))
+       (map str/capitalize)
+       (apply str)))
 
 (defmacro trycatch [& exprs]
   `(try* ~@exprs (catch :default e# e#)))
@@ -51,13 +56,18 @@
       (catch java.lang.reflect.InvocationTargetException ite
           (throw (.getCause ite))))))
 
-(defn jiffy-fn->java-class [jiffy-method]
-  (condp = (symbol (namespace jiffy-method))
-    'jiffy.instant 'java.time.Instant
-    'jiffy.temporal.value-range 'java.time.temporal.ValueRange
-    'jiffy.zoned-date-time 'java.time.ZonedDateTime
-    'jiffy.chrono.chrono-zoned-date-time 'java.time.chrono.ChronoZonedDateTime
-    (throw (ex-info "Unable to resolve java class of jiffy method " jiffy-method {}))))
+(def ns->class-anomalies
+  {"jiffy.time-comparable" "java.lang.Comparable"})
+
+(defn jiffy-ns->java-class [jiffy-ns-str]
+  (or (ns->class-anomalies jiffy-ns-str)
+      (let [idx (inc (str/last-index-of jiffy-ns-str "."))]
+        (str (-> jiffy-ns-str
+                 (subs 0 idx)
+                 (str/replace #"jiffy" "java.time"))
+             (-> jiffy-ns-str
+                 (subs idx (count jiffy-ns-str))
+                 camel-case)))))
 
 (defn gen-test-name [f]
   (symbol (str (str/replace (namespace f) #"\." "-")
@@ -72,12 +82,12 @@
 (defn invoke-jiffy [f args]
   (apply f args))
 
-(defmacro gen-protocol-method-prop [protocol-ns f]
+(defmacro gen-protocol-method-prop [impl-ns proto-fn]
   `(prop/for-all
-    [args# (s/gen ~(get-spec (symbol (str protocol-ns) (name f))))]
-    (same? (invoke-jiffy ~f args#)
-           (invoke-java '~(symbol (str (jiffy-fn->java-class f))
-                                  (name f))
+    [args# (s/gen ~(get-spec (symbol (str impl-ns) (name proto-fn))))]
+    (same? (invoke-jiffy ~proto-fn args#)
+           (invoke-java '~(symbol (jiffy-ns->java-class (namespace proto-fn))
+                                  (name proto-fn))
                         (map jiffy->java args#)
                         {:static? false}))))
 
@@ -94,6 +104,7 @@
 (defmacro test-proto-fn [protocol-ns f & [num-tests]]
   `(do
      (require '~(symbol (namespace f)))
+     (require '~(symbol protocol-ns))
      (defspec ~(gen-test-name f) ~(or num-tests default-num-tests)
        (gen-protocol-method-prop ~protocol-ns ~f))))
 
