@@ -23,11 +23,15 @@
 
 ;; divide by 1000 due to OpenJDK bug. toEpochMilli fails for MAX seconds
 (s/def ::second (s/int-in (/ -31557014167219200 1000) (/ 31556889864403200 1000)))
+(s/def ::year (int-in -999999999 1000000000))
 
 (s/def ::nano-of-second (int-in 0 1000000000))
 (s/def ::second-of-minute (int-in 0 60))
 (s/def ::minute-of-hour (int-in 0 60))
 (s/def ::hour-of-day (int-in 0 24))
+(s/def ::day-of-year (int-in 1 367))
+(s/def ::day-of-month (int-in 1 32))
+(s/def ::month-of-year (int-in 1 13))
 
 (defn constructor-spec [record-type constructor param-spec]
   (s/with-gen #(instance? record-type %)
