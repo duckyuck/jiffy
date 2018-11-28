@@ -31,7 +31,8 @@
             [jiffy.time-comparable :as TimeComparable]
             [jiffy.zone-id :as ZoneId]
             [jiffy.zone-offset :as ZoneOffset]
-            [jiffy.zoned-date-time-impl :as ZonedDateTime])
+            [jiffy.zoned-date-time-impl :as ZonedDateTime]
+            [jiffy.temporal.chrono-field :as ChronoField])
   #?(:clj (:import [jiffy.local_date_impl LocalDate])))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java
@@ -61,6 +62,8 @@
   (toEpochSecond [this time offset])
   (compareTo0 [this other-date]))
 
+(def DAYS_PER_CYCLE 146097)
+(def DAYS_0000_TO_1970 (- (* DAYS_PER_CYCLE 5) ( + (* 30 365) 7)))
 
 (s/def ::local-date ::impl/local-date)
 
@@ -437,7 +440,33 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L340
 (s/def ::of-epoch-day-args (args ::j/long))
-(defn ofEpochDay [epoch-day] (wip ::ofEpochDay))
+
+(defn --day-est [zero-day year-est]
+  (- zero-day (-> (* 365 year-est)
+                  (+ (/ year-est 4))
+                  (- (/ year-est 100))
+                  (+ (/ year-est 400)))))
+
+(defn ofEpochDay [epoch-day]
+  (let [[adjust zero-day] (let [zero-day (- (+ epoch-day DAYS_0000_TO_1970) 60)]
+                            (if-not (neg? zero-day)
+                              [0 zero-day]
+                              (let [adjust-cycles (/ (inc zero-day) (dec DAYS_PER_CYCLE))]
+                                [(* adjust-cycles 400)
+                                 (+ zero-day (* (- adjust-cycles) DAYS_PER_CYCLE))])))
+        [year-est day-est] (let [year-est (/ (+ (* 400 zero-day) 591) DAYS_PER_CYCLE)
+                                 day-est (--day-est zero-day year-est)]
+                             (if-not (neg? day-est)
+                               [year-est day-est]
+                               [(dec year-est) (--day-est zero-day (dec year-est))]))
+        year-est (+ year-est adjust)
+        march-doy-0 day-est
+        march-month-0 (/ (+ (* march-doy-0 5) 2) 153)
+        month (-> march-month-0 (+ 2) (mod 12) (+ 1))
+        dom (- march-doy-0 (-> march-month-0 (* 306) (+ 5) (/ 10) (+ 1)))
+        year-est (+ year-est (/ march-month-0 10))
+        year (ChronoField/checkValidIntValue ChronoField/YEAR year-est)]
+    (create year month dom)))
 (s/fdef ofEpochDay :args ::of-epoch-day-args :ret ::local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L391
@@ -462,6 +491,3 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L155
 (def EPOCH ::EPOCH--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L170
-(def DAYS_0000_TO_1970 ::DAYS_0000_TO_1970--not-implemented)

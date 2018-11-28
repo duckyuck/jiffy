@@ -25,7 +25,9 @@
             [jiffy.time-comparable :as TimeComparable]
             [jiffy.zone-id :as ZoneId]
             [jiffy.zone-offset :as ZoneOffset]
-            [jiffy.zoned-date-time-impl :as ZonedDateTime])
+            [jiffy.zoned-date-time-impl :as ZonedDateTime]
+            [jiffy.temporal.chrono-field :as ChronoField]
+            [jiffy.math :as math])
   #?(:clj (:import [jiffy.local_date_time_impl LocalDateTime])))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java
@@ -454,7 +456,14 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L416
 (s/def ::of-epoch-second-args (args ::j/long ::j/int ::ZoneOffset/zone-offset))
-(defn ofEpochSecond [epoch-second nano-of-second offset] (wip ::ofEpochSecond))
+(defn ofEpochSecond [epoch-second nano-of-second offset]
+  (ChronoField/checkValidValue ChronoField/NANO_OF_SECOND nano-of-second)
+  (let [local-second (+ epoch-second (ZoneOffset/getTotalSeconds offset)) ;; overflow caught later
+        local-epoch-day (math/floor-div local-second LocalTime/SECONDS_PER_DAY)
+        secs-of-day (math/floor-mod local-second LocalTime/SECONDS_PER_DAY)]
+    (create (LocalDate/ofEpochDay local-epoch-day)
+            (LocalTime/ofNanoOfDay (+ (* secs-of-day LocalTime/NANOS_PER_SECOND)
+                                      nano-of-second)))))
 (s/fdef ofEpochSecond :args ::of-epoch-second-args :ret ::local-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L447

@@ -25,7 +25,8 @@
             [jiffy.time-comparable :as TimeComparable]
             [jiffy.zone-id :as ZoneId]
             [jiffy.zone-offset-impl :as ZoneOffset]
-            [jiffy.zoned-date-time-impl :as ZonedDateTime])
+            [jiffy.zoned-date-time-impl :as ZonedDateTime]
+            [jiffy.zone.zone-rules :as ZoneRules])
   #?(:clj (:import [jiffy.offset_date_time_impl OffsetDateTime])))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java
@@ -521,7 +522,13 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L323
 (s/def ::of-instant-args (args ::Instant/instant ::ZoneId/zone-id))
-(defn ofInstant [instant zone] (wip ::ofInstant))
+(defn ofInstant [instant zone]
+  (let [rules (ZoneId/getRules zone)
+        offset (ZoneRules/getOffset rules instant)
+        ldt (LocalDateTime/ofEpochSecond (Instant/-get-epoch-second instant)
+                                         (Instant/-get-nano instant)
+                                         offset)]
+    (impl/create ldt offset)))
 (s/fdef ofInstant :args ::of-instant-args :ret ::offset-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L354
