@@ -120,7 +120,7 @@
      (require '~(symbol (namespace proto-fn)))
      (require '~(symbol impl-ns))
      (let [results#
-           (for [args# (gen/sample (s/gen ~(get-spec (symbol (str impl-ns) (name proto-fn)))) ~num-tests)]
+           (for [args# (gen/sample (s/gen ~(get-spec (symbol (str impl-ns) (name proto-fn)))) ~(or num-tests 1000))]
              (let [jiffy-result# (invoke-jiffy ~proto-fn args#)
                    java-args# (mapv jiffy->java args#)
                    result# {:failed/jiffy-args args#
