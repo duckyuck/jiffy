@@ -122,17 +122,18 @@
      (let [results#
            (for [args# (gen/sample (s/gen ~(get-spec (symbol (str protocol-ns) (name f)))) ~num-tests)]
              (let [jiffy-result# (invoke-jiffy ~f args#)
+                   java-args# (mapv jiffy->java args#)
+                   result# {:failed/jiffy-args args#
+                            :failed/jiffy-result jiffy-result#
+                            :failed/java-args java-args#}
                    java-result# (try
                                   (invoke-java '~(symbol (str (jiffy-fn->java-class f))
                                                          (name f))
-                                               (map jiffy->java args#)
+                                               java-args#
                                                {:static? false})
                                   (catch Exception e#
                                     (throw (ex-info "Exception when invoking java.time"
-                                                    {:failed/args args#}
-                                                    e#))))]
+                                                    result# e#))))]
                (when-not (same? jiffy-result# java-result#)
-                 {:failed/args args#
-                  :failed/java-result java-result#
-                  :failed/jiffy-result jiffy-result#})))]
+                 (assoc result# :failed/java-result java-result#))))]
        (or (first (remove nil? results#)) [(count results#) :success]))))
