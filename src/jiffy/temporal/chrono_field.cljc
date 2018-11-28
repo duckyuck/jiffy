@@ -9,7 +9,8 @@
             [jiffy.temporal.temporal-field :as TemporalField]
             [jiffy.temporal.temporal-unit :as TemporalUnit]
             [jiffy.temporal.value-range :as ValueRange]
-            [jiffy.year-impl :as Year]))
+            [jiffy.year-impl :as Year]
+            [jiffy.enum #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
 (defprotocol IChronoField
@@ -112,17 +113,37 @@
   (getFrom [this temporal] (-get-from this temporal))
   (adjustInto [this temporal new-value] (-adjust-into this temporal new-value)))
 
-
-(let [ordinal (atom -1)]
-  (defn next-ordinal []
-    (swap! ordinal inc)))
-
-(def enums (atom {}))
-
-(defmacro defenum [sym & args]
-  `(do
-     (def ~sym (create ~(next-ordinal) ~(str sym) ~@args))
-     (swap! enums assoc ~(str sym) ~sym)))
+(defenum create
+  {NANO_OF_SECOND ["NanoOfSecond" unit/NANOS unit/SECONDS (ValueRange/of 0 999999999)]
+   NANO_OF_DAY ["NanoOfDay" unit/NANOS unit/DAYS (ValueRange/of 0 (- (* 86400 1000000000) 1))]
+   MICRO_OF_SECOND ["MicroOfSecond" unit/MICROS unit/SECONDS (ValueRange/of 0 999999)]
+   MICRO_OF_DAY ["MicroOfDay" unit/MICROS unit/DAYS (ValueRange/of 0 (- (* 86400 1000000) 1))]
+   MILLI_OF_SECOND ["MilliOfSecond" unit/MILLIS unit/SECONDS (ValueRange/of 0 999)]
+   MILLI_OF_DAY ["MilliOfDay" unit/MILLIS unit/DAYS (ValueRange/of 0 (- (* 86400 1000) 1))]
+   SECOND_OF_MINUTE ["SecondOfMinute" unit/SECONDS unit/MINUTES (ValueRange/of 0 59) "second"]
+   SECOND_OF_DAY ["SecondOfDay" unit/SECONDS unit/DAYS (ValueRange/of 0 (- 86400 1))]
+   MINUTE_OF_HOUR ["MinuteOfHour" unit/MINUTES unit/HOURS (ValueRange/of 0 59) "minute"]
+   MINUTE_OF_DAY ["MinuteOfDay" unit/MINUTES unit/DAYS (ValueRange/of 0 (- (* 24 60) 1))]
+   HOUR_OF_AMPM ["HourOfAmPm" unit/HOURS unit/HALF_DAYS (ValueRange/of 0 11)]
+   CLOCK_HOUR_OF_AMPM ["ClockHourOfAmPm" unit/HOURS unit/HALF_DAYS (ValueRange/of 1 12)]
+   HOUR_OF_DAY ["HourOfDay" unit/HOURS unit/DAYS (ValueRange/of 0 23) "hour"]
+   CLOCK_HOUR_OF_DAY ["ClockHourOfDay" unit/HOURS unit/DAYS (ValueRange/of 1 24)]
+   AMPM_OF_DAY ["AmPmOfDay" unit/HALF_DAYS unit/DAYS (ValueRange/of 0 1) "dayperiod"]
+   DAY_OF_WEEK ["DayOfWeek" unit/DAYS unit/WEEKS (ValueRange/of 1 7) "weekday"]
+   ALIGNED_DAY_OF_WEEK_IN_MONTH ["AlignedDayOfWeekInMonth" unit/DAYS unit/WEEKS (ValueRange/of 1 7)]
+   ALIGNED_DAY_OF_WEEK_IN_YEAR ["AlignedDayOfWeekInYear" unit/DAYS unit/WEEKS (ValueRange/of 1 7)]
+   DAY_OF_MONTH ["DayOfMonth" unit/DAYS unit/MONTHS (ValueRange/of 1 28 31) "day"]
+   DAY_OF_YEAR ["DayOfYear" unit/DAYS unit/YEARS (ValueRange/of 1 365 366)]
+   EPOCH_DAY ["EpochDay" unit/DAYS unit/FOREVER (ValueRange/of -365243219162 365241780471)]
+   ALIGNED_WEEK_OF_MONTH ["AlignedWeekOfMonth" unit/WEEKS unit/MONTHS (ValueRange/of 1 4 5)]
+   ALIGNED_WEEK_OF_YEAR ["AlignedWeekOfYear" unit/WEEKS unit/YEARS (ValueRange/of 1 53)]
+   MONTH_OF_YEAR ["MonthOfYear" unit/MONTHS unit/YEARS (ValueRange/of 1 12) "month"]
+   PROLEPTIC_MONTH ["ProlepticMonth" unit/MONTHS unit/FOREVER (ValueRange/of (* Year/MIN_VALUE 12) (+ (* Year/MAX_VALUE 12) 11))]
+   YEAR_OF_ERA ["YearOfEra" unit/YEARS unit/FOREVER (ValueRange/of 1 Year/MAX_VALUE (+ Year/MAX_VALUE 1))]
+   YEAR ["Year" unit/YEARS unit/FOREVER (ValueRange/of Year/MIN_VALUE Year/MAX_VALUE) "year"]
+   ERA ["Era" unit/ERAS unit/FOREVER (ValueRange/of 0 1) "era"]
+   INSTANT_SECONDS ["InstantSeconds" unit/SECONDS unit/FOREVER (ValueRange/of math/long-min-value math/long-max-value)]
+   OFFSET_SECONDS ["OffsetSeconds" unit/SECONDS unit/FOREVER (ValueRange/of (* -18 3600) (* 18 3600))]})
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
 (defn values [] (vals @enums))
@@ -132,37 +153,6 @@
 (s/def ::value-of-args (args string?))
 (defn valueOf [enum-name] (@enums enum-name))
 (s/fdef valueOf :args ::value-of-args :ret ::chrono-field)
-
-(defenum NANO_OF_SECOND "NanoOfSecond" unit/NANOS unit/SECONDS (ValueRange/of 0 999999999))
-(defenum NANO_OF_DAY "NanoOfDay" unit/NANOS unit/DAYS (ValueRange/of 0 (- (* 86400 1000000000) 1)))
-(defenum MICRO_OF_SECOND "MicroOfSecond" unit/MICROS unit/SECONDS (ValueRange/of 0 999999))
-(defenum MICRO_OF_DAY "MicroOfDay" unit/MICROS unit/DAYS (ValueRange/of 0 (- (* 86400 1000000) 1)))
-(defenum MILLI_OF_SECOND "MilliOfSecond" unit/MILLIS unit/SECONDS (ValueRange/of 0 999))
-(defenum MILLI_OF_DAY "MilliOfDay" unit/MILLIS unit/DAYS (ValueRange/of 0 (- (* 86400 1000) 1)))
-(defenum SECOND_OF_MINUTE "SecondOfMinute" unit/SECONDS unit/MINUTES (ValueRange/of 0 59) "second")
-(defenum SECOND_OF_DAY "SecondOfDay" unit/SECONDS unit/DAYS (ValueRange/of 0 (- 86400 1)))
-(defenum MINUTE_OF_HOUR "MinuteOfHour" unit/MINUTES unit/HOURS (ValueRange/of 0 59) "minute")
-(defenum MINUTE_OF_DAY "MinuteOfDay" unit/MINUTES unit/DAYS (ValueRange/of 0 (- (* 24 60) 1)))
-(defenum HOUR_OF_AMPM "HourOfAmPm" unit/HOURS unit/HALF_DAYS (ValueRange/of 0 11))
-(defenum CLOCK_HOUR_OF_AMPM "ClockHourOfAmPm" unit/HOURS unit/HALF_DAYS (ValueRange/of 1 12))
-(defenum HOUR_OF_DAY "HourOfDay" unit/HOURS unit/DAYS (ValueRange/of 0 23) "hour")
-(defenum CLOCK_HOUR_OF_DAY "ClockHourOfDay" unit/HOURS unit/DAYS (ValueRange/of 1 24))
-(defenum AMPM_OF_DAY "AmPmOfDay" unit/HALF_DAYS unit/DAYS (ValueRange/of 0 1) "dayperiod")
-(defenum DAY_OF_WEEK "DayOfWeek" unit/DAYS unit/WEEKS (ValueRange/of 1 7) "weekday")
-(defenum ALIGNED_DAY_OF_WEEK_IN_MONTH "AlignedDayOfWeekInMonth" unit/DAYS unit/WEEKS (ValueRange/of 1 7))
-(defenum ALIGNED_DAY_OF_WEEK_IN_YEAR "AlignedDayOfWeekInYear" unit/DAYS unit/WEEKS (ValueRange/of 1 7))
-(defenum DAY_OF_MONTH "DayOfMonth" unit/DAYS unit/MONTHS (ValueRange/of 1 28 31) "day")
-(defenum DAY_OF_YEAR "DayOfYear" unit/DAYS unit/YEARS (ValueRange/of 1 365 366))
-(defenum EPOCH_DAY "EpochDay" unit/DAYS unit/FOREVER (ValueRange/of -365243219162 365241780471))
-(defenum ALIGNED_WEEK_OF_MONTH "AlignedWeekOfMonth" unit/WEEKS unit/MONTHS (ValueRange/of 1 4 5))
-(defenum ALIGNED_WEEK_OF_YEAR "AlignedWeekOfYear" unit/WEEKS unit/YEARS (ValueRange/of 1 53))
-(defenum MONTH_OF_YEAR "MonthOfYear" unit/MONTHS unit/YEARS (ValueRange/of 1 12) "month")
-(defenum PROLEPTIC_MONTH "ProlepticMonth" unit/MONTHS unit/FOREVER (ValueRange/of (* Year/MIN_VALUE 12) (+ (* Year/MAX_VALUE 12) 11)))
-(defenum YEAR_OF_ERA "YearOfEra" unit/YEARS unit/FOREVER (ValueRange/of 1 Year/MAX_VALUE (+ Year/MAX_VALUE 1)))
-(defenum YEAR "Year" unit/YEARS unit/FOREVER (ValueRange/of Year/MIN_VALUE Year/MAX_VALUE) "year")
-(defenum ERA "Era" unit/ERAS unit/FOREVER (ValueRange/of 0 1) "era")
-(defenum INSTANT_SECONDS "InstantSeconds" unit/SECONDS unit/FOREVER (ValueRange/of math/long-min-value math/long-max-value))
-(defenum OFFSET_SECONDS "OffsetSeconds" unit/SECONDS unit/FOREVER (ValueRange/of (* -18 3600) (* 18 3600)));
 
 #?(:clj
    (defmethod jiffy->java ChronoField [chrono-field]
