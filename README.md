@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/andersfurseth/jiffy.svg?branch=master)](https://travis-ci.org/andersfurseth/jiffy)
+
 # jiffy
 
 Jiffy is a port of java.time to Clojurescript and Clojure. Jiffy aims at being at parity with java.time API.
