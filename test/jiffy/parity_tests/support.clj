@@ -118,13 +118,19 @@
 (defmacro test-proto-fn! [protocol-ns f & [num-tests]]
   `(do
      (require '~(symbol (namespace f)))
+     (require '~(symbol protocol-ns))
      (let [results#
            (for [args# (gen/sample (s/gen ~(get-spec (symbol (str protocol-ns) (name f)))) ~num-tests)]
              (let [jiffy-result# (invoke-jiffy ~f args#)
-                   java-result# (invoke-java '~(symbol (str (jiffy-fn->java-class f))
-                                                       (name f))
-                                             (map jiffy->java args#)
-                                             {:static? false})]
+                   java-result# (try
+                                  (invoke-java '~(symbol (str (jiffy-fn->java-class f))
+                                                         (name f))
+                                               (map jiffy->java args#)
+                                               {:static? false})
+                                  (catch Exception e#
+                                    (throw (ex-info "Exception when invoking java.time"
+                                                    {:failed/args args#}
+                                                    e#))))]
                (when-not (same? jiffy-result# java-result#)
                  {:failed/args args#
                   :failed/java-result java-result#
