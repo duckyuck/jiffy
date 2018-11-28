@@ -1,8 +1,13 @@
 (ns jiffy.local-time
   (:refer-clojure :exclude [format])
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
+            [jiffy.asserts :refer [require-non-nil]]
+            [jiffy.chrono.chrono-local-date :as ChronoLocalDate]
             [jiffy.clock :as Clock]
             [jiffy.dev.wip :refer [wip]]
+            [jiffy.duration :as Duration]
+            [jiffy.exception :refer [ex JavaNullPointerException UnsupportedTemporalTypeException]]
             [jiffy.format.date-time-formatter :as DateTimeFormatter]
             [jiffy.instant-impl :as Instant]
             [jiffy.local-date-impl :as LocalDate]
@@ -10,10 +15,11 @@
             [jiffy.local-time-impl :as impl]
             [jiffy.offset-time-impl :as OffsetTime]
             [jiffy.specs :as j]
+            [jiffy.temporal.chrono-field :as ChronoField]
+            [jiffy.temporal.chrono-unit :as ChronoUnit]
             [jiffy.temporal.temporal :as Temporal]
             [jiffy.temporal.temporal-accessor :as TemporalAccessor]
             [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]
-            [jiffy.temporal.temporal-amount :as TemporalAmount]
             [jiffy.temporal.temporal-field :as TemporalField]
             [jiffy.temporal.temporal-query :as TemporalQuery]
             [jiffy.temporal.temporal-unit :as TemporalUnit]
@@ -21,6 +27,32 @@
             [jiffy.time-comparable :as TimeComparable]
             [jiffy.zone-id :as ZoneId]
             [jiffy.zone-offset :as ZoneOffset]))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L132
+(def MIN ::MIN--not-implemented)
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L137
+(def MAX ::MAX--not-implemented)
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L141
+(def MIDNIGHT ::MIDNIGHT--not-implemented)
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L145
+(def NOON ::NOON--not-implemented)
+
+(def HOURS_PER_DAY impl/HOURS_PER_DAY)
+(def MINUTES_PER_HOUR impl/MINUTES_PER_HOUR)
+(def MINUTES_PER_DAY impl/MINUTES_PER_DAY)
+(def SECONDS_PER_MINUTE impl/SECONDS_PER_MINUTE)
+(def SECONDS_PER_HOUR impl/SECONDS_PER_HOUR)
+(def SECONDS_PER_DAY impl/SECONDS_PER_DAY)
+(def MILLIS_PER_DAY impl/MILLIS_PER_DAY)
+(def MICROS_PER_DAY impl/MICROS_PER_DAY)
+(def NANOS_PER_MILLI impl/NANOS_PER_MILLI)
+(def NANOS_PER_SECOND impl/NANOS_PER_SECOND)
+(def NANOS_PER_MINUTE impl/NANOS_PER_MINUTE)
+(def NANOS_PER_HOUR impl/NANOS_PER_HOUR)
+(def NANOS_PER_DAY impl/NANOS_PER_DAY)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java
 (defprotocol ILocalTime
@@ -50,10 +82,14 @@
   (isAfter [this other])
   (isBefore [this other]))
 
-(defrecord LocalTime [])
+(defrecord LocalTime [hour minute second nano])
 
-(s/def ::create-args ::j/wip)
-(defn create [])
+(s/def ::create-args (s/tuple ::j/hour-of-day
+                              ::j/minute-of-hour
+                              ::j/second-of-minute
+                              ::j/nano-of-second))
+(defn create [hour minute second nano]
+  (->LocalTime hour minute second nano))
 (s/def ::local-time (j/constructor-spec LocalTime create ::create-args))
 (s/fdef create :args ::create-args :ret ::local-time)
 
@@ -61,127 +97,246 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L673
 (s/def ::to-nano-of-day-args (args))
-(defn -to-nano-of-day [this] (wip ::-to-nano-of-day))
+(defn -to-nano-of-day [this]
+  (+ (* (:hour this) NANOS_PER_HOUR)
+     (* (:minute this) NANOS_PER_MINUTE)
+     (* (:second this) NANOS_PER_SECOND)
+     (:nano this)))
 (s/fdef -to-nano-of-day :args ::to-nano-of-day-args :ret ::j/long)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L692
 (s/def ::to-second-of-day-args (args))
-(defn -to-second-of-day [this] (wip ::-to-second-of-day))
+(defn -to-second-of-day [this]
+  (+ (* (:hour this) SECONDS_PER_HOUR)
+     (* (:minute this) SECONDS_PER_MINUTE)
+     (:second this)))
 (s/fdef -to-second-of-day :args ::to-second-of-day-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L710
 (s/def ::get-hour-args (args))
-(defn -get-hour [this] (wip ::-get-hour))
+(defn -get-hour [this]
+  (:hour this))
 (s/fdef -get-hour :args ::get-hour-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L719
 (s/def ::get-minute-args (args))
-(defn -get-minute [this] (wip ::-get-minute))
+(defn -get-minute [this]
+  (:minute this))
 (s/fdef -get-minute :args ::get-minute-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L728
 (s/def ::get-second-args (args))
-(defn -get-second [this] (wip ::-get-second))
+(defn -get-second [this]
+  (:second this))
 (s/fdef -get-second :args ::get-second-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L737
 (s/def ::get-nano-args (args))
-(defn -get-nano [this] (wip ::-get-nano))
+(defn -get-nano [this]
+  (:nano this))
 (s/fdef -get-nano :args ::get-nano-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L891
-(s/def ::with-hour-args (args ::j/int))
-(defn -with-hour [this hour] (wip ::-with-hour))
+(s/def ::with-hour-args (args ::j/hour-of-day))
+(defn -with-hour [this hour]
+  (if (= hour (:hour this))
+    this
+    (do
+      (ChronoField/checkValidValue ChronoField/HOUR_OF_DAY hour)
+      (create hour (:minute this) (:second this) (:nano this)))))
 (s/fdef -with-hour :args ::with-hour-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L908
-(s/def ::with-minute-args (args ::j/int))
-(defn -with-minute [this minute] (wip ::-with-minute))
+(s/def ::with-minute-args (args ::j/minute-of-hour))
+(defn -with-minute [this minute]
+  (if (= minute (:minute this))
+    this
+    (do
+      (ChronoField/checkValidValue ChronoField/MINUTE_OF_HOUR minute)
+      (create (:hour this) minute (:second this) (:nano this)))))
 (s/fdef -with-minute :args ::with-minute-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L925
-(s/def ::with-second-args (args ::j/int))
-(defn -with-second [this second] (wip ::-with-second))
+(s/def ::with-second-args (args ::j/second-of-minute))
+(defn -with-second [this second]
+  (if (= second (:second this))
+    this
+    (do
+      (ChronoField/checkValidValue ChronoField/SECOND_OF_MINUTE second)
+      (create (:hour this) (:minute this) second (:nano this)))))
 (s/fdef -with-second :args ::with-second-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L942
-(s/def ::with-nano-args (args ::j/int))
-(defn -with-nano [this nano-of-second] (wip ::-with-nano))
+(s/def ::with-nano-args (args ::j/nano-of-second))
+(defn -with-nano [this nano-of-second]
+  (if (= nano-of-second (:nano this))
+    this
+    (do
+      (ChronoField/checkValidValue ChronoField/NANO_OF_SECOND nano-of-second)
+      (create (:hour this) (:minute this) (:second this) nano-of-second))))
 (s/fdef -with-nano :args ::with-nano-args :ret ::local-time)
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L397
+(s/def ::of-nano-of-day-args (args ::j/long))
+(defn ofNanoOfDay [nano-of-day]
+  (ChronoField/checkValidValue ChronoField/NANO_OF_DAY nano-of-day)
+  (let [hours (int (/ nano-of-day NANOS_PER_HOUR))
+        nanos (- nano-of-day (* hours NANOS_PER_HOUR))
+        minutes (int (/ nanos NANOS_PER_MINUTE))
+        nanos (- nanos (* minutes NANOS_PER_MINUTE))
+        seconds (int (/ nanos NANOS_PER_SECOND))
+        nanos (- nanos (* seconds NANOS_PER_SECOND))]
+    (create hours minutes seconds nanos)))
+(s/fdef ofNanoOfDay :args ::of-nano-of-day-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L971
 (s/def ::truncated-to-args (args ::TemporalUnit/temporal-unit))
-(defn -truncated-to [this unit] (wip ::-truncated-to))
+(defn -truncated-to [this unit]
+  (if (= unit ChronoUnit/NANOS)
+    this
+    (let [unit-dur (TemporalUnit/getDuration unit)
+          dur (Duration/toNanos unit-dur)]
+      (when (> (Duration/getSeconds unit-dur) SECONDS_PER_DAY)
+        (throw (ex UnsupportedTemporalTypeException "Unit is too large to be used for truncation" {:local-time this :unit unit})))
+      (when (not= 0 (mod NANOS_PER_DAY dur))
+        (throw (ex UnsupportedTemporalTypeException "Unit must divide into a standard day without remainder" {:local-time this :unit unit})))
+      (ofNanoOfDay (* dur (int (/ (-to-nano-of-day this) dur)))))))
 (s/fdef -truncated-to :args ::truncated-to-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1094
 (s/def ::plus-hours-args (args ::j/long))
-(defn -plus-hours [this hours-to-add] (wip ::-plus-hours))
+(defn -plus-hours [this hours-to-add]
+  (if (= 0 hours-to-add)
+    this
+    (create (mod (+ (int (mod hours-to-add HOURS_PER_DAY))
+                    (:hour this)
+                    HOURS_PER_DAY)
+                 HOURS_PER_DAY)
+            (:minute this)
+            (:second this)
+            (:nano this))))
 (s/fdef -plus-hours :args ::plus-hours-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1113
 (s/def ::plus-minutes-args (args ::j/long))
-(defn -plus-minutes [this minutes-to-add] (wip ::-plus-minutes))
+(defn -plus-minutes [this minutes-to-add]
+  (if (= 0 minutes-to-add)
+    this
+    (let [mofd (+ (:minute this)
+                  (* (:hour this) MINUTES_PER_HOUR))
+          new-mofd (mod (+ (int (mod minutes-to-add MINUTES_PER_DAY))
+                           mofd
+                           MINUTES_PER_DAY)
+                        MINUTES_PER_DAY)]
+      (if (= mofd new-mofd)
+        this
+        (create (int (/ new-mofd MINUTES_PER_HOUR))
+                (mod new-mofd MINUTES_PER_HOUR)
+                (:second this)
+                (:nano this))))))
 (s/fdef -plus-minutes :args ::plus-minutes-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1138
 (s/def ::plus-seconds-args (args ::j/long))
-(defn -plus-seconds [this secondsto-add] (wip ::-plus-seconds))
+(defn -plus-seconds [this seconds-to-add]
+  (if (= 0 seconds-to-add)
+    this
+    (let [sofd (+ (:second this)
+                  (* (:minute this) SECONDS_PER_MINUTE)
+                  (* (:hour this) SECONDS_PER_HOUR))
+          new-sofd (mod (+ (int (mod seconds-to-add SECONDS_PER_DAY))
+                           sofd
+                           SECONDS_PER_DAY)
+                        SECONDS_PER_DAY)]
+      (if (= sofd new-sofd)
+        this
+        (create (int (/ new-sofd SECONDS_PER_HOUR))
+                (mod (int (/ new-sofd SECONDS_PER_MINUTE)) MINUTES_PER_HOUR)
+                (mod new-sofd SECONDS_PER_MINUTE)
+                (:nano this))))))
 (s/fdef -plus-seconds :args ::plus-seconds-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1165
 (s/def ::plus-nanos-args (args ::j/long))
-(defn -plus-nanos [this nanos-to-add] (wip ::-plus-nanos))
+(defn -plus-nanos [this nanos-to-add]
+  (if (= 0 nanos-to-add)
+    this
+    (let [nofd (-to-nano-of-day this)
+          new-nofd (mod (+ (mod nanos-to-add NANOS_PER_DAY)
+                           nofd
+                           NANOS_PER_DAY)
+                        NANOS_PER_DAY)]
+      (if (= nofd new-nofd)
+        this
+        (create (int (/ new-nofd NANOS_PER_HOUR))
+                (mod (int (/ new-nofd NANOS_PER_MINUTE)) MINUTES_PER_HOUR)
+                (mod (int (/ new-nofd NANOS_PER_SECOND)) SECONDS_PER_MINUTE)
+                (mod new-nofd NANOS_PER_SECOND))))))
 (s/fdef -plus-nanos :args ::plus-nanos-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1243
 (s/def ::minus-hours-args (args ::j/long))
-(defn -minus-hours [this hours-to-subtract] (wip ::-minus-hours))
+(defn -minus-hours [this hours-to-subtract]
+  (-plus-hours this (- (mod hours-to-subtract HOURS_PER_DAY))))
 (s/fdef -minus-hours :args ::minus-hours-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1258
 (s/def ::minus-minutes-args (args ::j/long))
-(defn -minus-minutes [this minutes-to-subtract] (wip ::-minus-minutes))
+(defn -minus-minutes [this minutes-to-subtract]
+  (-plus-minutes this (- (mod minutes-to-subtract MINUTES_PER_DAY))))
 (s/fdef -minus-minutes :args ::minus-minutes-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1273
 (s/def ::minus-seconds-args (args ::j/long))
-(defn -minus-seconds [this seconds-to-subtract] (wip ::-minus-seconds))
+(defn -minus-seconds [this seconds-to-subtract]
+  (-plus-seconds this (- (mod seconds-to-subtract SECONDS_PER_DAY))))
 (s/fdef -minus-seconds :args ::minus-seconds-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1288
 (s/def ::minus-nanos-args (args ::j/long))
-(defn -minus-nanos [this nanos-to-subtract] (wip ::-minus-nanos))
+(defn -minus-nanos [this nanos-to-subtract]
+  (-plus-nanos this (- (mod nanos-to-subtract NANOS_PER_DAY))))
 (s/fdef -minus-nanos :args ::minus-nanos-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1433
 (s/def ::format-args (args ::DateTimeFormatter/date-time-formatter))
-(defn -format [this formatter] (wip ::-format))
+(defn -format [this formatter]
+  (require-non-nil formatter "formatter")
+  (DateTimeFormatter/format formatter this))
 (s/fdef -format :args ::format-args :ret string?)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1448
 (s/def ::at-date-args (args ::LocalDate/local-date))
-(defn -at-date [this date] (wip ::-at-date))
+(defn -at-date [this date]
+  (LocalDateTime/of date this))
 (s/fdef -at-date :args ::at-date-args :ret ::LocalDateTime/local-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1461
 (s/def ::at-offset-args (args ::ZoneOffset/zone-offset))
-(defn -at-offset [this offset] (wip ::-at-offset))
+(defn -at-offset [this offset]
+  (OffsetTime/of this offset))
 (s/fdef -at-offset :args ::at-offset-args :ret ::OffsetTime/offset-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1508
 (s/def ::to-epoch-second-args (args ::LocalDate/local-date ::ZoneOffset/zone-offset))
-(defn -to-epoch-second [this date offset] (wip ::-to-epoch-second))
+(defn -to-epoch-second [this date offset]
+  (require-non-nil date "date")
+  (require-non-nil offset "offset")
+  (+ (* (ChronoLocalDate/toEpochDay date) 86400)
+     (-to-second-of-day this)
+     (- (ZoneOffset/getTotalSeconds offset))))
 (s/fdef -to-epoch-second :args ::to-epoch-second-args :ret ::j/long)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1550
 (s/def ::is-after-args (args ::local-time))
-(defn -is-after [this other] (wip ::-is-after))
+(defn -is-after [this other]
+  (> (TimeComparable/compareTo this other) 0))
 (s/fdef -is-after :args ::is-after-args :ret ::j/boolean)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1562
 (s/def ::is-before-args (args ::local-time))
-(defn -is-before [this other] (wip ::-is-before))
+(defn -is-before [this other]
+  (< (TimeComparable/compareTo this other) 0))
 (s/fdef -is-before :args ::is-before-args :ret ::j/boolean)
 
 (extend-type LocalTime
@@ -212,23 +367,48 @@
   (isAfter [this other] (-is-after this other))
   (isBefore [this other] (-is-before this other)))
 
-;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1528
 (s/def ::compare-to-args (args ::local-time))
-(defn -compare-to [this compare-to--overloaded-param] (wip ::-compare-to))
+(defn -compare-to [this other]
+  (compare (mapv #(% this)  [:hour :minute :second :nano])
+           (mapv #(% other) [:hour :minute :second :nano])))
 (s/fdef -compare-to :args ::compare-to-args :ret ::j/int)
 
 (extend-type LocalTime
   TimeComparable/ITimeComparable
-  (compareTo [this compare-to--overloaded-param] (-compare-to this compare-to--overloaded-param)))
+  (compareTo [this other] (-compare-to this other)))
 
-(s/def ::with-args (args ::j/wip))
+(s/def ::with-args (s/or :arity-2 (s/tuple ::local-time ::TemporalAdjuster/temporal-adjuster)
+                         :arity-3 (s/tuple ::local-time ::TemporalField/temporal-field ::j/long)))
 (defn -with
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L764
-  ([this adjuster] (wip ::-with))
+  ([this adjuster]
+   (if (instance? LocalTime adjuster)
+     adjuster
+     (TemporalAdjuster/adjustInto adjuster this)))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L855
-  ([this field new-value] (wip ::-with)))
+  ([this field new-value]
+   (if (ChronoField/chrono-field? field)
+     (do (ChronoField/checkValidValue field new-value)
+         (cond
+           (= field ChronoField/NANO_OF_SECOND) (-with-nano this (int new-value))
+           (= field ChronoField/NANO_OF_DAY) (ofNanoOfDay new-value)
+           (= field ChronoField/MICRO_OF_SECOND) (-with-nano this (* (int new-value) 1000))
+           (= field ChronoField/MICRO_OF_DAY) (ofNanoOfDay (* new-value 1000))
+           (= field ChronoField/MILLI_OF_SECOND) (-with-nano this (* (int new-value) 1000000))
+           (= field ChronoField/MILLI_OF_DAY) (ofNanoOfDay (* new-value 1000000))
+           (= field ChronoField/SECOND_OF_MINUTE) (-with-second this (int new-value))
+           (= field ChronoField/SECOND_OF_DAY) (plusSeconds this (- new-value (-to-second-of-day this)))
+           (= field ChronoField/MINUTE_OF_HOUR) (-with-minute this (int new-value))
+           (= field ChronoField/MINUTE_OF_DAY) (plusMinutes this (- new-value (+ (* (:hour this) 60) (:minute this))))
+           (= field ChronoField/HOUR_OF_AMPM) (plusHours this (- new-value (mod (:hour this) 12)))
+           (= field ChronoField/CLOCK_HOUR_OF_AMPM) (plusHours this (- (if (= 12 new-value) 0 new-value) (mod (:hour this) 12)))
+           (= field ChronoField/HOUR_OF_DAY) (-with-hour this (int new-value))
+           (= field ChronoField/CLOCK_HOUR_OF_DAY) (-with-hour this (int (if (= 24 new-value) 0 new-value)))
+           (= field ChronoField/AMPM_OF_DAY) (plusHours this (* 12 (- new-value (/ (:hour this) 12))))
+           :else (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:local-time this :field field :new-value new-value}))))
+     (TemporalField/adjustInto field this new-value))))
 (s/fdef -with :args ::with-args :ret ::Temporal/temporal)
 
 (s/def ::plus-args (args ::j/wip))
@@ -345,11 +525,6 @@
 (defn ofSecondOfDay [second-of-day] (wip ::ofSecondOfDay))
 (s/fdef ofSecondOfDay :args ::of-second-of-day-args :ret ::local-time)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L397
-(s/def ::of-nano-of-day-args (args ::j/long))
-(defn ofNanoOfDay [nano-of-day] (wip ::ofNanoOfDay))
-(s/fdef ofNanoOfDay :args ::of-nano-of-day-args :ret ::local-time)
-
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L426
 (s/def ::from-args (args ::TemporalAccessor/temporal-accessor))
 (defn from [temporal] (wip ::from))
@@ -364,28 +539,18 @@
   ([text formatter] (wip ::parse)))
 (s/fdef parse :args ::parse-args :ret ::local-time)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L132
-(def MIN ::MIN--not-implemented)
+#?(:clj
+   (defmethod jiffy->java LocalTime [this]
+     (java.time.LocalTime/of (:hour this)
+                             (:minute this)
+                             (:second this)
+                             (:nano this))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L137
-(def MAX ::MAX--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L141
-(def MIDNIGHT ::MIDNIGHT--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L145
-(def NOON ::NOON--not-implemented)
-
-(def HOURS_PER_DAY impl/HOURS_PER_DAY)
-(def MINUTES_PER_HOUR impl/MINUTES_PER_HOUR)
-(def MINUTES_PER_DAY impl/MINUTES_PER_DAY)
-(def SECONDS_PER_MINUTE impl/SECONDS_PER_MINUTE)
-(def SECONDS_PER_HOUR impl/SECONDS_PER_HOUR)
-(def SECONDS_PER_DAY impl/SECONDS_PER_DAY)
-(def MILLIS_PER_DAY impl/MILLIS_PER_DAY)
-(def MICROS_PER_DAY impl/MICROS_PER_DAY)
-(def NANOS_PER_MILLI impl/NANOS_PER_MILLI)
-(def NANOS_PER_SECOND impl/NANOS_PER_SECOND)
-(def NANOS_PER_MINUTE impl/NANOS_PER_MINUTE)
-(def NANOS_PER_HOUR impl/NANOS_PER_HOUR)
-(def NANOS_PER_DAY impl/NANOS_PER_DAY)
+#?(:clj
+   (defmethod same? LocalTime
+     [jiffy-object java-object]
+     (= (mapv #(% jiffy-object) [:hour :minute :second :nano])
+        [(.getHour java-object)
+         (.getMinute java-object)
+         (.getSecond java-object)
+         (.getNano java-object)])))

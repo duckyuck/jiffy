@@ -12,4 +12,4 @@
   (addTo [this temporal amount])
   (between [this temporal1inclusive temporal2exclusive]))
 
-(s/def ::temporal-unit ::j/wip)
+(s/def ::temporal-unit #(satisfies? ITemporalUnit %))
