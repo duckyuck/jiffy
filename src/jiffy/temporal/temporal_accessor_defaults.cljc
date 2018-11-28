@@ -5,14 +5,15 @@
             [jiffy.temporal.chrono-field :as ChronoField]
             [jiffy.temporal.temporal-field :as TemporalField]
             [jiffy.temporal.value-range :as ValueRange]
-            [jiffy.exception :refer [UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]))
+            [jiffy.exception :refer [UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
+            [jiffy.temporal.temporal-accessor :as TemporalAccessor]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalAccessor.java#L169
 (s/def ::range-args ::j/wip)
 (defn -range [this field]
   (if (satisfies? ChronoField/IChronoField field)
-    (if (ChronoField/isSupported this field)
-      (range this field)
+    (if (TemporalAccessor/isSupported this field)
+      (TemporalField/range field)
       (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:field field})))
     (TemporalField/rangeRefinedBy field this)))
 (s/fdef -range :args ::range-args :ret ::ValueRange/value-range)
