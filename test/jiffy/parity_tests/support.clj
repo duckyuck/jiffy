@@ -114,3 +114,19 @@
      (require '~(symbol (namespace jiffy-fn)))
      (defspec ~(gen-test-name jiffy-fn) ~(or num-tests default-num-tests)
        (gen-static-method-prop ~jiffy-fn))))
+
+(defmacro test-proto-fn! [protocol-ns f & [num-tests]]
+  `(do
+     (require '~(symbol (namespace f)))
+     (let [results#
+           (for [args# (gen/sample (s/gen ~(get-spec (symbol (str protocol-ns) (name f)))) ~num-tests)]
+             (let [jiffy-result# (invoke-jiffy ~f args#)
+                   java-result# (invoke-java '~(symbol (str (jiffy-fn->java-class f))
+                                                       (name f))
+                                             (map jiffy->java args#)
+                                             {:static? false})]
+               (when-not (same? jiffy-result# java-result#)
+                 {:failed/args args#
+                  :failed/java-result java-result#
+                  :failed/jiffy-result jiffy-result#})))]
+       (or (first (remove nil? results#)) [(count results#) :success]))))
