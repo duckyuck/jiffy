@@ -43,10 +43,12 @@
 (s/fdef -get-nano :args ::get-nano-args :ret ::j/long)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L343
+(s/def ::of-epoch-milli-args ::j/milli)
 (defn ofEpochMilli [epoch-milli]
   (create (math/floor-div epoch-milli 1000)
           (int (* (math/floor-mod epoch-milli 1000)
                   1000000))))
+(s/fdef ofEpochMilli :args ::of-epoch-milli-args :ret ::instant)
 
 (s/def ::of-epoch-second-args (s/cat :epoch-second ::j/second :nano-adjustment (s/? ::j/nano)))
 (defn ofEpochSecond

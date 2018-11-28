@@ -434,7 +434,7 @@
 (s/fdef now :args ::now-args :ret ::instant)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L343
-(s/def ::of-epoch-milli-args (args ::j/long))
+(s/def ::of-epoch-milli-args ::impl/of-epoch-milli-args)
 (def ofEpochMilli #'impl/ofEpochMilli)
 (s/fdef ofEpochMilli :args ::of-epoch-milli-args :ret ::instant)
 
