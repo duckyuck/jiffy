@@ -147,10 +147,10 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
 (defn values [] (vals @enums))
-(s/fdef values :ret ::j/wip)
+(s/fdef values :ret (s/coll-of ::chrono-field))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
-(s/def ::value-of-args (args string?))
+(s/def ::value-of-args (s/tuple string?))
 (defn valueOf [enum-name] (@enums enum-name))
 (s/fdef valueOf :args ::value-of-args :ret ::chrono-field)
 
