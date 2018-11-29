@@ -5,7 +5,8 @@
             [jiffy.specs :as j]
             [jiffy.temporal.temporal :as Temporal]
             [jiffy.temporal.temporal-unit :as TemporalUnit]
-            [jiffy.math :as math]))
+            [jiffy.math :as math]
+            [jiffy.enum #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]))
 
 (defprotocol IChronoUnit)
 
@@ -13,7 +14,7 @@
   IChronoUnit)
 
 (s/def ::create-args (s/tuple string? ::Duration/duration))
-(defn create [name estimated-duration] (->ChronoUnit name estimated-duration))
+(defn create [ordinal enum-name name estimated-duration] (->ChronoUnit name estimated-duration))
 (s/def ::chrono-unit (j/constructor-spec ChronoUnit create ::create-args))
 (s/fdef create :args ::create-args :ret ::chrono-unit)
 
@@ -64,28 +65,29 @@
   (isSupportedBy [this temporal] (-is-supported-by this temporal))
   (between [this temporal-1-inclusive temporal-2-exclusive] (-between this temporal-1-inclusive temporal-2-exclusive)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoUnit.java
-(defn values [] (wip ::values))
-(s/fdef values :ret ::j/wip)
+(defenum create
+  {NANOS ["Nanos" (Duration/ofNanos 1)]
+   MICROS ["Micros" (Duration/ofNanos 1000)]
+   MILLIS ["Millis" (Duration/ofNanos 1000000)]
+   SECONDS ["Seconds" (Duration/ofSeconds 1)]
+   MINUTES ["Minutes" (Duration/ofSeconds 60)]
+   HOURS ["Hours" (Duration/ofSeconds 3600)]
+   HALF_DAYS ["HalfDays" (Duration/ofSeconds 43200)]
+   DAYS ["Days" (Duration/ofSeconds 86400)]
+   WEEKS ["Weeks" (Duration/ofSeconds (* 7 86400))]
+   MONTHS ["Months" (Duration/ofSeconds (/ 31556952 12))]
+   YEARS ["Years" (Duration/ofSeconds 31556952)]
+   DECADES ["Decades" (Duration/ofSeconds (* 31556952 10))]
+   CENTURIES ["Centuries" (Duration/ofSeconds (* 31556952 100))]
+   MILLENNIA ["Millennia" (Duration/ofSeconds (* 31556952 1000))]
+   ERAS ["Eras" (Duration/ofSeconds (* 31556952 1000000000))]
+   FOREVER ["Forever" (Duration/ofSeconds math/long-max-value 999999999)]})
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoUnit.java
-(s/def ::value-of-args (args string?))
-(defn valueOf [value-of--unknown-param-name] (wip ::valueOf))
+(defn values [] (vals @enums))
+(s/fdef values :ret (s/coll-of ::chrono-unit))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoUnit.java
+(s/def ::value-of-args (s/tuple string?))
+(defn valueOf [enum-name] (@enum enum-name))
 (s/fdef valueOf :args ::value-of-args :ret ::chrono-unit)
-
-(def NANOS (->ChronoUnit "Nanos" (Duration/ofNanos 1)))
-(def MICROS (->ChronoUnit "Micros" (Duration/ofNanos 1000)))
-(def MILLIS (->ChronoUnit "Millis" (Duration/ofNanos 1000000)))
-(def SECONDS (->ChronoUnit "Seconds" (Duration/ofSeconds 1)))
-(def MINUTES (->ChronoUnit "Minutes" (Duration/ofSeconds 60)))
-(def HOURS (->ChronoUnit "Hours" (Duration/ofSeconds 3600)))
-(def HALF_DAYS (->ChronoUnit "HalfDays" (Duration/ofSeconds 43200)))
-(def DAYS (->ChronoUnit "Days" (Duration/ofSeconds 86400)))
-(def WEEKS (->ChronoUnit "Weeks" (Duration/ofSeconds (* 7 86400))))
-(def MONTHS (->ChronoUnit "Months" (Duration/ofSeconds (/ 31556952 12))))
-(def YEARS (->ChronoUnit "Years" (Duration/ofSeconds 31556952)))
-(def DECADES (->ChronoUnit "Decades" (Duration/ofSeconds (* 31556952 10))))
-(def CENTURIES (->ChronoUnit "Centuries" (Duration/ofSeconds (* 31556952 100))))
-(def MILLENNIA (->ChronoUnit "Millennia" (Duration/ofSeconds (* 31556952 1000))))
-(def ERAS (->ChronoUnit "Eras" (Duration/ofSeconds (* 31556952 1000000000))))
-(def FOREVER (->ChronoUnit "Forever" (Duration/ofSeconds math/long-max-value 999999999)))
