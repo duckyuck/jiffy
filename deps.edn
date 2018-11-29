@@ -8,8 +8,7 @@
                  :extra-deps {com.bhauman/figwheel-main {:mvn/version "0.1.9"}
                               com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}}
            :test-clj {:extra-paths ["test"]
-                      :extra-deps {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
-                                                              :sha "028a6d41ac9ac5d5c405dfc38e4da6b4cc1255d5"}}
-                      :main-opts ["-m" "cognitect.test-runner"]}
+                      :extra-deps {lambdaisland/kaocha {:mvn/version "0.0-266"}}
+                      :main-opts ["-m" "kaocha.runner" "--watch"]}
            :test-cljs {:extra-deps {olical/cljs-test-runner {:mvn/version "0.1.1"}}
                        :main-opts ["-m" "cljs-test-runner.main"]}}}
