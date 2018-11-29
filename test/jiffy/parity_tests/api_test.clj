@@ -14,3 +14,8 @@
   (is (thrown-with-msg?
        java.lang.ArithmeticException #"long overflow"
        (.toEpochMilli (jiffy->java #jiffy.instant_impl.Instant{:seconds 9223372036854776, :nanos 100000})))))
+
+;; jiffy.zoned-date-time
+
+;;(test-proto-fn jiffy.zoned-date-time jiffy.chrono.chrono-zoned-date-time/getOffset)
+
