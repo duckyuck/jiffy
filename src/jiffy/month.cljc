@@ -1,26 +1,26 @@
 (ns jiffy.month
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.text-style :as TextStyle]
+            [jiffy.format.text-style :as text-style]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as Temporal]
-            [jiffy.temporal.temporal-accessor :as TemporalAccessor]
-            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]
-            [jiffy.temporal.temporal-field :as TemporalField]
-            [jiffy.temporal.temporal-query :as TemporalQuery]
-            [jiffy.temporal.value-range :as ValueRange]))
+            [jiffy.temporal.temporal :as temporal]
+            [jiffy.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.temporal.temporal-field :as temporal-field]
+            [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.temporal.value-range :as value-range]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java
 (defprotocol IMonth
-  (getValue [this])
-  (getDisplayName [this style locale])
+  (get-value [this])
+  (get-display-name [this style locale])
   (plus [this months])
   (minus [this months])
   (length [this leap-year])
-  (minLength [this])
-  (maxLength [this])
-  (firstDayOfYear [this leap-year])
-  (firstMonthOfQuarter [this]))
+  (min-length [this])
+  (max-length [this])
+  (first-day-of-year [this leap-year])
+  (first-month-of-quarter [this]))
 
 (defrecord Month [])
 
@@ -37,7 +37,7 @@
 (s/fdef -get-value :args ::get-value-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java#L253
-(s/def ::get-display-name-args (args ::TextStyle/text-style ::j/wip))
+(s/def ::get-display-name-args (args ::text-style/text-style ::j/wip))
 (defn -get-display-name [this style locale] (wip ::-get-display-name))
 (s/fdef -get-display-name :args ::get-display-name-args :ret string?)
 
@@ -78,57 +78,57 @@
 
 (extend-type Month
   IMonth
-  (getValue [this] (-get-value this))
-  (getDisplayName [this style locale] (-get-display-name this style locale))
+  (get-value [this] (-get-value this))
+  (get-display-name [this style locale] (-get-display-name this style locale))
   (plus [this months] (-plus this months))
   (minus [this months] (-minus this months))
   (length [this leap-year] (-length this leap-year))
-  (minLength [this] (-min-length this))
-  (maxLength [this] (-max-length this))
-  (firstDayOfYear [this leap-year] (-first-day-of-year this leap-year))
-  (firstMonthOfQuarter [this] (-first-month-of-quarter this)))
+  (min-length [this] (-min-length this))
+  (max-length [this] (-max-length this))
+  (first-day-of-year [this leap-year] (-first-day-of-year this leap-year))
+  (first-month-of-quarter [this] (-first-month-of-quarter this)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java#L278
-(s/def ::is-supported-args (args ::TemporalField/temporal-field))
+(s/def ::is-supported-args (args ::temporal-field/temporal-field))
 (defn -is-supported [this field] (wip ::-is-supported))
 (s/fdef -is-supported :args ::is-supported-args :ret ::j/boolean)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java#L308
-(s/def ::range-args (args ::TemporalField/temporal-field))
+(s/def ::range-args (args ::temporal-field/temporal-field))
 (defn -range [this field] (wip ::-range))
-(s/fdef -range :args ::range-args :ret ::ValueRange/value-range)
+(s/fdef -range :args ::range-args :ret ::value-range/value-range)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java#L341
-(s/def ::get-args (args ::TemporalField/temporal-field))
+(s/def ::get-args (args ::temporal-field/temporal-field))
 (defn -get [this field] (wip ::-get))
 (s/fdef -get :args ::get-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java#L371
-(s/def ::get-long-args (args ::TemporalField/temporal-field))
+(s/def ::get-long-args (args ::temporal-field/temporal-field))
 (defn -get-long [this field] (wip ::-get-long))
 (s/fdef -get-long :args ::get-long-args :ret ::j/long)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java#L563
-(s/def ::query-args (args ::TemporalQuery/temporal-query))
+(s/def ::query-args (args ::temporal-query/temporal-query))
 (defn -query [this query] (wip ::-query))
 (s/fdef -query :args ::query-args :ret ::j/wip)
 
 (extend-type Month
-  TemporalAccessor/ITemporalAccessor
-  (isSupported [this field] (-is-supported this field))
+  temporal-accessor/ITemporalAccessor
+  (is-supported [this field] (-is-supported this field))
   (range [this field] (-range this field))
   (get [this field] (-get this field))
-  (getLong [this field] (-get-long this field))
+  (get-long [this field] (-get-long this field))
   (query [this query] (-query this query)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java#L608
-(s/def ::adjust-into-args (args ::Temporal/temporal))
+(s/def ::adjust-into-args (args ::temporal/temporal))
 (defn -adjust-into [this temporal] (wip ::-adjust-into))
-(s/fdef -adjust-into :args ::adjust-into-args :ret ::Temporal/temporal)
+(s/fdef -adjust-into :args ::adjust-into-args :ret ::temporal/temporal)
 
 (extend-type Month
-  TemporalAdjuster/ITemporalAdjuster
-  (adjustInto [this temporal] (-adjust-into this temporal)))
+  temporal-adjuster/ITemporalAdjuster
+  (adjust-into [this temporal] (-adjust-into this temporal)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java
 (defn values [] (wip ::values))
@@ -136,8 +136,8 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java
 (s/def ::value-of-args (args string?))
-(defn valueOf [value-of--unknown-param-name] (wip ::valueOf))
-(s/fdef valueOf :args ::value-of-args :ret ::month)
+(defn value-of [value-of--unknown-param-name] (wip ::value-of))
+(s/fdef value-of :args ::value-of-args :ret ::month)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java#L185
 (s/def ::of-args (args ::j/int))
@@ -145,7 +145,7 @@
 (s/fdef of :args ::of-args :ret ::month)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java#L211
-(s/def ::from-args (args ::TemporalAccessor/temporal-accessor))
+(s/def ::from-args (args ::temporal-accessor/temporal-accessor))
 (defn from [temporal] (wip ::from))
 (s/fdef from :args ::from-args :ret ::month)
 

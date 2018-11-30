@@ -1,8 +1,8 @@
 (ns jiffy.chrono.chrono-local-date-defaults
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chrono-local-date-time-defaults :as ChronoLocalDateTime]
+            [jiffy.chrono.chrono-local-date-time-defaults :as chrono-local-date-time]
             [jiffy.specs :as j]
-            [jiffy.chrono.era :as Era]
+            [jiffy.chrono.era :as era]
             [jiffy.dev.wip :refer [wip]]))
 
 (s/def ::chrono-local-date #(= % ::wip))
@@ -10,7 +10,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L325
 (s/def ::get-era-args ::j/wip)
 (defn -get-era [this] (wip ::-get-era))
-(s/fdef -get-era :args ::get-era-args :ret ::Era/era)
+(s/fdef -get-era :args ::get-era-args :ret ::era/era)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L340
 (s/def ::is-leap-year-args ::j/wip)
@@ -35,7 +35,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L656
 (s/def ::at-time-args ::j/wip)
 (defn -at-time [this local-time] (wip ::-at-time))
-(s/fdef -at-time :args ::at-time-args :ret ::ChronoLocalDateTime/chrono-local-date-time)
+(s/fdef -at-time :args ::at-time-args :ret ::chrono-local-date-time/chrono-local-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L728
 (s/def ::is-after-args ::j/wip)

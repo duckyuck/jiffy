@@ -1,12 +1,12 @@
 (ns jiffy.chrono.chrono-period-impl
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chrono-period :as ChronoPeriod]
-            [jiffy.chrono.chronology :as Chronology]
+            [jiffy.chrono.chrono-period :as chrono-period]
+            [jiffy.chrono.chronology :as chronology]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as Temporal]
-            [jiffy.temporal.temporal-amount :as TemporalAmount]
-            [jiffy.temporal.temporal-unit :as TemporalUnit]))
+            [jiffy.temporal.temporal :as temporal]
+            [jiffy.temporal.temporal-amount :as temporal-amount]
+            [jiffy.temporal.temporal-unit :as temporal-unit]))
 
 (defrecord ChronoPeriodImpl [])
 
@@ -20,7 +20,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoPeriodImpl.java#L156
 (s/def ::get-chronology-args (args))
 (defn -get-chronology [this] (wip ::-get-chronology))
-(s/fdef -get-chronology :args ::get-chronology-args :ret ::Chronology/chronology)
+(s/fdef -get-chronology :args ::get-chronology-args :ret ::chronology/chronology)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoPeriodImpl.java#L162
 (s/def ::is-zero-args (args))
@@ -33,37 +33,37 @@
 (s/fdef -is-negative :args ::is-negative-args :ret ::j/boolean)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoPeriodImpl.java#L173
-(s/def ::plus-args (args ::TemporalAmount/temporal-amount))
+(s/def ::plus-args (args ::temporal-amount/temporal-amount))
 (defn -plus [this amount-to-add] (wip ::-plus))
-(s/fdef -plus :args ::plus-args :ret ::ChronoPeriod/chrono-period)
+(s/fdef -plus :args ::plus-args :ret ::chrono-period/chrono-period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoPeriodImpl.java#L183
-(s/def ::minus-args (args ::TemporalAmount/temporal-amount))
+(s/def ::minus-args (args ::temporal-amount/temporal-amount))
 (defn -minus [this amount-to-subtract] (wip ::-minus))
-(s/fdef -minus :args ::minus-args :ret ::ChronoPeriod/chrono-period)
+(s/fdef -minus :args ::minus-args :ret ::chrono-period/chrono-period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoPeriodImpl.java#L212
 (s/def ::multiplied-by-args (args ::j/int))
 (defn -multiplied-by [this scalar] (wip ::-multiplied-by))
-(s/fdef -multiplied-by :args ::multiplied-by-args :ret ::ChronoPeriod/chrono-period)
+(s/fdef -multiplied-by :args ::multiplied-by-args :ret ::chrono-period/chrono-period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoPeriodImpl.java#L225
 (s/def ::normalized-args (args))
 (defn -normalized [this] (wip ::-normalized))
-(s/fdef -normalized :args ::normalized-args :ret ::ChronoPeriod/chrono-period)
+(s/fdef -normalized :args ::normalized-args :ret ::chrono-period/chrono-period)
 
 (extend-type ChronoPeriodImpl
-  ChronoPeriod/IChronoPeriod
-  (getChronology [this] (-get-chronology this))
-  (isZero [this] (-is-zero this))
-  (isNegative [this] (-is-negative this))
+  chrono-period/IChronoPeriod
+  (get-chronology [this] (-get-chronology this))
+  (is-zero [this] (-is-zero this))
+  (is-negative [this] (-is-negative this))
   (plus [this amount-to-add] (-plus this amount-to-add))
   (minus [this amount-to-subtract] (-minus this amount-to-subtract))
-  (multipliedBy [this scalar] (-multiplied-by this scalar))
+  (multiplied-by [this scalar] (-multiplied-by this scalar))
   (normalized [this] (-normalized this)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoPeriodImpl.java#L138
-(s/def ::get-args (args ::TemporalUnit/temporal-unit))
+(s/def ::get-args (args ::temporal-unit/temporal-unit))
 (defn -get [this unit] (wip ::-get))
 (s/fdef -get :args ::get-args :ret ::j/long)
 
@@ -73,19 +73,19 @@
 (s/fdef -get-units :args ::get-units-args :ret ::j/wip)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoPeriodImpl.java#L255
-(s/def ::add-to-args (args ::Temporal/temporal))
+(s/def ::add-to-args (args ::temporal/temporal))
 (defn -add-to [this temporal] (wip ::-add-to))
-(s/fdef -add-to :args ::add-to-args :ret ::Temporal/temporal)
+(s/fdef -add-to :args ::add-to-args :ret ::temporal/temporal)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoPeriodImpl.java#L281
-(s/def ::subtract-from-args (args ::Temporal/temporal))
+(s/def ::subtract-from-args (args ::temporal/temporal))
 (defn -subtract-from [this temporal] (wip ::-subtract-from))
-(s/fdef -subtract-from :args ::subtract-from-args :ret ::Temporal/temporal)
+(s/fdef -subtract-from :args ::subtract-from-args :ret ::temporal/temporal)
 
 (extend-type ChronoPeriodImpl
-  TemporalAmount/ITemporalAmount
+  temporal-amount/ITemporalAmount
   (get [this unit] (-get this unit))
-  (getUnits [this] (-get-units this))
-  (addTo [this temporal] (-add-to this temporal))
-  (subtractFrom [this temporal] (-subtract-from this temporal)))
+  (get-units [this] (-get-units this))
+  (add-to [this temporal] (-add-to this temporal))
+  (subtract-from [this temporal] (-subtract-from this temporal)))
 

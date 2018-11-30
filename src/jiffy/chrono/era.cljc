@@ -1,19 +1,19 @@
 (ns jiffy.chrono.era
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.text-style :as TextStyle]
-            [jiffy.temporal.temporal :as Temporal]
-            [jiffy.temporal.temporal-accessor :as TemporalAccessor]
-            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]
-            [jiffy.temporal.temporal-field :as TemporalField]
-            [jiffy.temporal.temporal-query :as TemporalQuery]
-            [jiffy.temporal.value-range :as ValueRange]
+            [jiffy.format.text-style :as text-style]
+            [jiffy.temporal.temporal :as temporal]
+            [jiffy.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.temporal.temporal-field :as temporal-field]
+            [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.temporal.value-range :as value-range]
             [jiffy.specs :as j]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Era.java
 (defprotocol IEra
-  (getValue [this])
-  (getDisplayName [this style locale]))
+  (get-value [this])
+  (get-display-name [this style locale]))
 
 (s/def ::era #(satisfies? IEra %))
 

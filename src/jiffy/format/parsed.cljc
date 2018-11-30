@@ -2,11 +2,11 @@
   (:refer-clojure :exclude [resolve ])
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.resolver-style :as ResolverStyle]
+            [jiffy.format.resolver-style :as resolver-style]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal-accessor :as TemporalAccessor]
-            [jiffy.temporal.temporal-field :as TemporalField]
-            [jiffy.temporal.temporal-query :as TemporalQuery]))
+            [jiffy.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.temporal.temporal-field :as temporal-field]
+            [jiffy.temporal.temporal-query :as temporal-query]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/Parsed.java
 (defprotocol IParsed
@@ -28,9 +28,9 @@
 (s/fdef -copy :args ::copy-args :ret ::parsed)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/Parsed.java#L248
-(s/def ::resolve-args (args ::ResolverStyle/resolver-style ::j/wip))
+(s/def ::resolve-args (args ::resolver-style/resolver-style ::j/wip))
 (defn -resolve [this resolver-style resolver-fields] (wip ::-resolve))
-(s/fdef -resolve :args ::resolve-args :ret ::TemporalAccessor/temporal-accessor)
+(s/fdef -resolve :args ::resolve-args :ret ::temporal-accessor/temporal-accessor)
 
 (extend-type Parsed
   IParsed
@@ -38,23 +38,23 @@
   (resolve [this resolver-style resolver-fields] (-resolve this resolver-style resolver-fields)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/Parsed.java#L180
-(s/def ::is-supported-args (args ::TemporalField/temporal-field))
+(s/def ::is-supported-args (args ::temporal-field/temporal-field))
 (defn -is-supported [this field] (wip ::-is-supported))
 (s/fdef -is-supported :args ::is-supported-args :ret ::j/boolean)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/Parsed.java#L190
-(s/def ::get-long-args (args ::TemporalField/temporal-field))
+(s/def ::get-long-args (args ::temporal-field/temporal-field))
 (defn -get-long [this field] (wip ::-get-long))
 (s/fdef -get-long :args ::get-long-args :ret ::j/long)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/Parsed.java#L210
-(s/def ::query-args (args ::TemporalQuery/temporal-query))
+(s/def ::query-args (args ::temporal-query/temporal-query))
 (defn -query [this query] (wip ::-query))
 (s/fdef -query :args ::query-args :ret ::j/wip)
 
 (extend-type Parsed
-  TemporalAccessor/ITemporalAccessor
-  (isSupported [this field] (-is-supported this field))
-  (getLong [this field] (-get-long this field))
+  temporal-accessor/ITemporalAccessor
+  (is-supported [this field] (-is-supported this field))
+  (get-long [this field] (-get-long this field))
   (query [this query] (-query this query)))
 

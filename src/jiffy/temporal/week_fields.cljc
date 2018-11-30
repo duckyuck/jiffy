@@ -1,19 +1,19 @@
 (ns jiffy.temporal.week-fields
   (:require [clojure.spec.alpha :as s]
-            [jiffy.day-of-week :as DayOfWeek]
+            [jiffy.day-of-week :as day-of-week]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal-field :as TemporalField]))
+            [jiffy.temporal.temporal-field :as temporal-field]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/WeekFields.java
 (defprotocol IWeekFields
-  (getFirstDayOfWeek [this])
-  (getMinimalDaysInFirstWeek [this])
-  (dayOfWeek [this])
-  (weekOfMonth [this])
-  (weekOfYear [this])
-  (weekOfWeekBasedYear [this])
-  (weekBasedYear [this]))
+  (get-first-day-of-week [this])
+  (get-minimal-days-in-first-week [this])
+  (day-of-week [this])
+  (week-of-month [this])
+  (week-of-year [this])
+  (week-of-week-based-year [this])
+  (week-based-year [this]))
 
 (defrecord WeekFields [])
 
@@ -27,7 +27,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/WeekFields.java#L403
 (s/def ::get-first-day-of-week-args (args))
 (defn -get-first-day-of-week [this] (wip ::-get-first-day-of-week))
-(s/fdef -get-first-day-of-week :args ::get-first-day-of-week-args :ret ::DayOfWeek/day-of-week)
+(s/fdef -get-first-day-of-week :args ::get-first-day-of-week-args :ret ::day-of-week/day-of-week)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/WeekFields.java#L417
 (s/def ::get-minimal-days-in-first-week-args (args))
@@ -37,37 +37,37 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/WeekFields.java#L440
 (s/def ::day-of-week-args (args))
 (defn -day-of-week [this] (wip ::-day-of-week))
-(s/fdef -day-of-week :args ::day-of-week-args :ret ::TemporalField/temporal-field)
+(s/fdef -day-of-week :args ::day-of-week-args :ret ::temporal-field/temporal-field)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/WeekFields.java#L486
 (s/def ::week-of-month-args (args))
 (defn -week-of-month [this] (wip ::-week-of-month))
-(s/fdef -week-of-month :args ::week-of-month-args :ret ::TemporalField/temporal-field)
+(s/fdef -week-of-month :args ::week-of-month-args :ret ::temporal-field/temporal-field)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/WeekFields.java#L531
 (s/def ::week-of-year-args (args))
 (defn -week-of-year [this] (wip ::-week-of-year))
-(s/fdef -week-of-year :args ::week-of-year-args :ret ::TemporalField/temporal-field)
+(s/fdef -week-of-year :args ::week-of-year-args :ret ::temporal-field/temporal-field)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/WeekFields.java#L581
 (s/def ::week-of-week-based-year-args (args))
 (defn -week-of-week-based-year [this] (wip ::-week-of-week-based-year))
-(s/fdef -week-of-week-based-year :args ::week-of-week-based-year-args :ret ::TemporalField/temporal-field)
+(s/fdef -week-of-week-based-year :args ::week-of-week-based-year-args :ret ::temporal-field/temporal-field)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/WeekFields.java#L623
 (s/def ::week-based-year-args (args))
 (defn -week-based-year [this] (wip ::-week-based-year))
-(s/fdef -week-based-year :args ::week-based-year-args :ret ::TemporalField/temporal-field)
+(s/fdef -week-based-year :args ::week-based-year-args :ret ::temporal-field/temporal-field)
 
 (extend-type WeekFields
   IWeekFields
-  (getFirstDayOfWeek [this] (-get-first-day-of-week this))
-  (getMinimalDaysInFirstWeek [this] (-get-minimal-days-in-first-week this))
-  (dayOfWeek [this] (-day-of-week this))
-  (weekOfMonth [this] (-week-of-month this))
-  (weekOfYear [this] (-week-of-year this))
-  (weekOfWeekBasedYear [this] (-week-of-week-based-year this))
-  (weekBasedYear [this] (-week-based-year this)))
+  (get-first-day-of-week [this] (-get-first-day-of-week this))
+  (get-minimal-days-in-first-week [this] (-get-minimal-days-in-first-week this))
+  (day-of-week [this] (-day-of-week this))
+  (week-of-month [this] (-week-of-month this))
+  (week-of-year [this] (-week-of-year this))
+  (week-of-week-based-year [this] (-week-of-week-based-year this))
+  (week-based-year [this] (-week-based-year this)))
 
 (s/def ::of-args (args ::j/wip))
 (defn of

@@ -4,16 +4,16 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalField.java
 (defprotocol ITemporalField
-  (getDisplayName [this locale])
-  (getBaseUnit [this])
-  (getRangeUnit [this])
+  (get-display-name [this locale])
+  (get-base-unit [this])
+  (get-range-unit [this])
   (range [this])
-  (isDateBased [this])
-  (isTimeBased [this])
-  (isSupportedBy [this temporal])
-  (rangeRefinedBy [this temporal])
-  (getFrom [this temporal])
-  (adjustInto [this temporal new-value])
+  (is-date-based [this])
+  (is-time-based [this])
+  (is-supported-by [this temporal])
+  (range-refined-by [this temporal])
+  (get-from [this temporal])
+  (adjust-into [this temporal new-value])
   (resolve [this field-values partial-temporal resolver-style]))
 
 (s/def ::temporal-field #(satisfies? ITemporalField %))

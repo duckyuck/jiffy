@@ -3,21 +3,21 @@
             #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
             [jiffy.specs :as j]
             [jiffy.exception :refer [DateTimeException JavaIllegalArgumentException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
-            [jiffy.temporal.temporal-field :as TemporalField]
+            [jiffy.temporal.temporal-field :as temporal-field]
             [jiffy.math :as math]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java
 (defprotocol IValueRange
-  (isFixed [this])
-  (getMinimum [this])
-  (getLargestMinimum [this])
-  (getSmallestMaximum [this])
-  (getMaximum [this])
-  (isIntValue [this])
-  (isValidValue [this value])
-  (isValidIntValue [this value])
-  (checkValidValue [this value field])
-  (checkValidIntValue [this value field]))
+  (is-fixed [this])
+  (get-minimum [this])
+  (get-largest-minimum [this])
+  (get-smallest-maximum [this])
+  (get-maximum [this])
+  (is-int-value [this])
+  (is-valid-value [this value])
+  (is-valid-int-value [this value])
+  (check-valid-value [this value field])
+  (check-valid-int-value [this value field]))
 
 (defrecord ValueRange [min-smallest min-largest max-smallest max-largest])
 
@@ -124,7 +124,7 @@
     (str "Invalid value (valid values " this "): " value)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L309
-(s/def ::check-valid-value-args (args ::j/long ::TemporalField/temporal-field))
+(s/def ::check-valid-value-args (args ::j/long ::temporal-field/temporal-field))
 (defn -check-valid-value [this value field]
   (when-not (-is-valid-value this value)
     (throw (ex DateTimeException (--gen-invalid-field-message this value field))))
@@ -132,7 +132,7 @@
 (s/fdef -check-valid-value :args ::check-valid-value-args :ret ::j/long)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L328
-(s/def ::check-valid-int-value-args (args ::j/long ::TemporalField/temporal-field))
+(s/def ::check-valid-int-value-args (args ::j/long ::temporal-field/temporal-field))
 (defn -check-valid-int-value [this value field]
   (when-not (-is-valid-int-value this value)
     (throw (ex DateTimeException (--gen-invalid-field-message this value field))))
@@ -141,16 +141,16 @@
 
 (extend-type ValueRange
   IValueRange
-  (isFixed [this] (-is-fixed this))
-  (getMinimum [this] (-get-minimum this))
-  (getLargestMinimum [this] (-get-largest-minimum this))
-  (getSmallestMaximum [this] (-get-smallest-maximum this))
-  (getMaximum [this] (-get-maximum this))
-  (isIntValue [this] (-is-int-value this))
-  (isValidValue [this value] (-is-valid-value this value))
-  (isValidIntValue [this value] (-is-valid-int-value this value))
-  (checkValidValue [this value field] (-check-valid-value this value field))
-  (checkValidIntValue [this value field] (-check-valid-int-value this value field)))
+  (is-fixed [this] (-is-fixed this))
+  (get-minimum [this] (-get-minimum this))
+  (get-largest-minimum [this] (-get-largest-minimum this))
+  (get-smallest-maximum [this] (-get-smallest-maximum this))
+  (get-maximum [this] (-get-maximum this))
+  (is-int-value [this] (-is-int-value this))
+  (is-valid-value [this value] (-is-valid-value this value))
+  (is-valid-int-value [this value] (-is-valid-int-value this value))
+  (check-valid-value [this value field] (-check-valid-value this value field))
+  (check-valid-int-value [this value field] (-check-valid-int-value this value field)))
 
 (s/def ::of-args ::create-args)
 (defn of [& args] (apply create args))

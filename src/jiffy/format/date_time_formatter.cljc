@@ -1,38 +1,38 @@
 (ns jiffy.format.date-time-formatter
-  (:refer-clojure :exclude [format ])
+  (:refer-clojure :exclude [format])
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chronology :as Chronology]
+            [jiffy.chrono.chronology :as chronology]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.decimal-style :as DecimalStyle]
-            [jiffy.format.format-style :as FormatStyle]
-            [jiffy.format.resolver-style :as ResolverStyle]
+            [jiffy.format.decimal-style :as decimal-style]
+            [jiffy.format.format-style :as format-style]
+            [jiffy.format.resolver-style :as resolver-style]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal-accessor :as TemporalAccessor]
-            [jiffy.temporal.temporal-query :as TemporalQuery]
-            [jiffy.zone-id :as ZoneId]))
+            [jiffy.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.zone-id :as zone-id]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java
 (defprotocol IDateTimeFormatter
-  (parseBest [this parse-best--unknown-param-name-1 parse-best--unknown-param-name-2])
+  (parse-best [this parse-best--unknown-param-name-1 parse-best--unknown-param-name-2])
   (format [this formatter])
-  (getLocale [this])
-  (withLocale [this locale])
-  (localizedBy [this locale])
-  (getDecimalStyle [this])
-  (withDecimalStyle [this decimal-style])
-  (getChronology [this])
-  (withChronology [this chrono])
-  (getZone [this])
-  (withZone [this zone])
-  (getResolverStyle [this])
-  (withResolverStyle [this resolver-style])
-  (getResolverFields [this])
-  (withResolverFields [this with-resolver-fields--overloaded-param])
-  (formatTo [this temporal appendable])
+  (get-locale [this])
+  (with-locale [this locale])
+  (localized-by [this locale])
+  (get-decimal-style [this])
+  (with-decimal-style [this decimal-style])
+  (get-chronology [this])
+  (with-chronology [this chrono])
+  (get-zone [this])
+  (with-zone [this zone])
+  (get-resolver-style [this])
+  (with-resolver-style [this resolver-style])
+  (get-resolver-fields [this])
+  (with-resolver-fields [this with-resolver-fields--overloaded-param])
+  (format-to [this temporal appendable])
   (parse [this text] [this parse--overloaded-param-1 parse--overloaded-param-2])
-  (parseUnresolved [this text position])
-  (toPrinterParser [this optional])
-  (toFormat [this] [this parse-query]))
+  (parse-unresolved [this text position])
+  (to-printer-parser [this optional])
+  (to-format [this] [this parse-query]))
 
 (defrecord DateTimeFormatter [])
 
@@ -46,10 +46,10 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java
 (s/def ::parse-best-args (args ::j/wip ::j/wip))
 (defn -parse-best [this parse-best--unknown-param-name-1 parse-best--unknown-param-name-2] (wip ::-parse-best))
-(s/fdef -parse-best :args ::parse-best-args :ret ::TemporalAccessor/temporal-accessor)
+(s/fdef -parse-best :args ::parse-best-args :ret ::temporal-accessor/temporal-accessor)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L118
-(s/def ::format-args (args ::TemporalAccessor/temporal-accessor))
+(s/def ::format-args (args ::temporal-accessor/temporal-accessor))
 (defn -format [this formatter] (wip ::-format))
 (s/fdef -format :args ::format-args :ret string?)
 
@@ -71,40 +71,40 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L1518
 (s/def ::get-decimal-style-args (args))
 (defn -get-decimal-style [this] (wip ::-get-decimal-style))
-(s/fdef -get-decimal-style :args ::get-decimal-style-args :ret ::DecimalStyle/decimal-style)
+(s/fdef -get-decimal-style :args ::get-decimal-style-args :ret ::decimal-style/decimal-style)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L1530
-(s/def ::with-decimal-style-args (args ::DecimalStyle/decimal-style))
+(s/def ::with-decimal-style-args (args ::decimal-style/decimal-style))
 (defn -with-decimal-style [this decimal-style] (wip ::-with-decimal-style))
 (s/fdef -with-decimal-style :args ::with-decimal-style-args :ret ::date-time-formatter)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L1547
 (s/def ::get-chronology-args (args))
 (defn -get-chronology [this] (wip ::-get-chronology))
-(s/fdef -get-chronology :args ::get-chronology-args :ret ::Chronology/chronology)
+(s/fdef -get-chronology :args ::get-chronology-args :ret ::chronology/chronology)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L1584
-(s/def ::with-chronology-args (args ::Chronology/chronology))
+(s/def ::with-chronology-args (args ::chronology/chronology))
 (defn -with-chronology [this chrono] (wip ::-with-chronology))
 (s/fdef -with-chronology :args ::with-chronology-args :ret ::date-time-formatter)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L1601
 (s/def ::get-zone-args (args))
 (defn -get-zone [this] (wip ::-get-zone))
-(s/fdef -get-zone :args ::get-zone-args :ret ::ZoneId/zone-id)
+(s/fdef -get-zone :args ::get-zone-args :ret ::zone-id/zone-id)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L1641
-(s/def ::with-zone-args (args ::ZoneId/zone-id))
+(s/def ::with-zone-args (args ::zone-id/zone-id))
 (defn -with-zone [this zone] (wip ::-with-zone))
 (s/fdef -with-zone :args ::with-zone-args :ret ::date-time-formatter)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L1659
 (s/def ::get-resolver-style-args (args))
 (defn -get-resolver-style [this] (wip ::-get-resolver-style))
-(s/fdef -get-resolver-style :args ::get-resolver-style-args :ret ::ResolverStyle/resolver-style)
+(s/fdef -get-resolver-style :args ::get-resolver-style-args :ret ::resolver-style/resolver-style)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L1682
-(s/def ::with-resolver-style-args (args ::ResolverStyle/resolver-style))
+(s/def ::with-resolver-style-args (args ::resolver-style/resolver-style))
 (defn -with-resolver-style [this resolver-style] (wip ::-with-resolver-style))
 (s/fdef -with-resolver-style :args ::with-resolver-style-args :ret ::date-time-formatter)
 
@@ -120,7 +120,7 @@
 (s/fdef -with-resolver-fields :args ::with-resolver-fields-args :ret ::date-time-formatter)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L1837
-(s/def ::format-to-args (args ::TemporalAccessor/temporal-accessor ::j/wip))
+(s/def ::format-to-args (args ::temporal-accessor/temporal-accessor ::j/wip))
 (defn -format-to [this temporal appendable] (wip ::-format-to))
 (s/fdef -format-to :args ::format-to-args :ret ::j/void)
 
@@ -132,12 +132,12 @@
   ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L119
   ([this parse--overloaded-param-1 parse--overloaded-param-2] (wip ::-parse)))
-(s/fdef -parse :args ::parse-args :ret ::TemporalAccessor/temporal-accessor)
+(s/fdef -parse :args ::parse-args :ret ::temporal-accessor/temporal-accessor)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L2094
 (s/def ::parse-unresolved-args (args ::j/wip ::j/wip))
 (defn -parse-unresolved [this text position] (wip ::-parse-unresolved))
-(s/fdef -parse-unresolved :args ::parse-unresolved-args :ret ::TemporalAccessor/temporal-accessor)
+(s/fdef -parse-unresolved :args ::parse-unresolved-args :ret ::temporal-accessor/temporal-accessor)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L2123
 (s/def ::to-printer-parser-args (args ::j/boolean))
@@ -155,66 +155,66 @@
 
 (extend-type DateTimeFormatter
   IDateTimeFormatter
-  (parseBest [this parse-best--unknown-param-name-1 parse-best--unknown-param-name-2] (-parse-best this parse-best--unknown-param-name-1 parse-best--unknown-param-name-2))
+  (parse-best [this parse-best--unknown-param-name-1 parse-best--unknown-param-name-2] (-parse-best this parse-best--unknown-param-name-1 parse-best--unknown-param-name-2))
   (format [this formatter] (-format this formatter))
-  (getLocale [this] (-get-locale this))
-  (withLocale [this locale] (-with-locale this locale))
-  (localizedBy [this locale] (-localized-by this locale))
-  (getDecimalStyle [this] (-get-decimal-style this))
-  (withDecimalStyle [this decimal-style] (-with-decimal-style this decimal-style))
-  (getChronology [this] (-get-chronology this))
-  (withChronology [this chrono] (-with-chronology this chrono))
-  (getZone [this] (-get-zone this))
-  (withZone [this zone] (-with-zone this zone))
-  (getResolverStyle [this] (-get-resolver-style this))
-  (withResolverStyle [this resolver-style] (-with-resolver-style this resolver-style))
-  (getResolverFields [this] (-get-resolver-fields this))
-  (withResolverFields [this with-resolver-fields--overloaded-param] (-with-resolver-fields this with-resolver-fields--overloaded-param))
-  (formatTo [this temporal appendable] (-format-to this temporal appendable))
+  (get-locale [this] (-get-locale this))
+  (with-locale [this locale] (-with-locale this locale))
+  (localized-by [this locale] (-localized-by this locale))
+  (get-decimal-style [this] (-get-decimal-style this))
+  (with-decimal-style [this decimal-style] (-with-decimal-style this decimal-style))
+  (get-chronology [this] (-get-chronology this))
+  (with-chronology [this chrono] (-with-chronology this chrono))
+  (get-zone [this] (-get-zone this))
+  (with-zone [this zone] (-with-zone this zone))
+  (get-resolver-style [this] (-get-resolver-style this))
+  (with-resolver-style [this resolver-style] (-with-resolver-style this resolver-style))
+  (get-resolver-fields [this] (-get-resolver-fields this))
+  (with-resolver-fields [this with-resolver-fields--overloaded-param] (-with-resolver-fields this with-resolver-fields--overloaded-param))
+  (format-to [this temporal appendable] (-format-to this temporal appendable))
   (parse
     ([this text] (-parse this text))
     ([this parse--overloaded-param-1 parse--overloaded-param-2] (-parse this parse--overloaded-param-1 parse--overloaded-param-2)))
-  (parseUnresolved [this text position] (-parse-unresolved this text position))
-  (toPrinterParser [this optional] (-to-printer-parser this optional))
-  (toFormat
+  (parse-unresolved [this text position] (-parse-unresolved this text position))
+  (to-printer-parser [this optional] (-to-printer-parser this optional))
+  (to-format
     ([this] (-to-format this))
     ([this parse-query] (-to-format this parse-query))))
 
 (s/def ::of-pattern-args (args ::j/wip))
-(defn ofPattern
+(defn of-pattern
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L563
-  ([pattern] (wip ::ofPattern))
+  ([pattern] (wip ::of-pattern))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L587
-  ([pattern locale] (wip ::ofPattern)))
-(s/fdef ofPattern :args ::of-pattern-args :ret ::date-time-formatter)
+  ([pattern locale] (wip ::of-pattern)))
+(s/fdef of-pattern :args ::of-pattern-args :ret ::date-time-formatter)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L614
-(s/def ::of-localized-date-args (args ::FormatStyle/format-style))
-(defn ofLocalizedDate [date-style] (wip ::ofLocalizedDate))
-(s/fdef ofLocalizedDate :args ::of-localized-date-args :ret ::date-time-formatter)
+(s/def ::of-localized-date-args (args ::format-style/format-style))
+(defn of-localized-date [date-style] (wip ::of-localized-date))
+(s/fdef of-localized-date :args ::of-localized-date-args :ret ::date-time-formatter)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L645
-(s/def ::of-localized-time-args (args ::FormatStyle/format-style))
-(defn ofLocalizedTime [time-style] (wip ::ofLocalizedTime))
-(s/fdef ofLocalizedTime :args ::of-localized-time-args :ret ::date-time-formatter)
+(s/def ::of-localized-time-args (args ::format-style/format-style))
+(defn of-localized-time [time-style] (wip ::of-localized-time))
+(s/fdef of-localized-time :args ::of-localized-time-args :ret ::date-time-formatter)
 
 (s/def ::of-localized-date-time-args (args ::j/wip))
-(defn ofLocalizedDateTime
+(defn of-localized-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L676
-  ([date-time-style] (wip ::ofLocalizedDateTime))
+  ([date-time-style] (wip ::of-localized-date-time))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L708
-  ([date-style time-style] (wip ::ofLocalizedDateTime)))
-(s/fdef ofLocalizedDateTime :args ::of-localized-date-time-args :ret ::date-time-formatter)
+  ([date-style time-style] (wip ::of-localized-date-time)))
+(s/fdef of-localized-date-time :args ::of-localized-date-time-args :ret ::date-time-formatter)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L1351
-(defn parsedExcessDays [] (wip ::parsedExcessDays))
-(s/fdef parsedExcessDays :ret ::TemporalQuery/temporal-query)
+(defn parsed-excess-days [] (wip ::parsed-excess-days))
+(s/fdef parsed-excess-days :ret ::temporal-query/temporal-query)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L1392
-(defn parsedLeapSecond [] (wip ::parsedLeapSecond))
-(s/fdef parsedLeapSecond :ret ::TemporalQuery/temporal-query)
+(defn parsed-leap-second [] (wip ::parsed-leap-second))
+(s/fdef parsed-leap-second :ret ::temporal-query/temporal-query)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java#L739
 (def ISO_LOCAL_DATE ::ISO_LOCAL_DATE--not-implemented)

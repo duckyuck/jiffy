@@ -5,11 +5,11 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/TextStyle.java
 (defprotocol ITextStyle
-  (isStandalone [this])
-  (asStandalone [this])
-  (asNormal [this])
-  (toCalendarStyle [this])
-  (zoneNameStyleIndex [this]))
+  (is-standalone [this])
+  (as-standalone [this])
+  (as-normal [this])
+  (to-calendar-style [this])
+  (zone-name-style-index [this]))
 
 (defrecord TextStyle [])
 
@@ -47,16 +47,16 @@
 
 (extend-type TextStyle
   ITextStyle
-  (isStandalone [this] (-is-standalone this))
-  (asStandalone [this] (-as-standalone this))
-  (asNormal [this] (-as-normal this))
-  (toCalendarStyle [this] (-to-calendar-style this))
-  (zoneNameStyleIndex [this] (-zone-name-style-index this)))
+  (is-standalone [this] (-is-standalone this))
+  (as-standalone [this] (-as-standalone this))
+  (as-normal [this] (-as-normal this))
+  (to-calendar-style [this] (-to-calendar-style this))
+  (zone-name-style-index [this] (-zone-name-style-index this)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/TextStyle.java
 (s/def ::value-of-args (args string?))
-(defn valueOf [value-of--unknown-param-name] (wip ::valueOf))
-(s/fdef valueOf :args ::value-of-args :ret ::text-style)
+(defn value-of [value-of--unknown-param-name] (wip ::value-of))
+(s/fdef value-of :args ::value-of-args :ret ::text-style)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/TextStyle.java
 (defn values [] (wip ::values))

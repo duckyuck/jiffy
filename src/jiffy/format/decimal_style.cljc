@@ -5,16 +5,16 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DecimalStyle.java
 (defprotocol IDecimalStyle
-  (getZeroDigit [this])
-  (withZeroDigit [this zero-digit])
-  (getPositiveSign [this])
-  (withPositiveSign [this positive-sign])
-  (getNegativeSign [this])
-  (withNegativeSign [this negative-sign])
-  (getDecimalSeparator [this])
-  (withDecimalSeparator [this decimal-separator])
-  (convertToDigit [this ch])
-  (convertNumberToI18N [this numeric-text]))
+  (get-zero-digit [this])
+  (with-zero-digit [this zero-digit])
+  (get-positive-sign [this])
+  (with-positive-sign [this positive-sign])
+  (get-negative-sign [this])
+  (with-negative-sign [this negative-sign])
+  (get-decimal-separator [this])
+  (with-decimal-separator [this decimal-separator])
+  (convert-to-digit [this ch])
+  (convert-number-to-i18n [this numeric-text]))
 
 (defrecord DecimalStyle [])
 
@@ -77,24 +77,24 @@
 
 (extend-type DecimalStyle
   IDecimalStyle
-  (getZeroDigit [this] (-get-zero-digit this))
-  (withZeroDigit [this zero-digit] (-with-zero-digit this zero-digit))
-  (getPositiveSign [this] (-get-positive-sign this))
-  (withPositiveSign [this positive-sign] (-with-positive-sign this positive-sign))
-  (getNegativeSign [this] (-get-negative-sign this))
-  (withNegativeSign [this negative-sign] (-with-negative-sign this negative-sign))
-  (getDecimalSeparator [this] (-get-decimal-separator this))
-  (withDecimalSeparator [this decimal-separator] (-with-decimal-separator this decimal-separator))
-  (convertToDigit [this ch] (-convert-to-digit this ch))
-  (convertNumberToI18N [this numeric-text] (-convert-number-to-i18n this numeric-text)))
+  (get-zero-digit [this] (-get-zero-digit this))
+  (with-zero-digit [this zero-digit] (-with-zero-digit this zero-digit))
+  (get-positive-sign [this] (-get-positive-sign this))
+  (with-positive-sign [this positive-sign] (-with-positive-sign this positive-sign))
+  (get-negative-sign [this] (-get-negative-sign this))
+  (with-negative-sign [this negative-sign] (-with-negative-sign this negative-sign))
+  (get-decimal-separator [this] (-get-decimal-separator this))
+  (with-decimal-separator [this decimal-separator] (-with-decimal-separator this decimal-separator))
+  (convert-to-digit [this ch] (-convert-to-digit this ch))
+  (convert-number-to-i18n [this numeric-text] (-convert-number-to-i18n this numeric-text)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DecimalStyle.java#L122
-(defn getAvailableLocales [] (wip ::getAvailableLocales))
-(s/fdef getAvailableLocales :ret ::j/wip)
+(defn get-available-locales [] (wip ::get-available-locales))
+(s/fdef get-available-locales :ret ::j/wip)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DecimalStyle.java#L142
-(defn ofDefaultLocale [] (wip ::ofDefaultLocale))
-(s/fdef ofDefaultLocale :ret ::decimal-style)
+(defn of-default-locale [] (wip ::of-default-locale))
+(s/fdef of-default-locale :ret ::decimal-style)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DecimalStyle.java#L159
 (s/def ::of-args (args ::j/wip))

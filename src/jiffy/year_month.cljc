@@ -1,43 +1,43 @@
 (ns jiffy.year-month
-  (:refer-clojure :exclude [format])
+  (:refer-clojure :exclude [format ])
   (:require [clojure.spec.alpha :as s]
-            [jiffy.clock :as Clock]
+            [jiffy.clock :as clock]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.date-time-formatter :as DateTimeFormatter]
-            [jiffy.local-date :as LocalDate]
-            [jiffy.month :as Month]
+            [jiffy.format.date-time-formatter :as date-time-formatter]
+            [jiffy.local-date :as local-date]
+            [jiffy.month :as month]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as Temporal]
-            [jiffy.temporal.temporal-accessor :as TemporalAccessor]
-            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]
-            [jiffy.temporal.temporal-amount :as TemporalAmount]
-            [jiffy.temporal.temporal-field :as TemporalField]
-            [jiffy.temporal.temporal-query :as TemporalQuery]
-            [jiffy.temporal.temporal-unit :as TemporalUnit]
-            [jiffy.temporal.value-range :as ValueRange]
-            [jiffy.time-comparable :as TimeComparable]
-            [jiffy.zone-id :as ZoneId]))
+            [jiffy.temporal.temporal :as temporal]
+            [jiffy.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.temporal.temporal-amount :as temporal-amount]
+            [jiffy.temporal.temporal-field :as temporal-field]
+            [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.temporal.temporal-unit :as temporal-unit]
+            [jiffy.temporal.value-range :as value-range]
+            [jiffy.time-comparable :as time-comparable]
+            [jiffy.zone-id :as zone-id]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java
 (defprotocol IYearMonth
-  (getYear [this])
-  (getMonthValue [this])
-  (getMonth [this])
-  (isLeapYear [this])
-  (isValidDay [this day-of-month])
-  (lengthOfMonth [this])
-  (lengthOfYear [this])
-  (withYear [this year])
-  (withMonth [this month])
-  (plusYears [this years-to-add])
-  (plusMonths [this months-to-add])
-  (minusYears [this years-to-subtract])
-  (minusMonths [this months-to-subtract])
+  (get-year [this])
+  (get-month-value [this])
+  (get-month [this])
+  (is-leap-year [this])
+  (is-valid-day [this day-of-month])
+  (length-of-month [this])
+  (length-of-year [this])
+  (with-year [this year])
+  (with-month [this month])
+  (plus-years [this years-to-add])
+  (plus-months [this months-to-add])
+  (minus-years [this years-to-subtract])
+  (minus-months [this months-to-subtract])
   (format [this formatter])
-  (atDay [this day-of-month])
-  (atEndOfMonth [this])
-  (isAfter [this other])
-  (isBefore [this other]))
+  (at-day [this day-of-month])
+  (at-end-of-month [this])
+  (is-after [this other])
+  (is-before [this other]))
 
 (defrecord YearMonth [])
 
@@ -61,7 +61,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L542
 (s/def ::get-month-args (args))
 (defn -get-month [this] (wip ::-get-month))
-(s/fdef -get-month :args ::get-month-args :ret ::Month/month)
+(s/fdef -get-month :args ::get-month-args :ret ::month/month)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L565
 (s/def ::is-leap-year-args (args))
@@ -114,19 +114,19 @@
 (s/fdef -minus-months :args ::minus-months-args :ret ::year-month)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L1071
-(s/def ::format-args (args ::DateTimeFormatter/date-time-formatter))
+(s/def ::format-args (args ::date-time-formatter/date-time-formatter))
 (defn -format [this formatter] (wip ::-format))
 (s/fdef -format :args ::format-args :ret string?)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L1094
 (s/def ::at-day-args (args ::j/int))
 (defn -at-day [this day-of-month] (wip ::-at-day))
-(s/fdef -at-day :args ::at-day-args :ret ::LocalDate/local-date)
+(s/fdef -at-day :args ::at-day-args :ret ::local-date/local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L1112
 (s/def ::at-end-of-month-args (args))
 (defn -at-end-of-month [this] (wip ::-at-end-of-month))
-(s/fdef -at-end-of-month :args ::at-end-of-month-args :ret ::LocalDate/local-date)
+(s/fdef -at-end-of-month :args ::at-end-of-month-args :ret ::local-date/local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L1141
 (s/def ::is-after-args (args ::year-month))
@@ -140,24 +140,24 @@
 
 (extend-type YearMonth
   IYearMonth
-  (getYear [this] (-get-year this))
-  (getMonthValue [this] (-get-month-value this))
-  (getMonth [this] (-get-month this))
-  (isLeapYear [this] (-is-leap-year this))
-  (isValidDay [this day-of-month] (-is-valid-day this day-of-month))
-  (lengthOfMonth [this] (-length-of-month this))
-  (lengthOfYear [this] (-length-of-year this))
-  (withYear [this year] (-with-year this year))
-  (withMonth [this month] (-with-month this month))
-  (plusYears [this years-to-add] (-plus-years this years-to-add))
-  (plusMonths [this months-to-add] (-plus-months this months-to-add))
-  (minusYears [this years-to-subtract] (-minus-years this years-to-subtract))
-  (minusMonths [this months-to-subtract] (-minus-months this months-to-subtract))
+  (get-year [this] (-get-year this))
+  (get-month-value [this] (-get-month-value this))
+  (get-month [this] (-get-month this))
+  (is-leap-year [this] (-is-leap-year this))
+  (is-valid-day [this day-of-month] (-is-valid-day this day-of-month))
+  (length-of-month [this] (-length-of-month this))
+  (length-of-year [this] (-length-of-year this))
+  (with-year [this year] (-with-year this year))
+  (with-month [this month] (-with-month this month))
+  (plus-years [this years-to-add] (-plus-years this years-to-add))
+  (plus-months [this months-to-add] (-plus-months this months-to-add))
+  (minus-years [this years-to-subtract] (-minus-years this years-to-subtract))
+  (minus-months [this months-to-subtract] (-minus-months this months-to-subtract))
   (format [this formatter] (-format this formatter))
-  (atDay [this day-of-month] (-at-day this day-of-month))
-  (atEndOfMonth [this] (-at-end-of-month this))
-  (isAfter [this other] (-is-after this other))
-  (isBefore [this other] (-is-before this other)))
+  (at-day [this day-of-month] (-at-day this day-of-month))
+  (at-end-of-month [this] (-at-end-of-month this))
+  (is-after [this other] (-is-after this other))
+  (is-before [this other] (-is-before this other)))
 
 ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L1127
@@ -166,8 +166,8 @@
 (s/fdef -compare-to :args ::compare-to-args :ret ::j/int)
 
 (extend-type YearMonth
-  TimeComparable/ITimeComparable
-  (compareTo [this compare-to--overloaded-param] (-compare-to this compare-to--overloaded-param)))
+  time-comparable/ITimeComparable
+  (compare-to [this compare-to--overloaded-param] (-compare-to this compare-to--overloaded-param)))
 
 (s/def ::with-args (args ::j/wip))
 (defn -with
@@ -176,7 +176,7 @@
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L318
   ([this new-year new-month] (wip ::-with)))
-(s/fdef -with :args ::with-args :ret ::Temporal/temporal)
+(s/fdef -with :args ::with-args :ret ::temporal/temporal)
 
 (s/def ::plus-args (args ::j/wip))
 (defn -plus
@@ -197,12 +197,12 @@
 (s/fdef -minus :args ::minus-args :ret ::year-month)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L1045
-(s/def ::until-args (args ::Temporal/temporal ::TemporalUnit/temporal-unit))
+(s/def ::until-args (args ::temporal/temporal ::temporal-unit/temporal-unit))
 (defn -until [this end-exclusive unit] (wip ::-until))
 (s/fdef -until :args ::until-args :ret ::j/long)
 
 (extend-type YearMonth
-  Temporal/ITemporal
+  temporal/ITemporal
   (with
     ([this adjuster] (-with this adjuster))
     ([this new-year new-month] (-with this new-year new-month)))
@@ -216,46 +216,46 @@
 
 ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L354
-(s/def ::is-supported-args (args ::TemporalUnit/temporal-unit))
+(s/def ::is-supported-args (args ::temporal-unit/temporal-unit))
 (defn -is-supported [this is-supported--overloaded-param] (wip ::-is-supported))
 (s/fdef -is-supported :args ::is-supported-args :ret ::j/boolean)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L422
-(s/def ::range-args (args ::TemporalField/temporal-field))
+(s/def ::range-args (args ::temporal-field/temporal-field))
 (defn -range [this field] (wip ::-range))
-(s/fdef -range :args ::range-args :ret ::ValueRange/value-range)
+(s/fdef -range :args ::range-args :ret ::value-range/value-range)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L457
-(s/def ::get-args (args ::TemporalField/temporal-field))
+(s/def ::get-args (args ::temporal-field/temporal-field))
 (defn -get [this field] (wip ::-get))
 (s/fdef -get :args ::get-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L485
-(s/def ::get-long-args (args ::TemporalField/temporal-field))
+(s/def ::get-long-args (args ::temporal-field/temporal-field))
 (defn -get-long [this field] (wip ::-get-long))
 (s/fdef -get-long :args ::get-long-args :ret ::j/long)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L954
-(s/def ::query-args (args ::TemporalQuery/temporal-query))
+(s/def ::query-args (args ::temporal-query/temporal-query))
 (defn -query [this query] (wip ::-query))
 (s/fdef -query :args ::query-args :ret ::j/wip)
 
 (extend-type YearMonth
-  TemporalAccessor/ITemporalAccessor
-  (isSupported [this is-supported--overloaded-param] (-is-supported this is-supported--overloaded-param))
+  temporal-accessor/ITemporalAccessor
+  (is-supported [this is-supported--overloaded-param] (-is-supported this is-supported--overloaded-param))
   (range [this field] (-range this field))
   (get [this field] (-get this field))
-  (getLong [this field] (-get-long this field))
+  (get-long [this field] (-get-long this field))
   (query [this query] (-query this query)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L990
-(s/def ::adjust-into-args (args ::Temporal/temporal))
+(s/def ::adjust-into-args (args ::temporal/temporal))
 (defn -adjust-into [this temporal] (wip ::-adjust-into))
-(s/fdef -adjust-into :args ::adjust-into-args :ret ::Temporal/temporal)
+(s/fdef -adjust-into :args ::adjust-into-args :ret ::temporal/temporal)
 
 (extend-type YearMonth
-  TemporalAdjuster/ITemporalAdjuster
-  (adjustInto [this temporal] (-adjust-into this temporal)))
+  temporal-adjuster/ITemporalAdjuster
+  (adjust-into [this temporal] (-adjust-into this temporal)))
 
 (s/def ::now-args (args ::j/wip))
 (defn now
@@ -274,7 +274,7 @@
 (s/fdef of :args ::of-args :ret ::year-month)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L251
-(s/def ::from-args (args ::TemporalAccessor/temporal-accessor))
+(s/def ::from-args (args ::temporal-accessor/temporal-accessor))
 (defn from [temporal] (wip ::from))
 (s/fdef from :args ::from-args :ret ::year-month)
 

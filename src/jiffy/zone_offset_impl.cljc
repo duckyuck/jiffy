@@ -1,7 +1,7 @@
 (ns jiffy.zone-offset-impl
   (:require [clojure.spec.alpha :as s]
             #?(:clj [jiffy.conversion :as conversion])
-            [jiffy.local-time-impl :as LocalTime]
+            [jiffy.local-time-impl :as local-time]
             [jiffy.specs :as j]))
 
 (defrecord ZoneOffset [id total-seconds])
@@ -10,10 +10,10 @@
   (if (zero? total-seconds)
     "Z"
     (let [abs-total-seconds (Math/abs total-seconds)
-          abs-hours (long (/ abs-total-seconds LocalTime/SECONDS_PER_HOUR))
-          abs-minutes (long (mod (/ abs-total-seconds LocalTime/SECONDS_PER_MINUTE)
-                                 LocalTime/MINUTES_PER_HOUR))
-          abs-seconds (long (mod abs-total-seconds LocalTime/SECONDS_PER_MINUTE))]
+          abs-hours (long (/ abs-total-seconds local-time/SECONDS_PER_HOUR))
+          abs-minutes (long (mod (/ abs-total-seconds local-time/SECONDS_PER_MINUTE)
+                                 local-time/MINUTES_PER_HOUR))
+          abs-seconds (long (mod abs-total-seconds local-time/SECONDS_PER_MINUTE))]
       (str (if (neg? total-seconds) "-" "+")
            (when (< abs-hours 10) "0")
            abs-hours

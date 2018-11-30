@@ -1,57 +1,57 @@
 (ns jiffy.offset-time
   (:refer-clojure :exclude [format ])
   (:require [clojure.spec.alpha :as s]
-            [jiffy.clock :as Clock]
+            [jiffy.clock :as clock]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.date-time-formatter :as DateTimeFormatter]
-            [jiffy.instant-impl :as Instant]
-            [jiffy.local-date :as LocalDate]
-            [jiffy.local-time :as LocalTime]
+            [jiffy.format.date-time-formatter :as date-time-formatter]
+            [jiffy.instant-impl :as instant]
+            [jiffy.local-date :as local-date]
+            [jiffy.local-time :as local-time]
             [jiffy.offset-time-impl :refer [create #?@(:cljs [OffsetTime])] :as impl]
-            [jiffy.offset-date-time-impl :as OffsetDateTime]
+            [jiffy.offset-date-time-impl :as offset-date-time]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as Temporal]
-            [jiffy.temporal.temporal-accessor :as TemporalAccessor]
-            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]
-            [jiffy.temporal.temporal-amount :as TemporalAmount]
-            [jiffy.temporal.temporal-field :as TemporalField]
-            [jiffy.temporal.temporal-query :as TemporalQuery]
-            [jiffy.temporal.temporal-unit :as TemporalUnit]
-            [jiffy.temporal.value-range :as ValueRange]
-            [jiffy.time-comparable :as TimeComparable]
-            [jiffy.zone-id :as ZoneId]
-            [jiffy.zone-offset-impl :as ZoneOffset])
+            [jiffy.temporal.temporal :as temporal]
+            [jiffy.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.temporal.temporal-amount :as temporal-amount]
+            [jiffy.temporal.temporal-field :as temporal-field]
+            [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.temporal.temporal-unit :as temporal-unit]
+            [jiffy.temporal.value-range :as value-range]
+            [jiffy.time-comparable :as time-comparable]
+            [jiffy.zone-id :as zone-id]
+            [jiffy.zone-offset-impl :as zone-offset])
   #?(:clj (:import [jiffy.offset_time_impl OffsetTime])))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java
 (defprotocol IOffsetTime
-  (getOffset [this])
-  (withOffsetSameLocal [this offset])
-  (withOffsetSameInstant [this offset])
-  (toLocalTime [this])
-  (getHour [this])
-  (getMinute [this])
-  (getSecond [this])
-  (getNano [this])
-  (withHour [this hour])
-  (withMinute [this minute])
-  (withSecond [this second])
-  (withNano [this nano-of-second])
-  (truncatedTo [this unit])
-  (plusHours [this hours])
-  (plusMinutes [this minutes])
-  (plusSeconds [this seconds])
-  (plusNanos [this nanos])
-  (minusHours [this hours])
-  (minusMinutes [this minutes])
-  (minusSeconds [this seconds])
-  (minusNanos [this nanos])
+  (get-offset [this])
+  (with-offset-same-local [this offset])
+  (with-offset-same-instant [this offset])
+  (to-local-time [this])
+  (get-hour [this])
+  (get-minute [this])
+  (get-second [this])
+  (get-nano [this])
+  (with-hour [this hour])
+  (with-minute [this minute])
+  (with-second [this second])
+  (with-nano [this nano-of-second])
+  (truncated-to [this unit])
+  (plus-hours [this hours])
+  (plus-minutes [this minutes])
+  (plus-seconds [this seconds])
+  (plus-nanos [this nanos])
+  (minus-hours [this hours])
+  (minus-minutes [this minutes])
+  (minus-seconds [this seconds])
+  (minus-nanos [this nanos])
   (format [this formatter])
-  (atDate [this date])
-  (toEpochSecond [this date])
-  (isAfter [this other])
-  (isBefore [this other])
-  (isEqual [this other]))
+  (at-date [this date])
+  (to-epoch-second [this date])
+  (is-after [this other])
+  (is-before [this other])
+  (is-equal [this other]))
 
 (s/def ::offset-time ::impl/offset-time)
 
@@ -60,22 +60,22 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L547
 (s/def ::get-offset-args (args))
 (defn -get-offset [this] (wip ::-get-offset))
-(s/fdef -get-offset :args ::get-offset-args :ret ::ZoneOffset/zone-offset)
+(s/fdef -get-offset :args ::get-offset-args :ret ::zone-offset/zone-offset)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L568
-(s/def ::with-offset-same-local-args (args ::ZoneOffset/zone-offset))
+(s/def ::with-offset-same-local-args (args ::zone-offset/zone-offset))
 (defn -with-offset-same-local [this offset] (wip ::-with-offset-same-local))
 (s/fdef -with-offset-same-local :args ::with-offset-same-local-args :ret ::offset-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L590
-(s/def ::with-offset-same-instant-args (args ::ZoneOffset/zone-offset))
+(s/def ::with-offset-same-instant-args (args ::zone-offset/zone-offset))
 (defn -with-offset-same-instant [this offset] (wip ::-with-offset-same-instant))
 (s/fdef -with-offset-same-instant :args ::with-offset-same-instant-args :ret ::offset-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L608
 (s/def ::to-local-time-args (args))
 (defn -to-local-time [this] (wip ::-to-local-time))
-(s/fdef -to-local-time :args ::to-local-time-args :ret ::LocalTime/local-time)
+(s/fdef -to-local-time :args ::to-local-time-args :ret ::local-time/local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L618
 (s/def ::get-hour-args (args))
@@ -118,7 +118,7 @@
 (s/fdef -with-nano :args ::with-nano-args :ret ::offset-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L822
-(s/def ::truncated-to-args (args ::TemporalUnit/temporal-unit))
+(s/def ::truncated-to-args (args ::temporal-unit/temporal-unit))
 (defn -truncated-to [this unit] (wip ::-truncated-to))
 (s/fdef -truncated-to :args ::truncated-to-args :ret ::offset-time)
 
@@ -163,17 +163,17 @@
 (s/fdef -minus-nanos :args ::minus-nanos-args :ret ::offset-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1204
-(s/def ::format-args (args ::DateTimeFormatter/date-time-formatter))
+(s/def ::format-args (args ::date-time-formatter/date-time-formatter))
 (defn -format [this formatter] (wip ::-format))
 (s/fdef -format :args ::format-args :ret string?)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1219
-(s/def ::at-date-args (args ::LocalDate/local-date))
+(s/def ::at-date-args (args ::local-date/local-date))
 (defn -at-date [this date] (wip ::-at-date))
-(s/fdef -at-date :args ::at-date-args :ret ::OffsetDateTime/offset-date-time)
+(s/fdef -at-date :args ::at-date-args :ret ::offset-date-time/offset-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1249
-(s/def ::to-epoch-second-args (args ::LocalDate/local-date))
+(s/def ::to-epoch-second-args (args ::local-date/local-date))
 (defn -to-epoch-second [this date] (wip ::-to-epoch-second))
 (s/fdef -to-epoch-second :args ::to-epoch-second-args :ret ::j/long)
 
@@ -194,33 +194,33 @@
 
 (extend-type OffsetTime
   IOffsetTime
-  (getOffset [this] (-get-offset this))
-  (withOffsetSameLocal [this offset] (-with-offset-same-local this offset))
-  (withOffsetSameInstant [this offset] (-with-offset-same-instant this offset))
-  (toLocalTime [this] (-to-local-time this))
-  (getHour [this] (-get-hour this))
-  (getMinute [this] (-get-minute this))
-  (getSecond [this] (-get-second this))
-  (getNano [this] (-get-nano this))
-  (withHour [this hour] (-with-hour this hour))
-  (withMinute [this minute] (-with-minute this minute))
-  (withSecond [this second] (-with-second this second))
-  (withNano [this nano-of-second] (-with-nano this nano-of-second))
-  (truncatedTo [this unit] (-truncated-to this unit))
-  (plusHours [this hours] (-plus-hours this hours))
-  (plusMinutes [this minutes] (-plus-minutes this minutes))
-  (plusSeconds [this seconds] (-plus-seconds this seconds))
-  (plusNanos [this nanos] (-plus-nanos this nanos))
-  (minusHours [this hours] (-minus-hours this hours))
-  (minusMinutes [this minutes] (-minus-minutes this minutes))
-  (minusSeconds [this seconds] (-minus-seconds this seconds))
-  (minusNanos [this nanos] (-minus-nanos this nanos))
+  (get-offset [this] (-get-offset this))
+  (with-offset-same-local [this offset] (-with-offset-same-local this offset))
+  (with-offset-same-instant [this offset] (-with-offset-same-instant this offset))
+  (to-local-time [this] (-to-local-time this))
+  (get-hour [this] (-get-hour this))
+  (get-minute [this] (-get-minute this))
+  (get-second [this] (-get-second this))
+  (get-nano [this] (-get-nano this))
+  (with-hour [this hour] (-with-hour this hour))
+  (with-minute [this minute] (-with-minute this minute))
+  (with-second [this second] (-with-second this second))
+  (with-nano [this nano-of-second] (-with-nano this nano-of-second))
+  (truncated-to [this unit] (-truncated-to this unit))
+  (plus-hours [this hours] (-plus-hours this hours))
+  (plus-minutes [this minutes] (-plus-minutes this minutes))
+  (plus-seconds [this seconds] (-plus-seconds this seconds))
+  (plus-nanos [this nanos] (-plus-nanos this nanos))
+  (minus-hours [this hours] (-minus-hours this hours))
+  (minus-minutes [this minutes] (-minus-minutes this minutes))
+  (minus-seconds [this seconds] (-minus-seconds this seconds))
+  (minus-nanos [this nanos] (-minus-nanos this nanos))
   (format [this formatter] (-format this formatter))
-  (atDate [this date] (-at-date this date))
-  (toEpochSecond [this date] (-to-epoch-second this date))
-  (isAfter [this other] (-is-after this other))
-  (isBefore [this other] (-is-before this other))
-  (isEqual [this other] (-is-equal this other)))
+  (at-date [this date] (-at-date this date))
+  (to-epoch-second [this date] (-to-epoch-second this date))
+  (is-after [this other] (-is-after this other))
+  (is-before [this other] (-is-before this other))
+  (is-equal [this other] (-is-equal this other)))
 
 ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1285
@@ -229,8 +229,8 @@
 (s/fdef -compare-to :args ::compare-to-args :ret ::j/int)
 
 (extend-type OffsetTime
-  TimeComparable/ITimeComparable
-  (compareTo [this compare-to--overloaded-param] (-compare-to this compare-to--overloaded-param)))
+  time-comparable/ITimeComparable
+  (compare-to [this compare-to--overloaded-param] (-compare-to this compare-to--overloaded-param)))
 
 (s/def ::with-args (args ::j/wip))
 (defn -with
@@ -239,7 +239,7 @@
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L348
   ([this time offset] (wip ::-with)))
-(s/fdef -with :args ::with-args :ret ::Temporal/temporal)
+(s/fdef -with :args ::with-args :ret ::temporal/temporal)
 
 (s/def ::plus-args (args ::j/wip))
 (defn -plus
@@ -248,7 +248,7 @@
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L878
   ([this amount-to-add unit] (wip ::-plus)))
-(s/fdef -plus :args ::plus-args :ret ::Temporal/temporal)
+(s/fdef -plus :args ::plus-args :ret ::temporal/temporal)
 
 (s/def ::minus-args (args ::j/wip))
 (defn -minus
@@ -260,12 +260,12 @@
 (s/fdef -minus :args ::minus-args :ret ::offset-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1177
-(s/def ::until-args (args ::Temporal/temporal ::TemporalUnit/temporal-unit))
+(s/def ::until-args (args ::temporal/temporal ::temporal-unit/temporal-unit))
 (defn -until [this end-exclusive unit] (wip ::-until))
 (s/fdef -until :args ::until-args :ret ::j/long)
 
 (extend-type OffsetTime
-  Temporal/ITemporal
+  temporal/ITemporal
   (with
     ([this adjuster] (-with this adjuster))
     ([this time offset] (-with this time offset)))
@@ -279,46 +279,46 @@
 
 ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L395
-(s/def ::is-supported-args (args ::TemporalField/temporal-field))
+(s/def ::is-supported-args (args ::temporal-field/temporal-field))
 (defn -is-supported [this is-supported--overloaded-param] (wip ::-is-supported))
 (s/fdef -is-supported :args ::is-supported-args :ret ::j/boolean)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L463
-(s/def ::range-args (args ::TemporalField/temporal-field))
+(s/def ::range-args (args ::temporal-field/temporal-field))
 (defn -range [this field] (wip ::-range))
-(s/fdef -range :args ::range-args :ret ::ValueRange/value-range)
+(s/fdef -range :args ::range-args :ret ::value-range/value-range)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L501
-(s/def ::get-args (args ::TemporalField/temporal-field))
+(s/def ::get-args (args ::temporal-field/temporal-field))
 (defn -get [this field] (wip ::-get))
 (s/fdef -get :args ::get-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L529
-(s/def ::get-long-args (args ::TemporalField/temporal-field))
+(s/def ::get-long-args (args ::temporal-field/temporal-field))
 (defn -get-long [this field] (wip ::-get-long))
 (s/fdef -get-long :args ::get-long-args :ret ::j/long)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1078
-(s/def ::query-args (args ::TemporalQuery/temporal-query))
+(s/def ::query-args (args ::temporal-query/temporal-query))
 (defn -query [this query] (wip ::-query))
 (s/fdef -query :args ::query-args :ret ::j/wip)
 
 (extend-type OffsetTime
-  TemporalAccessor/ITemporalAccessor
-  (isSupported [this is-supported--overloaded-param] (-is-supported this is-supported--overloaded-param))
+  temporal-accessor/ITemporalAccessor
+  (is-supported [this is-supported--overloaded-param] (-is-supported this is-supported--overloaded-param))
   (range [this field] (-range this field))
   (get [this field] (-get this field))
-  (getLong [this field] (-get-long this field))
+  (get-long [this field] (-get-long this field))
   (query [this query] (-query this query)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1120
-(s/def ::adjust-into-args (args ::Temporal/temporal))
+(s/def ::adjust-into-args (args ::temporal/temporal))
 (defn -adjust-into [this temporal] (wip ::-adjust-into))
-(s/fdef -adjust-into :args ::adjust-into-args :ret ::Temporal/temporal)
+(s/fdef -adjust-into :args ::adjust-into-args :ret ::temporal/temporal)
 
 (extend-type OffsetTime
-  TemporalAdjuster/ITemporalAdjuster
-  (adjustInto [this temporal] (-adjust-into this temporal)))
+  temporal-adjuster/ITemporalAdjuster
+  (adjust-into [this temporal] (-adjust-into this temporal)))
 
 (s/def ::now-args (args ::j/wip))
 (defn now
@@ -335,12 +335,12 @@
 (s/fdef of :args ::of-args :ret ::offset-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L255
-(s/def ::of-instant-args (args ::Instant/instant ::ZoneId/zone-id))
-(defn ofInstant [instant zone] (wip ::ofInstant))
-(s/fdef ofInstant :args ::of-instant-args :ret ::offset-time)
+(s/def ::of-instant-args (args ::instant/instant ::zone-id/zone-id))
+(defn of-instant [instant zone] (wip ::of-instant))
+(s/fdef of-instant :args ::of-instant-args :ret ::offset-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L286
-(s/def ::from-args (args ::TemporalAccessor/temporal-accessor))
+(s/def ::from-args (args ::temporal-accessor/temporal-accessor))
 (defn from [temporal] (wip ::from))
 (s/fdef from :args ::from-args :ret ::offset-time)
 

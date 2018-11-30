@@ -2,8 +2,8 @@
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.specs :as j]
-            [jiffy.zone.zone-rules :as ZoneRules]
-            [jiffy.zone.zone-rules-provider :as ZoneRulesProvider]))
+            [jiffy.zone.zone-rules :as zone-rules]
+            [jiffy.zone.zone-rules-provider :as zone-rules-provider]))
 
 (defrecord TzdbZoneRulesProvider [])
 
@@ -22,7 +22,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/TzdbZoneRulesProvider.java#L126
 (s/def ::provide-rules-args (args string? ::j/boolean))
 (defn -provide-rules [this zone-id for-caching] (wip ::-provide-rules))
-(s/fdef -provide-rules :args ::provide-rules-args :ret ::ZoneRules/zone-rules)
+(s/fdef -provide-rules :args ::provide-rules-args :ret ::zone-rules/zone-rules)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/TzdbZoneRulesProvider.java#L146
 (s/def ::provide-versions-args (args string?))
@@ -30,8 +30,8 @@
 (s/fdef -provide-versions :args ::provide-versions-args :ret ::j/wip)
 
 (extend-type TzdbZoneRulesProvider
-  ZoneRulesProvider/IZoneRulesProvider
-  (provideZoneIds [this] (-provide-zone-ids this))
-  (provideRules [this zone-id for-caching] (-provide-rules this zone-id for-caching))
-  (provideVersions [this zone-id] (-provide-versions this zone-id)))
+  zone-rules-provider/IZoneRulesProvider
+  (provide-zone-ids [this] (-provide-zone-ids this))
+  (provide-rules [this zone-id for-caching] (-provide-rules this zone-id for-caching))
+  (provide-versions [this zone-id] (-provide-versions this zone-id)))
 

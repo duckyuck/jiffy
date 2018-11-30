@@ -2,21 +2,21 @@
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.specs :as j]
-            [jiffy.temporal.chrono-field :as ChronoField]
-            [jiffy.temporal.temporal-field :as TemporalField]
-            [jiffy.temporal.value-range :as ValueRange]
+            [jiffy.temporal.chrono-field :as chrono-field]
+            [jiffy.temporal.temporal-field :as temporal-field]
+            [jiffy.temporal.value-range :as value-range]
             [jiffy.exception :refer [UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
-            [jiffy.temporal.temporal-accessor :as TemporalAccessor]))
+            [jiffy.temporal.temporal-accessor :as temporal-accessor]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalAccessor.java#L169
 (s/def ::range-args ::j/wip)
 (defn -range [this field]
-  (if (satisfies? ChronoField/IChronoField field)
-    (if (TemporalAccessor/isSupported this field)
-      (TemporalField/range field)
+  (if (satisfies? chrono-field/IChronoField field)
+    (if (temporal-accessor/is-supported this field)
+      (temporal-field/range field)
       (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:field field})))
-    (TemporalField/rangeRefinedBy field this)))
-(s/fdef -range :args ::range-args :ret ::ValueRange/value-range)
+    (temporal-field/range-refined-by field this)))
+(s/fdef -range :args ::range-args :ret ::value-range/value-range)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalAccessor.java#L217
 (s/def ::get-args ::j/wip)

@@ -1,26 +1,26 @@
 (ns jiffy.chrono.minguo-date
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chrono-local-date :as ChronoLocalDate]
-            [jiffy.chrono.chrono-local-date-impl :as ChronoLocalDateImpl]
-            [jiffy.chrono.chrono-local-date-time :as ChronoLocalDateTime]
-            [jiffy.chrono.chrono-period :as ChronoPeriod]
-            [jiffy.chrono.chronology :as Chronology]
-            [jiffy.chrono.era :as Era]
-            [jiffy.chrono.minguo-chronology-impl :as MinguoChronology]
-            [jiffy.chrono.minguo-era :as MinguoEra]
-            [jiffy.clock :as Clock]
+            [jiffy.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.chrono.chrono-local-date-impl :as chrono-local-date-impl]
+            [jiffy.chrono.chrono-local-date-time :as chrono-local-date-time]
+            [jiffy.chrono.chrono-period :as chrono-period]
+            [jiffy.chrono.chronology :as chronology]
+            [jiffy.chrono.era :as era]
+            [jiffy.chrono.minguo-chronology-impl :as minguo-chronology]
+            [jiffy.chrono.minguo-era :as minguo-era]
+            [jiffy.clock :as clock]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.local-time :as LocalTime]
+            [jiffy.local-time :as local-time]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as Temporal]
-            [jiffy.temporal.temporal-accessor :as TemporalAccessor]
-            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]
-            [jiffy.temporal.temporal-amount :as TemporalAmount]
-            [jiffy.temporal.temporal-field :as TemporalField]
-            [jiffy.temporal.temporal-unit :as TemporalUnit]
-            [jiffy.temporal.value-range :as ValueRange]
-            [jiffy.time-comparable :as TimeComparable]
-            [jiffy.zone-id :as ZoneId]))
+            [jiffy.temporal.temporal :as temporal]
+            [jiffy.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.temporal.temporal-amount :as temporal-amount]
+            [jiffy.temporal.temporal-field :as temporal-field]
+            [jiffy.temporal.temporal-unit :as temporal-unit]
+            [jiffy.temporal.value-range :as value-range]
+            [jiffy.time-comparable :as time-comparable]
+            [jiffy.zone-id :as zone-id]))
 
 (defrecord MinguoDate [])
 
@@ -36,12 +36,12 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L227
 (s/def ::get-chronology-args (args))
 (defn -get-chronology [this] (wip ::-get-chronology))
-(s/fdef -get-chronology :args ::get-chronology-args :ret ::MinguoChronology/minguo-chronology)
+(s/fdef -get-chronology :args ::get-chronology-args :ret ::minguo-chronology/minguo-chronology)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L240
 (s/def ::get-era-args (args))
 (defn -get-era [this] (wip ::-get-era))
-(s/fdef -get-era :args ::get-era-args :ret ::Era/era)
+(s/fdef -get-era :args ::get-era-args :ret ::era/era)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L253
 (s/def ::length-of-month-args (args))
@@ -49,14 +49,14 @@
 (s/fdef -length-of-month :args ::length-of-month-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L427
-(s/def ::at-time-args (args ::LocalTime/local-time))
+(s/def ::at-time-args (args ::local-time/local-time))
 (defn -at-time [this local-time] (wip ::-at-time))
-(s/fdef -at-time :args ::at-time-args :ret ::ChronoLocalDateTime/chrono-local-date-time)
+(s/fdef -at-time :args ::at-time-args :ret ::chrono-local-date-time/chrono-local-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L432
-(s/def ::until-args (args ::ChronoLocalDate/chrono-local-date))
+(s/def ::until-args (args ::chrono-local-date/chrono-local-date))
 (defn -until [this end-date] (wip ::-until))
-(s/fdef -until :args ::until-args :ret ::ChronoPeriod/chrono-period)
+(s/fdef -until :args ::until-args :ret ::chrono-period/chrono-period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L438
 (s/def ::to-epoch-day-args (args))
@@ -64,13 +64,13 @@
 (s/fdef -to-epoch-day :args ::to-epoch-day-args :ret ::j/long)
 
 (extend-type MinguoDate
-  ChronoLocalDate/IChronoLocalDate
-  (getChronology [this] (-get-chronology this))
-  (getEra [this] (-get-era this))
-  (lengthOfMonth [this] (-length-of-month this))
-  (atTime [this local-time] (-at-time this local-time))
+  chrono-local-date/IChronoLocalDate
+  (get-chronology [this] (-get-chronology this))
+  (get-era [this] (-get-era this))
+  (length-of-month [this] (-length-of-month this))
+  (at-time [this local-time] (-at-time this local-time))
   (until [this end-date] (-until this end-date))
-  (toEpochDay [this] (-to-epoch-day this)))
+  (to-epoch-day [this] (-to-epoch-day this)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L372
 (s/def ::plus-years-args (args ::j/long))
@@ -80,7 +80,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L377
 (s/def ::plus-months-args (args ::j/long))
 (defn -plus-months [this months] (wip ::-plus-months))
-(s/fdef -plus-months :args ::plus-months-args :ret ::ChronoLocalDate/chrono-local-date)
+(s/fdef -plus-months :args ::plus-months-args :ret ::chrono-local-date/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L382
 (s/def ::plus-weeks-args (args ::j/long))
@@ -90,22 +90,22 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L387
 (s/def ::plus-days-args (args ::j/long))
 (defn -plus-days [this days] (wip ::-plus-days))
-(s/fdef -plus-days :args ::plus-days-args :ret ::ChronoLocalDate/chrono-local-date)
+(s/fdef -plus-days :args ::plus-days-args :ret ::chrono-local-date/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L402
 (s/def ::minus-years-args (args ::j/long))
 (defn -minus-years [this years-to-subtract] (wip ::-minus-years))
-(s/fdef -minus-years :args ::minus-years-args :ret ::ChronoLocalDate/chrono-local-date)
+(s/fdef -minus-years :args ::minus-years-args :ret ::chrono-local-date/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L407
 (s/def ::minus-months-args (args ::j/long))
 (defn -minus-months [this months-to-subtract] (wip ::-minus-months))
-(s/fdef -minus-months :args ::minus-months-args :ret ::ChronoLocalDate/chrono-local-date)
+(s/fdef -minus-months :args ::minus-months-args :ret ::chrono-local-date/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L412
 (s/def ::minus-weeks-args (args ::j/long))
 (defn -minus-weeks [this weeks-to-subtract] (wip ::-minus-weeks))
-(s/fdef -minus-weeks :args ::minus-weeks-args :ret ::ChronoLocalDate/chrono-local-date)
+(s/fdef -minus-weeks :args ::minus-weeks-args :ret ::chrono-local-date/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L417
 (s/def ::minus-days-args (args ::j/long))
@@ -113,19 +113,19 @@
 (s/fdef -minus-days :args ::minus-days-args :ret ::minguo-date)
 
 (extend-type MinguoDate
-  ChronoLocalDateImpl/IChronoLocalDateImpl
-  (plusYears [this years] (-plus-years this years))
-  (plusMonths [this months] (-plus-months this months))
-  (plusWeeks [this weeks-to-add] (-plus-weeks this weeks-to-add))
-  (plusDays [this days] (-plus-days this days))
-  (minusYears [this years-to-subtract] (-minus-years this years-to-subtract))
-  (minusMonths [this months-to-subtract] (-minus-months this months-to-subtract))
-  (minusWeeks [this weeks-to-subtract] (-minus-weeks this weeks-to-subtract))
-  (minusDays [this days-to-subtract] (-minus-days this days-to-subtract)))
+  chrono-local-date-impl/IChronoLocalDateImpl
+  (plus-years [this years] (-plus-years this years))
+  (plus-months [this months] (-plus-months this months))
+  (plus-weeks [this weeks-to-add] (-plus-weeks this weeks-to-add))
+  (plus-days [this days] (-plus-days this days))
+  (minus-years [this years-to-subtract] (-minus-years this years-to-subtract))
+  (minus-months [this months-to-subtract] (-minus-months this months-to-subtract))
+  (minus-weeks [this weeks-to-subtract] (-minus-weeks this weeks-to-subtract))
+  (minus-days [this days-to-subtract] (-minus-days this days-to-subtract)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java
-(s/def ::until-temporal-args (args ::Temporal/temporal ::TemporalUnit/temporal-unit))
-(defn -until-temporal [this until-temporal--unknown-param-name-1 until-temporal--unknown-param-name-2] (wip ::-until-temporal))
+(s/def ::until-temporal-args (args ::temporal/temporal ::temporal-unit/temporal-unit))
+(defn -until-temporal [this until--unknown-param-name-1 until--unknown-param-name-2] (wip ::-until-temporal))
 (s/fdef -until-temporal :args ::until-temporal-args :ret ::j/long)
 
 (s/def ::with-args (args ::j/wip))
@@ -144,7 +144,7 @@
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L392
   ([this amount-to-add unit] (wip ::-plus)))
-(s/fdef -plus :args ::plus-args :ret ::Temporal/temporal)
+(s/fdef -plus :args ::plus-args :ret ::temporal/temporal)
 
 (s/def ::minus-args (args ::j/wip))
 (defn -minus
@@ -153,10 +153,10 @@
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L397
   ([this amount-to-add unit] (wip ::-minus)))
-(s/fdef -minus :args ::minus-args :ret ::ChronoLocalDate/chrono-local-date)
+(s/fdef -minus :args ::minus-args :ret ::chrono-local-date/chrono-local-date)
 
 (extend-type MinguoDate
-  Temporal/ITemporal
+  temporal/ITemporal
   (until [this until--unknown-param-name-1 until--unknown-param-name-2] (-until-temporal this until--unknown-param-name-1 until--unknown-param-name-2))
   (with
     ([this adjuster] (-with this adjuster))
@@ -169,19 +169,19 @@
     ([this amount-to-add unit] (-minus this amount-to-add unit))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L259
-(s/def ::range-args (args ::TemporalField/temporal-field))
+(s/def ::range-args (args ::temporal-field/temporal-field))
 (defn -range [this field] (wip ::-range))
-(s/fdef -range :args ::range-args :ret ::ValueRange/value-range)
+(s/fdef -range :args ::range-args :ret ::value-range/value-range)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L282
-(s/def ::get-long-args (args ::TemporalField/temporal-field))
+(s/def ::get-long-args (args ::temporal-field/temporal-field))
 (defn -get-long [this field] (wip ::-get-long))
 (s/fdef -get-long :args ::get-long-args :ret ::j/long)
 
 (extend-type MinguoDate
-  TemporalAccessor/ITemporalAccessor
+  temporal-accessor/ITemporalAccessor
   (range [this field] (-range this field))
-  (getLong [this field] (-get-long this field)))
+  (get-long [this field] (-get-long this field)))
 
 ;; FIXME: no implementation found from inherited class interface java.time.temporal.TemporalAdjuster
 
@@ -201,6 +201,6 @@
 (s/fdef of :args ::of-args :ret ::minguo-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/MinguoDate.java#L202
-(s/def ::from-args (args ::TemporalAccessor/temporal-accessor))
+(s/def ::from-args (args ::temporal-accessor/temporal-accessor))
 (defn from [temporal] (wip ::from))
 (s/fdef from :args ::from-args :ret ::minguo-date)

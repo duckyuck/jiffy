@@ -1,10 +1,10 @@
 (ns jiffy.chrono.iso-era
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.era :as Era]
+            [jiffy.chrono.era :as era]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal-accessor :as TemporalAccessor]
-            [jiffy.temporal.temporal-adjuster :as TemporalAdjuster]))
+            [jiffy.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]))
 
 (defrecord IsoEra [])
 
@@ -21,8 +21,8 @@
 (s/fdef -get-value :args ::get-value-args :ret ::j/int)
 
 (extend-type IsoEra
-  Era/IEra
-  (getValue [this] (-get-value this)))
+  era/IEra
+  (get-value [this] (-get-value this)))
 
 ;; FIXME: no implementation found from inherited class interface java.time.temporal.TemporalAccessor
 
@@ -30,8 +30,8 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/IsoEra.java
 (s/def ::value-of-args (args string?))
-(defn valueOf [value-of--unknown-param-name] (wip ::valueOf))
-(s/fdef valueOf :args ::value-of-args :ret ::iso-era)
+(defn value-of [value-of--unknown-param-name] (wip ::value-of))
+(s/fdef value-of :args ::value-of-args :ret ::iso-era)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/IsoEra.java
 (defn values [] (wip ::values))

@@ -1,9 +1,9 @@
 (ns jiffy.chrono.chrono-local-date-time-defaults
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chronology :as Chronology]
+            [jiffy.chrono.chronology :as chronology]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.specs :as j]
-            [jiffy.instant-impl :as Instant]))
+            [jiffy.instant-impl :as instant]))
 
 (s/def ::chrono-local-date-time #(= % ::wip))
 
@@ -11,7 +11,7 @@
 (s/def ::get-chronology-args ::j/wip)
 (defn -get-chronology [this] (wip ::-get-chronology))
 ;; TODO: fix cyclic dependency
-;; (s/fdef -get-chronology :args ::get-chronology-args :ret ::Chronology/chronology)
+;; (s/fdef -get-chronology :args ::get-chronology-args :ret ::chronology/chronology)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L404
 (s/def ::format-args ::j/wip)
@@ -22,7 +22,7 @@
 (s/def ::to-instant-args ::j/wip)
 (defn -to-instant [this offset] (wip ::-to-instant))
 ;; TODO: fix cyclic dependency
-;; (s/fdef -to-instant :args ::to-instant-args :ret ::Instant/instant)
+;; (s/fdef -to-instant :args ::to-instant-args :ret ::instant/instant)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L470
 (s/def ::to-epoch-second-args ::j/wip)

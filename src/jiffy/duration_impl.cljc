@@ -20,7 +20,7 @@
 (s/def ::duration (j/constructor-spec Duration create ::create-args))
 (s/fdef create :args ::create-args :ret ::duration)
 
-(defn ofSeconds
+(defn of-seconds
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L223
   ([seconds]
    (create seconds 0))
@@ -31,7 +31,7 @@
            (int (math/floor-mod nano-adjustment NANOS_PER_SECOND)))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L280
-(defn ofNanos [nanos]
+(defn of-nanos [nanos]
   (let [nos (int (mod nanos NANOS_PER_SECOND))
         secs (cond-> (long (/ nanos NANOS_PER_SECOND)) (neg? nos) dec)
         nos (cond-> nos (neg? nos) (+ NANOS_PER_SECOND))]

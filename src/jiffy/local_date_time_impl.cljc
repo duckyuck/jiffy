@@ -1,13 +1,13 @@
 (ns jiffy.local-date-time-impl
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.local-date-impl :as LocalDate]
-            [jiffy.local-time-impl :as LocalTime]
+            [jiffy.local-date-impl :as local-date]
+            [jiffy.local-time-impl :as local-time]
             [jiffy.specs :as j]))
 
 (defrecord LocalDateTime [date time])
 
-(s/def ::create-args (s/tuple ::LocalDate/local-date ::LocalTime/local-time))
+(s/def ::create-args (s/tuple ::local-date/local-date ::local-time/local-time))
 (def create ->LocalDateTime)
 (s/def ::local-date-time (j/constructor-spec LocalDateTime create ::create-args))
 (s/fdef create :args ::create-args :ret ::local-date-time)

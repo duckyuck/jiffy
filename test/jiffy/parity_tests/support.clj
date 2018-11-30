@@ -49,12 +49,14 @@
                     (filter #(-> % .getName (= method-name)))
                     (filter #(-> % .getParameterCount (= (count (if static? args (rest args))))))
                     first)]
+    (when-not method
+      (throw (ex-info (str "Unable to find Java method " method-name " on object " obj) {})))
     (try
       (if static?
         (.invoke method obj (into-array Object args))
         (.invoke method obj (into-array Object (rest args))))
       (catch java.lang.reflect.InvocationTargetException ite
-          (throw (.getCause ite))))))
+        (throw (.getCause ite))))))
 
 (def ns->class-anomalies
   {"jiffy.time-comparable" "java.lang.Comparable"})
@@ -72,8 +74,7 @@
 (defn gen-test-name [f]
   (symbol (str (str/replace (namespace f) #"\." "-")
                "--"
-               (name f)
-               "-test")))
+               (name f))))
 
 (defn get-spec [f]
   (keyword (str (namespace f))
@@ -82,12 +83,17 @@
 (defn invoke-jiffy [f args]
   (apply f args))
 
+(defn jiffy-fn->java-fn [s]
+  (let [[first-char & rest] (camel-case s)]
+    (str (str/lower-case (str first-char))
+         (apply str rest))))
+
 (defmacro gen-protocol-method-prop [impl-ns proto-fn]
   `(prop/for-all
     [args# (s/gen ~(get-spec (symbol (str impl-ns) (name proto-fn))))]
     (same? (invoke-jiffy ~proto-fn args#)
            (invoke-java '~(symbol (jiffy-ns->java-class (namespace proto-fn))
-                                  (name proto-fn))
+                                  (jiffy-fn->java-fn (name proto-fn)))
                         (map jiffy->java args#)
                         {:static? false}))))
 
@@ -96,7 +102,7 @@
     [args# (s/gen ~(get-spec jiffy-fn))]
     (same? (invoke-jiffy ~jiffy-fn args#)
            (invoke-java '~(symbol (jiffy-ns->java-class (namespace jiffy-fn))
-                                  (name jiffy-fn))
+                                  (jiffy-fn->java-fn (name jiffy-fn)))
                         (map jiffy->java args#)
                         {:static? true}))))
 
@@ -128,7 +134,7 @@
                             :failed/java-args java-args#}
                    java-result# (try
                                   (invoke-java '~(symbol (jiffy-ns->java-class (namespace proto-fn))
-                                                         (name proto-fn))
+                                                         (jiffy-fn->java-fn (name proto-fn)))
                                                java-args#
                                                {:static? false})
                                   (catch Exception e#

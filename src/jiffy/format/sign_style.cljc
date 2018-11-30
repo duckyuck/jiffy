@@ -27,8 +27,8 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/SignStyle.java
 (s/def ::value-of-args (args string?))
-(defn valueOf [value-of--unknown-param-name] (wip ::valueOf))
-(s/fdef valueOf :args ::value-of-args :ret ::sign-style)
+(defn value-of [value-of--unknown-param-name] (wip ::value-of))
+(s/fdef value-of :args ::value-of-args :ret ::sign-style)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/SignStyle.java
 (defn values [] (wip ::values))

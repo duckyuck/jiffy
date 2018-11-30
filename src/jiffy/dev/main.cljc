@@ -28,7 +28,7 @@
             jiffy.clock
             jiffy.day-of-week
             jiffy.dev.wip
-            [jiffy.duration :as Duration]
+            [jiffy.duration :as duration]
             [jiffy.exception :refer [ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             jiffy.format.date-time-formatter
             jiffy.format.date-time-formatter-builder
@@ -41,7 +41,7 @@
             jiffy.format.resolver-style
             jiffy.format.sign-style
             jiffy.format.text-style
-            [jiffy.instant :as Instant]
+            [jiffy.instant :as instant]
             jiffy.local-date
             jiffy.local-date-time
             jiffy.local-time
@@ -51,12 +51,12 @@
             jiffy.offset-date-time
             jiffy.offset-time
             jiffy.period
-            [jiffy.temporal.chrono-field :as ChronoField]
+            [jiffy.temporal.chrono-field :as chrono-field]
             jiffy.temporal.chrono-unit
             jiffy.temporal.iso-fields
             jiffy.temporal.julian-fields
             jiffy.temporal.temporal
-            [jiffy.temporal.temporal-accessor :as TemporalAccessor]
+            [jiffy.temporal.temporal-accessor :as temporal-accessor]
             jiffy.temporal.temporal-adjuster
             jiffy.temporal.temporal-adjusters
             jiffy.temporal.temporal-amount
@@ -168,19 +168,19 @@
 
 (comment
 
-  (def i1 (Instant/now))
+  (def i1 (instant/now))
   i1
 
   (def i2 (-> i1
-              (Instant/plusSeconds 30)
-              (Instant/plusMillis 2500)))
+              (instant/plus-seconds 30)
+              (instant/plus-millis 2500)))
   i2
 
-  (def d1 (Duration/between i1 i2))
+  (def d1 (duration/between i1 i2))
 
   d1
 
-  (Duration/toMinutes d1)
+  (duration/to-minutes d1)
 
   )
 

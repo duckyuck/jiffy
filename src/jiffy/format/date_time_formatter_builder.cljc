@@ -1,47 +1,47 @@
 (ns jiffy.format.date-time-formatter-builder
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chrono-local-date :as ChronoLocalDate]
-            [jiffy.chrono.chronology :as Chronology]
+            [jiffy.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.chrono.chronology :as chronology]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.date-time-formatter :as DateTimeFormatter]
-            [jiffy.format.format-style :as FormatStyle]
-            [jiffy.format.resolver-style :as ResolverStyle]
-            [jiffy.format.sign-style :as SignStyle]
-            [jiffy.format.text-style :as TextStyle]
+            [jiffy.format.date-time-formatter :as date-time-formatter]
+            [jiffy.format.format-style :as format-style]
+            [jiffy.format.resolver-style :as resolver-style]
+            [jiffy.format.sign-style :as sign-style]
+            [jiffy.format.text-style :as text-style]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal-field :as TemporalField]))
+            [jiffy.temporal.temporal-field :as temporal-field]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatterBuilder.java
 (defprotocol IDateTimeFormatterBuilder
-  (parseCaseSensitive [this])
-  (parseCaseInsensitive [this])
-  (parseStrict [this])
-  (parseLenient [this])
-  (parseDefaulting [this field value])
-  (appendValue [this field] [this field width] [this field min-width max-width sign-style])
-  (appendValueReduced [this append-value-reduced--overloaded-param-1 append-value-reduced--overloaded-param-2 append-value-reduced--overloaded-param-3 append-value-reduced--overloaded-param-4])
-  (appendFraction [this field min-width max-width decimal-point])
-  (appendText [this field] [this append-text--overloaded-param-1 append-text--overloaded-param-2])
-  (appendInstant [this] [this fractional-digits])
-  (appendOffsetId [this])
-  (appendOffset [this pattern no-offset-text])
-  (appendLocalizedOffset [this style])
-  (appendZoneId [this])
-  (appendZoneRegionId [this])
-  (appendZoneOrOffsetId [this])
-  (appendZoneText [this text-style] [this text-style preferred-zones])
-  (appendGenericZoneText [this text-style] [this text-style preferred-zones])
-  (appendChronologyId [this])
-  (appendChronologyText [this text-style])
-  (appendLocalized [this date-style time-style])
-  (appendLiteral [this append-literal--overloaded-param])
+  (parse-case-sensitive [this])
+  (parse-case-insensitive [this])
+  (parse-strict [this])
+  (parse-lenient [this])
+  (parse-defaulting [this field value])
+  (append-value [this field] [this field width] [this field min-width max-width sign-style])
+  (append-value-reduced [this append-value-reduced--overloaded-param-1 append-value-reduced--overloaded-param-2 append-value-reduced--overloaded-param-3 append-value-reduced--overloaded-param-4])
+  (append-fraction [this field min-width max-width decimal-point])
+  (append-text [this field] [this append-text--overloaded-param-1 append-text--overloaded-param-2])
+  (append-instant [this] [this fractional-digits])
+  (append-offset-id [this])
+  (append-offset [this pattern no-offset-text])
+  (append-localized-offset [this style])
+  (append-zone-id [this])
+  (append-zone-region-id [this])
+  (append-zone-or-offset-id [this])
+  (append-zone-text [this text-style] [this text-style preferred-zones])
+  (append-generic-zone-text [this text-style] [this text-style preferred-zones])
+  (append-chronology-id [this])
+  (append-chronology-text [this text-style])
+  (append-localized [this date-style time-style])
+  (append-literal [this append-literal--overloaded-param])
   (append [this formatter])
-  (appendOptional [this formatter])
-  (optionalStart [this])
-  (optionalEnd [this])
-  (appendPattern [this pattern])
-  (padNext [this pad-width] [this pad-width pad-char])
-  (toFormatter [this] [this locale] [this resolver-style chrono]))
+  (append-optional [this formatter])
+  (optional-start [this])
+  (optional-end [this])
+  (append-pattern [this pattern])
+  (pad-next [this pad-width] [this pad-width pad-char])
+  (to-formatter [this] [this locale] [this resolver-style chrono]))
 
 (defrecord DateTimeFormatterBuilder [])
 
@@ -73,7 +73,7 @@
 (s/fdef -parse-lenient :args ::parse-lenient-args :ret ::date-time-formatter-builder)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatterBuilder.java#L373
-(s/def ::parse-defaulting-args (args ::TemporalField/temporal-field ::j/long))
+(s/def ::parse-defaulting-args (args ::temporal-field/temporal-field ::j/long))
 (defn -parse-defaulting [this field value] (wip ::-parse-defaulting))
 (s/fdef -parse-defaulting :args ::parse-defaulting-args :ret ::date-time-formatter-builder)
 
@@ -91,12 +91,12 @@
 
 ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatterBuilder.java#L554
-(s/def ::append-value-reduced-args (args ::TemporalField/temporal-field ::j/int ::j/int ::j/int))
+(s/def ::append-value-reduced-args (args ::temporal-field/temporal-field ::j/int ::j/int ::j/int))
 (defn -append-value-reduced [this append-value-reduced--overloaded-param-1 append-value-reduced--overloaded-param-2 append-value-reduced--overloaded-param-3 append-value-reduced--overloaded-param-4] (wip ::-append-value-reduced))
 (s/fdef -append-value-reduced :args ::append-value-reduced-args :ret ::date-time-formatter-builder)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatterBuilder.java#L701
-(s/def ::append-fraction-args (args ::TemporalField/temporal-field ::j/int ::j/int ::j/boolean))
+(s/def ::append-fraction-args (args ::temporal-field/temporal-field ::j/int ::j/int ::j/boolean))
 (defn -append-fraction [this field min-width max-width decimal-point] (wip ::-append-fraction))
 (s/fdef -append-fraction :args ::append-fraction-args :ret ::date-time-formatter-builder)
 
@@ -130,7 +130,7 @@
 (s/fdef -append-offset :args ::append-offset-args :ret ::date-time-formatter-builder)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatterBuilder.java#L1007
-(s/def ::append-localized-offset-args (args ::TextStyle/text-style))
+(s/def ::append-localized-offset-args (args ::text-style/text-style))
 (defn -append-localized-offset [this style] (wip ::-append-localized-offset))
 (s/fdef -append-localized-offset :args ::append-localized-offset-args :ret ::date-time-formatter-builder)
 
@@ -173,12 +173,12 @@
 (s/fdef -append-chronology-id :args ::append-chronology-id-args :ret ::date-time-formatter-builder)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatterBuilder.java#L1360
-(s/def ::append-chronology-text-args (args ::TextStyle/text-style))
+(s/def ::append-chronology-text-args (args ::text-style/text-style))
 (defn -append-chronology-text [this text-style] (wip ::-append-chronology-text))
 (s/fdef -append-chronology-text :args ::append-chronology-text-args :ret ::date-time-formatter-builder)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatterBuilder.java#L1398
-(s/def ::append-localized-args (args ::FormatStyle/format-style ::FormatStyle/format-style))
+(s/def ::append-localized-args (args ::format-style/format-style ::format-style/format-style))
 (defn -append-localized [this date-style time-style] (wip ::-append-localized))
 (s/fdef -append-localized :args ::append-localized-args :ret ::date-time-formatter-builder)
 
@@ -189,12 +189,12 @@
 (s/fdef -append-literal :args ::append-literal-args :ret ::date-time-formatter-builder)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatterBuilder.java#L1452
-(s/def ::append-args (args ::DateTimeFormatter/date-time-formatter))
+(s/def ::append-args (args ::date-time-formatter/date-time-formatter))
 (defn -append [this formatter] (wip ::-append))
 (s/fdef -append :args ::append-args :ret ::date-time-formatter-builder)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatterBuilder.java#L1471
-(s/def ::append-optional-args (args ::DateTimeFormatter/date-time-formatter))
+(s/def ::append-optional-args (args ::date-time-formatter/date-time-formatter))
 (defn -append-optional [this formatter] (wip ::-append-optional))
 (s/fdef -append-optional :args ::append-optional-args :ret ::date-time-formatter-builder)
 
@@ -232,60 +232,60 @@
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatterBuilder.java#L2215
   ([this resolver-style chrono] (wip ::-to-formatter)))
-(s/fdef -to-formatter :args ::to-formatter-args :ret ::DateTimeFormatter/date-time-formatter)
+(s/fdef -to-formatter :args ::to-formatter-args :ret ::date-time-formatter/date-time-formatter)
 
 (extend-type DateTimeFormatterBuilder
   IDateTimeFormatterBuilder
-  (parseCaseSensitive [this] (-parse-case-sensitive this))
-  (parseCaseInsensitive [this] (-parse-case-insensitive this))
-  (parseStrict [this] (-parse-strict this))
-  (parseLenient [this] (-parse-lenient this))
-  (parseDefaulting [this field value] (-parse-defaulting this field value))
-  (appendValue
+  (parse-case-sensitive [this] (-parse-case-sensitive this))
+  (parse-case-insensitive [this] (-parse-case-insensitive this))
+  (parse-strict [this] (-parse-strict this))
+  (parse-lenient [this] (-parse-lenient this))
+  (parse-defaulting [this field value] (-parse-defaulting this field value))
+  (append-value
     ([this field] (-append-value this field))
     ([this field width] (-append-value this field width))
     ([this field min-width max-width sign-style] (-append-value this field min-width max-width sign-style)))
-  (appendValueReduced [this append-value-reduced--overloaded-param-1 append-value-reduced--overloaded-param-2 append-value-reduced--overloaded-param-3 append-value-reduced--overloaded-param-4] (-append-value-reduced this append-value-reduced--overloaded-param-1 append-value-reduced--overloaded-param-2 append-value-reduced--overloaded-param-3 append-value-reduced--overloaded-param-4))
-  (appendFraction [this field min-width max-width decimal-point] (-append-fraction this field min-width max-width decimal-point))
-  (appendText
+  (append-value-reduced [this append-value-reduced--overloaded-param-1 append-value-reduced--overloaded-param-2 append-value-reduced--overloaded-param-3 append-value-reduced--overloaded-param-4] (-append-value-reduced this append-value-reduced--overloaded-param-1 append-value-reduced--overloaded-param-2 append-value-reduced--overloaded-param-3 append-value-reduced--overloaded-param-4))
+  (append-fraction [this field min-width max-width decimal-point] (-append-fraction this field min-width max-width decimal-point))
+  (append-text
     ([this field] (-append-text this field))
     ([this append-text--overloaded-param-1 append-text--overloaded-param-2] (-append-text this append-text--overloaded-param-1 append-text--overloaded-param-2)))
-  (appendInstant
+  (append-instant
     ([this] (-append-instant this))
     ([this fractional-digits] (-append-instant this fractional-digits)))
-  (appendOffsetId [this] (-append-offset-id this))
-  (appendOffset [this pattern no-offset-text] (-append-offset this pattern no-offset-text))
-  (appendLocalizedOffset [this style] (-append-localized-offset this style))
-  (appendZoneId [this] (-append-zone-id this))
-  (appendZoneRegionId [this] (-append-zone-region-id this))
-  (appendZoneOrOffsetId [this] (-append-zone-or-offset-id this))
-  (appendZoneText
+  (append-offset-id [this] (-append-offset-id this))
+  (append-offset [this pattern no-offset-text] (-append-offset this pattern no-offset-text))
+  (append-localized-offset [this style] (-append-localized-offset this style))
+  (append-zone-id [this] (-append-zone-id this))
+  (append-zone-region-id [this] (-append-zone-region-id this))
+  (append-zone-or-offset-id [this] (-append-zone-or-offset-id this))
+  (append-zone-text
     ([this text-style] (-append-zone-text this text-style))
     ([this text-style preferred-zones] (-append-zone-text this text-style preferred-zones)))
-  (appendGenericZoneText
+  (append-generic-zone-text
     ([this text-style] (-append-generic-zone-text this text-style))
     ([this text-style preferred-zones] (-append-generic-zone-text this text-style preferred-zones)))
-  (appendChronologyId [this] (-append-chronology-id this))
-  (appendChronologyText [this text-style] (-append-chronology-text this text-style))
-  (appendLocalized [this date-style time-style] (-append-localized this date-style time-style))
-  (appendLiteral [this append-literal--overloaded-param] (-append-literal this append-literal--overloaded-param))
+  (append-chronology-id [this] (-append-chronology-id this))
+  (append-chronology-text [this text-style] (-append-chronology-text this text-style))
+  (append-localized [this date-style time-style] (-append-localized this date-style time-style))
+  (append-literal [this append-literal--overloaded-param] (-append-literal this append-literal--overloaded-param))
   (append [this formatter] (-append this formatter))
-  (appendOptional [this formatter] (-append-optional this formatter))
-  (optionalStart [this] (-optional-start this))
-  (optionalEnd [this] (-optional-end this))
-  (appendPattern [this pattern] (-append-pattern this pattern))
-  (padNext
+  (append-optional [this formatter] (-append-optional this formatter))
+  (optional-start [this] (-optional-start this))
+  (optional-end [this] (-optional-end this))
+  (append-pattern [this pattern] (-append-pattern this pattern))
+  (pad-next
     ([this pad-width] (-pad-next this pad-width))
     ([this pad-width pad-char] (-pad-next this pad-width pad-char)))
-  (toFormatter
+  (to-formatter
     ([this] (-to-formatter this))
     ([this locale] (-to-formatter this locale))
     ([this resolver-style chrono] (-to-formatter this resolver-style chrono))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatterBuilder.java#L214
-(s/def ::get-localized-date-time-pattern-args (args ::FormatStyle/format-style ::FormatStyle/format-style ::Chronology/chronology ::j/wip))
-(defn getLocalizedDateTimePattern [date-style time-style chrono locale] (wip ::getLocalizedDateTimePattern))
-(s/fdef getLocalizedDateTimePattern :args ::get-localized-date-time-pattern-args :ret string?)
+(s/def ::get-localized-date-time-pattern-args (args ::format-style/format-style ::format-style/format-style ::chronology/chronology ::j/wip))
+(defn get-localized-date-time-pattern [date-style time-style chrono locale] (wip ::get-localized-date-time-pattern))
+(s/fdef get-localized-date-time-pattern :args ::get-localized-date-time-pattern-args :ret string?)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatterBuilder.java#L4942
 (def LENGTH_SORT ::LENGTH_SORT--not-implemented)

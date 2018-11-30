@@ -1,15 +1,15 @@
 (ns jiffy.format.date-time-text-provider
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chronology :as Chronology]
+            [jiffy.chrono.chronology :as chronology]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.text-style :as TextStyle]
+            [jiffy.format.text-style :as text-style]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal-field :as TemporalField]))
+            [jiffy.temporal.temporal-field :as temporal-field]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeTextProvider.java
 (defprotocol IDateTimeTextProvider
-  (getText [this field value style locale] [this chrono field value style locale])
-  (getTextIterator [this field style locale] [this chrono field style locale]))
+  (get-text [this field value style locale] [this chrono field value style locale])
+  (get-text-iterator [this field style locale] [this chrono field style locale]))
 
 (defrecord DateTimeTextProvider [])
 
@@ -40,18 +40,18 @@
 
 (extend-type DateTimeTextProvider
   IDateTimeTextProvider
-  (getText
+  (get-text
     ([this field value style locale] (-get-text this field value style locale))
     ([this chrono field value style locale] (-get-text this chrono field value style locale)))
-  (getTextIterator
+  (get-text-iterator
     ([this field style locale] (-get-text-iterator this field style locale))
     ([this chrono field style locale] (-get-text-iterator this chrono field style locale))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeTextProvider.java#L125
-(defn getInstance [] (wip ::getInstance))
-(s/fdef getInstance :ret ::date-time-text-provider)
+(defn get-instance [] (wip ::get-instance))
+(s/fdef get-instance :ret ::date-time-text-provider)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeTextProvider.java#L511
 (s/def ::get-localized-resource-args (args string? ::j/wip))
-(defn getLocalizedResource [key locale] (wip ::getLocalizedResource))
-(s/fdef getLocalizedResource :args ::get-localized-resource-args :ret ::j/wip)
+(defn get-localized-resource [key locale] (wip ::get-localized-resource))
+(s/fdef get-localized-resource :args ::get-localized-resource-args :ret ::j/wip)
