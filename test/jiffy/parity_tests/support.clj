@@ -88,23 +88,14 @@
     (str (str/lower-case (str first-char))
          (apply str rest))))
 
-(defmacro gen-protocol-method-prop [impl-ns proto-fn]
+(defmacro gen-prop [jiffy-fn spec & [{:keys [static?]}]]
   `(prop/for-all
-    [args# (s/gen ~(get-spec (symbol (str impl-ns) (name proto-fn))))]
-    (same? (invoke-jiffy ~proto-fn args#)
-           (invoke-java '~(symbol (jiffy-ns->java-class (namespace proto-fn))
-                                  (jiffy-fn->java-fn (name proto-fn)))
-                        (map jiffy->java args#)
-                        {:static? false}))))
-
-(defmacro gen-static-method-prop [jiffy-fn]
-  `(prop/for-all
-    [args# (s/gen ~(get-spec jiffy-fn))]
+    [args# (s/gen ~spec)]
     (same? (invoke-jiffy ~jiffy-fn args#)
            (invoke-java '~(symbol (jiffy-ns->java-class (namespace jiffy-fn))
                                   (jiffy-fn->java-fn (name jiffy-fn)))
                         (map jiffy->java args#)
-                        {:static? true}))))
+                        {:static? ~static?}))))
 
 (def default-num-tests 1000)
 
@@ -113,33 +104,50 @@
      (require '~(symbol (namespace proto-fn)))
      (require '~(symbol impl-ns))
      (defspec ~(gen-test-name proto-fn) ~(or num-tests default-num-tests)
-       (gen-protocol-method-prop ~impl-ns ~proto-fn))))
+       (gen-prop ~proto-fn
+                 (get-spec '~(symbol (str impl-ns) (name proto-fn)))
+                 {:static? false}))))
 
 (defmacro test-static-fn [jiffy-fn & [num-tests]]
   `(do
      (require '~(symbol (namespace jiffy-fn)))
      (defspec ~(gen-test-name jiffy-fn) ~(or num-tests default-num-tests)
-       (gen-static-method-prop ~jiffy-fn))))
+       (gen-prop ~jiffy-fn
+                 (get-spec '~jiffy-fn)
+                 {:static? true}))))
 
-(defmacro test-proto-fn! [impl-ns proto-fn & [num-tests]]
+(defmacro test-fn! [jiffy-fn args-samples & [{:keys [static?]}]]
   `(do
-     (require '~(symbol (namespace proto-fn)))
-     (require '~(symbol impl-ns))
      (let [results#
-           (for [args# (gen/sample (s/gen ~(get-spec (symbol (str impl-ns) (name proto-fn)))) ~(or num-tests 1000))]
-             (let [jiffy-result# (invoke-jiffy ~proto-fn args#)
+           (for [args# ~args-samples]
+             (let [jiffy-result# (invoke-jiffy ~jiffy-fn args#)
                    java-args# (mapv jiffy->java args#)
                    result# {:failed/jiffy-args args#
                             :failed/jiffy-result jiffy-result#
                             :failed/java-args java-args#}
                    java-result# (try
-                                  (invoke-java '~(symbol (jiffy-ns->java-class (namespace proto-fn))
-                                                         (jiffy-fn->java-fn (name proto-fn)))
+                                  (invoke-java '~(symbol (jiffy-ns->java-class (namespace jiffy-fn))
+                                                         (jiffy-fn->java-fn (name jiffy-fn)))
                                                java-args#
-                                               {:static? false})
+                                               {:static? ~static?})
                                   (catch Exception e#
                                     (throw (ex-info "Exception when invoking java.time"
                                                     result# e#))))]
                (when-not (same? jiffy-result# java-result#)
                  (assoc result# :failed/java-result java-result#))))]
        (or (first (remove nil? results#)) [(count results#) :success]))))
+
+(defmacro test-proto-fn! [impl-ns proto-fn & [num-tests]]
+  `(do
+     (require '~(symbol (namespace proto-fn)))
+     (require '~(symbol impl-ns))
+     (test-fn! ~proto-fn
+               (gen/sample (s/gen ~(get-spec (symbol (str impl-ns) (name proto-fn)))) ~(or num-tests 1000))
+               {:static? false})))
+
+(defmacro test-static-fn! [jiffy-fn & [num-tests]]
+  `(do
+     (require '~(symbol (namespace jiffy-fn)))
+     (test-fn! ~jiffy-fn
+               (gen/sample (s/gen ~(get-spec jiffy-fn)) ~(or num-tests 1000))
+               {:static? true})))
