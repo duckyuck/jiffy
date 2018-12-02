@@ -486,10 +486,10 @@
   ([this adjuster]
    (cond
      (instance? LocalDate adjuster)
-     (resolve-local this (local-date-time/of (chrono-local-date-time/to-local-time (:date-time this)) adjuster))
+     (resolve-local this (local-date-time/of adjuster (chrono-local-date-time/to-local-time (:time this))))
 
      (instance? LocalTime adjuster)
-     (resolve-local this (local-date-time/of (chrono-local-date-time/to-local-date (:date-time this))) adjuster)
+     (resolve-local this (local-date-time/of (chrono-local-date-time/to-local-date (:date this)) adjuster))
 
      (instance? LocalDateTime adjuster)
      (resolve-local this adjuster)
@@ -517,7 +517,7 @@
                                 (chrono-field/check-valid-int-value new-value)
                                 zone-offset/of-total-seconds))
 
-       :default (resolve-local (temporal/with (:date-time this) field new-value))))))
+       (resolve-local this (temporal/with (:date-time this) field new-value))))))
 (s/fdef -with :args ::with-args :ret ::temporal/temporal)
 
 (s/def ::plus-args (args ::j/wip))
@@ -734,7 +734,9 @@
    (asserts/require-non-nil zone "zone")
    (if (-> zone zone-id/get-rules (zone-rules/is-valid-offset local-date-time offset))
      (ZonedDateTime. local-date-time offset zone)
-     (-create (chrono-local-date-time/to-epoch-second local-date-time offset) zone))))
+     (-create (chrono-local-date-time/to-epoch-second local-date-time offset)
+              (local-date-time/get-nano local-date-time)
+              zone))))
 (s/fdef of-instant :args ::of-instant-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L475

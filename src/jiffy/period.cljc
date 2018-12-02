@@ -376,8 +376,8 @@
            [y m w d] (map #(some-> % math/parse-int (* factor)) nums)]
        (create y m (math/add-exact (or d 0) (math/multiply-exact (or w 0) 7))))
      (catch :default e
-       (ex DateTimeParseException "Text cannot be parsed to a Period" text 0 e)))
-    (throw (ex DateTimeParseException "Text cannot be parsed to a Period" text 0))))
+       (ex DateTimeParseException "Text cannot be parsed to a Period" {:parsed-data text :error-index 0} e)))
+    (throw (ex DateTimeParseException "Text cannot be parsed to a Period" {:parsed-data text :error-index 0}))))
 (s/fdef parse :args ::parse-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L386
