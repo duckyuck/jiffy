@@ -8,6 +8,7 @@
             [jiffy.conversion :refer [jiffy->java] :as conversion]
             [jiffy.exception :refer [try*]]
             [jiffy.math :as math]
+            [jiffy.parity-tests.test-specs]
             [jiffy.specs :as j]))
 
 (defn partition-between

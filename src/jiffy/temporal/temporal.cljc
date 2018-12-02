@@ -9,4 +9,4 @@
   (minus [this amount] [this amount-to-subtract unit])
   (until [this end-exclusive unit]))
 
-(s/def ::temporal ::j/wip)
+(s/def ::temporal #(satisfies? ITemporal %))
