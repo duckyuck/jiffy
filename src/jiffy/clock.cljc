@@ -14,41 +14,7 @@
   (millis [this])
   (instant [this]))
 
-(defrecord Clock [])
-
-(s/def ::create-clock-args ::j/wip)
-(defn create-clock [])
-(s/def ::clock (j/constructor-spec Clock create-clock ::create-clock-args))
-(s/fdef create-clock :args ::create-clock-args :ret ::clock)
-
-(defmacro clock-args [& x] `(s/tuple ::clock ~@x))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L399
-(s/def ::get-zone-clock-args (clock-args))
-(defn -get-zone-clock [this] (wip ::-get-zone-clock))
-(s/fdef -get-zone-clock :args ::get-zone-clock-args :ret ::zone-id/zone-id)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L411
-(s/def ::with-zone-clock-args (clock-args ::zone-id/zone-id))
-(defn -with-zone-clock [this zone] (wip ::-with-zone-clock))
-(s/fdef -with-zone-clock :args ::with-zone-clock-args :ret ::clock)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L431
-(s/def ::millis-clock-args (clock-args))
-(defn -millis-clock [this] (wip ::-millis-clock))
-(s/fdef -millis-clock :args ::millis-clock-args :ret ::j/long)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L444
-(s/def ::instant-clock-args (clock-args))
-(defn -instant-clock [this] (wip ::-instant-clock))
-(s/fdef -instant-clock :args ::instant-clock-args :ret ::instant/instant)
-
-(extend-type Clock
-  IClock
-  (get-zone [this] (-get-zone-clock this))
-  (with-zone [this zone] (-with-zone-clock this zone))
-  (millis [this] (-millis-clock this))
-  (instant [this] (-instant-clock this)))
+(s/def ::clock #(satisfies? IClock %))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L183
 (defn system-default-zone [] (wip ::system-default-zone))
@@ -96,8 +62,8 @@
 
 (defrecord SystemClock [zone])
 
-(s/def ::create-system-clock-args ::j/wip)
-(defn create-system-clock [])
+(s/def ::create-system-clock-args empty?)
+(defn create-system-clock [] (->SystemClock nil))
 (s/def ::system-clock (j/constructor-spec SystemClock create-system-clock ::create-system-clock-args))
 (s/fdef create-system-clock :args ::create-system-clock-args :ret ::clock)
 
