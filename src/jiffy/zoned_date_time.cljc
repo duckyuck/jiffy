@@ -17,7 +17,7 @@
             [jiffy.local-date-time-impl :refer [#?@(:cljs [LocalDateTime])]]
             [jiffy.local-time :as local-time :refer [#?@(:cljs [LocalTime])]]
             [jiffy.month :as month]
-            [jiffy.number :as number]
+            [jiffy.math :as math]
             [jiffy.offset-date-time :as offset-date-time]
             [jiffy.offset-date-time-impl :refer [#?@(:cljs [OffsetDateTime])]]
             [jiffy.period :refer [#?@(:cljs [Period])]]
@@ -548,9 +548,9 @@
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1853
   ([this amount-to-subtract unit]
-   (if (= number/MIN_VALUE amount-to-subtract)
+   (if (= math/long-min-value amount-to-subtract)
      (-> this
-         (-plus number/MAX_VALUE unit)
+         (-plus math/long-max-value unit)
          (-plus 1 unit))
      (-plus this (- amount-to-subtract) unit))))
 (s/fdef -minus :args ::minus-args :ret ::temporal/temporal)
