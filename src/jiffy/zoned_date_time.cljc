@@ -1,5 +1,6 @@
 (ns jiffy.zoned-date-time
   (:require [clojure.spec.alpha :as s]
+            [jiffy.asserts :as asserts]
             [jiffy.chrono.chrono-local-date :as chrono-local-date]
             [jiffy.chrono.chrono-local-date-time :as chrono-local-date-time]
             [jiffy.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
@@ -411,7 +412,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L967
 (s/def ::with-zone-same-local-args (args ::zone-id/zone-id))
 (defn -with-zone-same-local [this zone]
-  ;; TODO: Objects.requireNonNull(zone, "zone");
+  (asserts/require-non-nil zone "zone")
   (if (= (:zone this) zone)
     this
     (of-local (:date-time this) zone (:offset this))))
@@ -426,7 +427,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L990
 (s/def ::with-zone-same-instant-args (args ::zone-id/zone-id))
 (defn -with-zone-same-instant [this zone]
-  ;;Objects.requireNonNull(zone, "zone");
+  (asserts/require-non-nil zone "zone")
   (if (= (:zone this) zone)
     this
     (-create (chrono-local-date-time/to-epoch-second (:date-time this) (:offset this)) (local-date-time/get-nano (:date-time this)) zone)))
@@ -453,7 +454,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L2152
 (s/def ::format-args (args ::date-time-formatter/date-time-formatter))
 (defn -format [this formatter]
-  ;; TODO: Objects.requireNonNull(formatter, "formatter");
+  (asserts/require-non-nil formatter "formatter")
   (date-time-formatter/format formatter this))
 (s/fdef -format :args ::format-args :ret string?)
 
@@ -523,7 +524,7 @@
    (if (instance? (Period amount-to-add))
      (resolve-local this (local-date-time/plus (:date-time this) amount-to-add))
      (do
-       ;;Objects.requireNonNull(amountToAdd, "amountToAdd");
+       (asserts/require-non-nil amount-to-add "amount-to-add")
        (temporal-amount/add-to amount-to-add this))))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1600
@@ -542,7 +543,7 @@
    (if (instance? (Period amount-subtract))
      (resolve-local this (local-date-time/minus (:date-time this) amount-subtract))
      (do
-       ;;Objects.requireNonNull(amountToAdd, "amountToSubtract");
+       (asserts/require-non-nil amount-to-subtract "amount-to-subtract")
        (temporal-amount/add-to amount-subtract this))))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1853
@@ -668,7 +669,7 @@
 
      (satisfies? IClock arg)
      (do
-       ;; TODO: Objects.requireNonNull(clock, "clock");
+       (asserts/require-non-nil arg "clock")
        (of-instant (clock/instant arg) (clock/get-zone arg))))))
 (s/fdef now :args ::now-args :ret ::zoned-date-time)
 
@@ -691,9 +692,8 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L366
 (s/def ::of-local-args (args ::local-date-time/local-date-time ::zone-id/zone-id ::zone-offset/zone-offset))
 (defn of-local [local-date-time zone preferred-offset]
-  ;; TODO: Objects.requireNonNull(localDateTime, "localDateTime");
-  ;; TODO: Objects.requireNonNull(zone, "zone");
-
+  (asserts/require-non-nil local-date-time "LocalDateTime")
+  (asserts/require-non-nil zone "zone")
   (if (instance? ZoneOffset zone)
     (impl/create local-date-time zone zone)
     (let [rules (zone-id/get-rules zone)
@@ -713,7 +713,7 @@
                           ((set valid-offsets) preferred-offset))
                    (impl/create local-date-time preferred-offset zone)
                    (do
-                     ;; TODO: Objects.requireNonNull(validOffsets.get(0), "offset")
+                     (asserts/require-non-nil (first valid-offsets) "offset")
                      (impl/create local-date-time (first valid-offsets) zone)))))))
 (s/fdef of-local :args ::of-local-args :ret ::zoned-date-time)
 
@@ -721,15 +721,15 @@
 (defn of-instant
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L406
   ([instant zone]
-   ;; TODO: Objects.requireNonNull(instant, "instant");
-   ;; TODO: Objects.requireNonNull(zone, "zone");
+   (asserts/require-non-nil instant "instant")
+   (asserts/require-non-nil zone "zone")
    (-create (instant/get-epoch-second instant) (instant/get-nano instant) zone))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L432
   ([local-date-time offset zone]
-   ;; TODO: Objects.requireNonNull(localDateTime, "localDateTime");
-   ;; TODO: Objects.requireNonNull(offset, "offset");
-   ;; TODO: Objects.requireNonNull(zone, "zone");
+   (asserts/require-non-nil local-date-time "LocalDateTime")
+   (asserts/require-non-nil offset "offset")
+   (asserts/require-non-nil zone "zone")
    (if (-> zone zone-id/get-rules (zone-offset-transition/is-valid-offset local-date-time offset))
      (ZonedDateTime. local-date-time offset zone)
      (-create (local-date-time/to-epoch-second local-date-time offset zone)))))
@@ -738,10 +738,9 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L475
 (s/def ::of-strict-args (args ::local-date-time/local-date-time ::zone-offset/zone-offset ::zone-id/zone-id))
 (defn of-strict [local-date-time offset zone]
-  ;; TODO: Objects.requireNonNull(localDateTime, "localDateTime");
-  ;; TODO: Objects.requireNonNull(offset, "offset");
-  ;; TODO: Objects.requireNonNull(zone, "zone");
-
+  (asserts/require-non-nil local-date-time "LocalDateTime")
+  (asserts/require-non-nil offset "offset")
+  (asserts/require-non-nil zone "zone")
   (let [rules (-> zone zone-id/get-rules)]
     (if (-> rules (zone-offset-transition/is-valid-offset local-date-time offset) not)
       (let [trans (-> rules (zone-rules/get-transition local-date-time))]
@@ -783,7 +782,7 @@
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L596
   ([text formatter]
-   ;; TODO: Objects.requireNonNull(formatter, "formatter");
+   (asserts/require-non-nil formatter "formatter")
    (date-time-formatter/parse text zone-date-time/from)))
 (s/fdef parse :args ::parse-args :ret ::zoned-date-time)
 
