@@ -3,11 +3,14 @@
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]))
 
-(s/def ::int int?)
+(s/def ::int (s/with-gen int?
+               (fn [] (gen/fmap int (s/gen int?)))))
 (s/def ::long int?)
 (s/def ::boolean boolean?)
 (s/def ::char char?)
 (s/def ::void nil?)
+(s/def ::any any?)
+(s/def ::char-sequence string?)
 
 (defn int-in [from-inclusive to-exclusive]
   (s/with-gen int?
