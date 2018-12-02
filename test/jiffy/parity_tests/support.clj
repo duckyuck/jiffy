@@ -138,32 +138,31 @@
                  (get-spec '~jiffy-fn)
                  {:static? true}))))
 
-(defmacro test-fn! [jiffy-fn args-samples & [{:keys [static?]}]]
+(defmacro test-fn! [jiffy-fn java-fn args-samples & [{:keys [static?]}]]
   `(do
      (let [results#
            (for [args# ~args-samples]
-             (let [jiffy-result# (invoke-jiffy ~jiffy-fn args#)
+             (let [jiffy-result# (trycatch (invoke-jiffy ~jiffy-fn args#))
                    java-args# (mapv jiffy->java args#)
                    result# {:failed/jiffy-args args#
                             :failed/jiffy-result jiffy-result#
                             :failed/java-args java-args#}
-                   java-result# (try
-                                  (invoke-java '~(symbol (jiffy-ns->java-class (namespace jiffy-fn))
-                                                         (jiffy-fn->java-fn (name jiffy-fn)))
-                                               java-args#
-                                               {:static? ~static?})
-                                  (catch Exception e#
-                                    (throw (ex-info "Exception when invoking java.time"
-                                                    result# e#))))]
+                   java-result# (trycatch
+                                 (invoke-java ~java-fn
+                                              java-args#
+                                              {:static? ~static?}))]
                (when-not (same? jiffy-result# java-result#)
                  (assoc result# :failed/java-result java-result#))))]
-       (or (first (remove nil? results#)) [(count results#) :success]))))
+       (or (first (remove nil? results#))
+           [(count results#) :success]))))
 
 (defmacro test-proto-fn! [impl-ns proto-fn & [num-tests]]
   `(do
      (require '~(symbol (namespace proto-fn)))
      (require '~(symbol impl-ns))
      (test-fn! ~proto-fn
+               '~(symbol (jiffy-ns->java-class (str impl-ns))
+                         (jiffy-fn->java-fn (name proto-fn)))
                (gen/sample (s/gen ~(get-spec (symbol (str impl-ns) (name proto-fn)))) ~(or num-tests 1000))
                {:static? false})))
 
@@ -171,5 +170,7 @@
   `(do
      (require '~(symbol (namespace jiffy-fn)))
      (test-fn! ~jiffy-fn
+               '~(symbol (jiffy-ns->java-class (namespace jiffy-fn))
+                         (jiffy-fn->java-fn (name jiffy-fn)))
                (gen/sample (s/gen ~(get-spec jiffy-fn)) ~(or num-tests 1000))
                {:static? true})))
