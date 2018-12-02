@@ -1,18 +1,32 @@
 (ns jiffy.duration-impl
-  (:require [jiffy.dev.wip :refer [wip]]
-            [clojure.spec.alpha :as s]
-            [jiffy.specs :as j]
+  (:require [clojure.spec.alpha :as s]
+            [jiffy.big-decimal :as big-decimal]
+            [jiffy.big-integer :as big-integer]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.local-time-constants :refer [NANOS_PER_SECOND NANOS_PER_DAY SECONDS_PER_DAY SECONDS_PER_MINUTE SECONDS_PER_HOUR SECONDS_PER_MINUTE NANOS_PER_MILLI MINUTES_PER_HOUR]]
-            [jiffy.math :as math]))
+            [jiffy.exception :refer [ex JavaArithmeticException]]
+            [jiffy.local-time-constants :refer [MINUTES_PER_HOUR NANOS_PER_DAY NANOS_PER_MILLI NANOS_PER_SECOND SECONDS_PER_DAY SECONDS_PER_HOUR SECONDS_PER_MINUTE]]
+            [jiffy.math :as math]
+            [jiffy.specs :as j]))
 
 (defrecord Duration [seconds nanos])
 
 (def ZERO (->Duration 0 0))
+(def BI_NANOS_PER_SECOND (big-integer/value-of NANOS_PER_SECOND))
 
-(s/def ::create-args ::j/wip)
+(declare of-seconds)
+
+(s/def ::create-args (s/tuple pos-int? ::j/nano-of-second))
 (defn create
-  ([big-decimal-seconds] (wip ::create))
+  ([big-decimal-seconds]
+   (let [nanos (-> big-decimal-seconds
+                   (big-decimal/move-point-right 9)
+                   (big-decimal/to-big-integer-exact))
+         [div rem] (big-integer/divide-and-reminder nanos BI_NANOS_PER_SECOND)]
+     (when (> (big-integer/bit-length div) 63)
+       (throw (ex JavaArithmeticException (str "Exceeds capacity of Duration: " nanos)
+                  {:big-decimal-seconds big-decimal-seconds :nanos nanos})))
+     (of-seconds (big-integer/long-value div)
+                 (big-integer/int-value rem))))
   ([seconds nano-adjustment]
    (if (zero? (bit-or seconds nano-adjustment))
      ZERO
@@ -20,6 +34,7 @@
 (s/def ::duration (j/constructor-spec Duration create ::create-args))
 (s/fdef create :args ::create-args :ret ::duration)
 
+(s/def ::of-seconds-args (s/cat :seconds ::j/long :nano-adjustment (s/? ::j/long)))
 (defn of-seconds
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L223
   ([seconds]
@@ -29,6 +44,7 @@
   ([seconds nano-adjustment]
    (create (math/add-exact seconds (math/floor-div nano-adjustment NANOS_PER_SECOND))
            (int (math/floor-mod nano-adjustment NANOS_PER_SECOND)))))
+(s/fdef of-seconds :args ::of-seconds-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L280
 (defn of-nanos [nanos]
