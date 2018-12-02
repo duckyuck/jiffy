@@ -5,7 +5,7 @@
         next-ordinal #(swap! ordinal inc)]
     `(do
        (def ~'enums (atom {}))
-       ~@(for [[sym args] enums]
+       ~@(for [[sym args] (partition 2 enums)]
            `(do
               (def ~sym (~constructor-fn ~(next-ordinal) ~(str sym) ~@args))
               (swap! ~'enums assoc ~(str sym) ~sym))))))

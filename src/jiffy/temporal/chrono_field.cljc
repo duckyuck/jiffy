@@ -115,7 +115,7 @@
   (adjust-into [this temporal new-value] (-adjust-into this temporal new-value)))
 
 (defenum create
-  {NANO_OF_SECOND ["NanoOfSecond" unit/NANOS unit/SECONDS (value-range/of 0 999999999)]
+  [NANO_OF_SECOND ["NanoOfSecond" unit/NANOS unit/SECONDS (value-range/of 0 999999999)]
    NANO_OF_DAY ["NanoOfDay" unit/NANOS unit/DAYS (value-range/of 0 (- (* 86400 1000000000) 1))]
    MICRO_OF_SECOND ["MicroOfSecond" unit/MICROS unit/SECONDS (value-range/of 0 999999)]
    MICRO_OF_DAY ["MicroOfDay" unit/MICROS unit/DAYS (value-range/of 0 (- (* 86400 1000000) 1))]
@@ -144,7 +144,7 @@
    YEAR ["Year" unit/YEARS unit/FOREVER (value-range/of year/MIN_VALUE year/MAX_VALUE) "year"]
    ERA ["Era" unit/ERAS unit/FOREVER (value-range/of 0 1) "era"]
    INSTANT_SECONDS ["InstantSeconds" unit/SECONDS unit/FOREVER (value-range/of math/long-min-value math/long-max-value)]
-   OFFSET_SECONDS ["OffsetSeconds" unit/SECONDS unit/FOREVER (value-range/of (* -18 3600) (* 18 3600))]})
+   OFFSET_SECONDS ["OffsetSeconds" unit/SECONDS unit/FOREVER (value-range/of (* -18 3600) (* 18 3600))]])
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java
 (defn values [] (vals @enums))
