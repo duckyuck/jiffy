@@ -27,10 +27,9 @@
             [jiffy.temporal.temporal-amount :as temporal-amount]
             [jiffy.temporal.chrono-unit :refer [#?@(:cljs [ChronoUnit])]]
             [jiffy.temporal.temporal-field :as temporal-field :refer [#?@(:cljs [ITemporalField])]]
-            [jiffy.temporal.temporal-field-impl :as temporal-field-impl]
             [jiffy.temporal.temporal-query :as temporal-query]
             [jiffy.temporal.temporal-unit :as temporal-unit :refer [#?@(:cljs [ITemporalUnit])]]
-            [jiffy.temporal.temporal.chrono-field :as chrono-field :refer [#?@(:cljs [ChronoField])]]
+            [jiffy.temporal.chrono-field :as chrono-field :refer [#?@(:cljs [ChronoField])]]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.temporal.value-range :as value-range]
             [jiffy.time-comparable :as time-comparable]
@@ -45,14 +44,14 @@
                    [jiffy.zoned_date_time_impl ZonedDateTime]
                    [jiffy.zone_offset_impl ZoneOffset]
                    [jiffy.local_date_impl LocalDate]
-                   [jiffy.local_time_impl LocalTime]
+                   [jiffy.local_time LocalTime]
                    [jiffy.local_date_time_impl LocalDateTime]
                    [jiffy.offset_date_time_impl OffsetDateTime]
                    [jiffy.period Period]
-                   [jiffy.temporal.chrono-unit ChronoUnit]
-                   [jiffy.temporal.temporal.chrono-field ChronoField]
-                   [jiffy.temporal.temporal-field ITemporalField]
-                   [jiffy.zoned-id IZoneId])))
+                   [jiffy.temporal.chrono_unit ChronoUnit]
+                   [jiffy.temporal.chrono_field ChronoField]
+                   [jiffy.temporal.temporal_field ITemporalField]
+                   [jiffy.zone_id IZoneId])))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java
 (defprotocol IZonedDateTime
