@@ -37,5 +37,10 @@
   (s/with-gen #(instance? record-type %)
     (fn [] (gen/fmap #(apply constructor %) (s/gen param-spec)))))
 
+(defn- zone-id? [s]
+  (re-find #"^[a-zA-Z][a-zA-Z/0-9~\._+-]+$" s))
+
+(s/def ::zone-id (s/and string? zone-id?))
+
 ;; Placeholder for incomplete specs
 (s/def ::wip (s/and keyword? #(= % ::wip)))
