@@ -1,5 +1,6 @@
 (ns jiffy.zone-offset-impl
   (:require [clojure.spec.alpha :as s]
+            [jiffy.exception :refer [DateTimeException ex]]
             #?(:clj [jiffy.conversion :as conversion])
             [jiffy.local-time-impl :as local-time]
             [jiffy.specs :as j]))
@@ -29,6 +30,16 @@
   (->ZoneOffset (build-id total-seconds) total-seconds))
 (s/def ::zone-offset (j/constructor-spec ZoneOffset create ::create-args))
 (s/fdef create :args ::create-args :ret ::zone-offset)
+
+(def MAX_SECONDS (* 18 local-time/SECONDS_PER_HOUR))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L413
+(s/def ::of-total-seconds-args (s/tuple ::total-seconds))
+(defn of-total-seconds [total-seconds]
+  (when (not (<= (- MAX_SECONDS) total-seconds MAX_SECONDS))
+    (throw (ex DateTimeException "Zone offset not in valid range: -18:00 to +18:00")))
+  (create total-seconds))
+(s/fdef of-total-seconds :args ::of-total-seconds-args :ret ::zone-offset)
 
 #?(:clj
    (defmethod conversion/jiffy->java ZoneOffset [jiffy-object]

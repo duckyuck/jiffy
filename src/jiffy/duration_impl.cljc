@@ -3,7 +3,7 @@
             [clojure.spec.alpha :as s]
             [jiffy.specs :as j]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.local-time-impl :refer [NANOS_PER_SECOND NANOS_PER_DAY SECONDS_PER_DAY SECONDS_PER_MINUTE SECONDS_PER_HOUR SECONDS_PER_MINUTE NANOS_PER_MILLI MINUTES_PER_HOUR]]
+            [jiffy.local-time-constants :refer [NANOS_PER_SECOND NANOS_PER_DAY SECONDS_PER_DAY SECONDS_PER_MINUTE SECONDS_PER_HOUR SECONDS_PER_MINUTE NANOS_PER_MILLI MINUTES_PER_HOUR]]
             [jiffy.math :as math]))
 
 (defrecord Duration [seconds nanos])

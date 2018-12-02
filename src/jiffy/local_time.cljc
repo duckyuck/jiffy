@@ -12,7 +12,7 @@
             [jiffy.instant-impl :as instant]
             [jiffy.local-date-impl :as local-date]
             [jiffy.local-date-time-impl :as local-date-time]
-            [jiffy.local-time-impl :as impl]
+            [jiffy.local-time-impl :refer [create #?@(:cljs [LocalTime])] :as impl]
             [jiffy.offset-time-impl :as offset-time]
             [jiffy.specs :as j]
             [jiffy.temporal.chrono-field :as chrono-field]
@@ -26,7 +26,8 @@
             [jiffy.temporal.value-range :as value-range]
             [jiffy.time-comparable :as time-comparable]
             [jiffy.zone-id :as zone-id]
-            [jiffy.zone-offset :as zone-offset]))
+            [jiffy.zone-offset :as zone-offset])
+  #?(:clj (:import [jiffy.local_time_impl LocalTime])))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L132
 (def MIN ::MIN--not-implemented)
@@ -82,16 +83,7 @@
   (is-after [this other])
   (is-before [this other]))
 
-(defrecord LocalTime [hour minute second nano])
-
-(s/def ::create-args (s/tuple ::j/hour-of-day
-                              ::j/minute-of-hour
-                              ::j/second-of-minute
-                              ::j/nano-of-second))
-(defn create [hour minute second nano]
-  (->LocalTime hour minute second nano))
-(s/def ::local-time (j/constructor-spec LocalTime create ::create-args))
-(s/fdef create :args ::create-args :ret ::local-time)
+(s/def ::local-time ::impl/local-time)
 
 (defmacro args [& x] `(s/tuple ::local-time ~@x))
 
@@ -177,16 +169,8 @@
 (s/fdef -with-nano :args ::with-nano-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L397
-(s/def ::of-nano-of-day-args (args ::j/long))
-(defn of-nano-of-day [nano-of-day]
-  (chrono-field/check-valid-value chrono-field/NANO_OF_DAY nano-of-day)
-  (let [hours (int (/ nano-of-day NANOS_PER_HOUR))
-        nanos (- nano-of-day (* hours NANOS_PER_HOUR))
-        minutes (int (/ nanos NANOS_PER_MINUTE))
-        nanos (- nanos (* minutes NANOS_PER_MINUTE))
-        seconds (int (/ nanos NANOS_PER_SECOND))
-        nanos (- nanos (* seconds NANOS_PER_SECOND))]
-    (create hours minutes seconds nanos)))
+(s/def ::of-nano-of-day-args ::impl/of-nano-of-day-args)
+(def of-nano-of-day #'impl/of-nano-of-day)
 (s/fdef of-nano-of-day :args ::of-nano-of-day-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L971

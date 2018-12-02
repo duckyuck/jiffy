@@ -22,7 +22,7 @@
 ;; TODO: implement caching via ID_CACHE (see java.time source code)
 ;; TODO: implement caching via SECONDS_CACHE (see java.time source code)
 
-(def MAX_SECONDS (* 18 local-time/SECONDS_PER_HOUR))
+(def MAX_SECONDS impl/MAX_SECONDS)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java
 (defprotocol IZoneOffset
@@ -173,8 +173,12 @@
          (not (zero? (bit-or minutes seconds))))
     (throw (ex DateTimeException "Zone offset not in valid range: -18:00 to +18:00"))))
 
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L413
+(s/def ::of-total-seconds-args ::impl/of-total-seconds-args)
+(def of-total-seconds #'impl/of-total-seconds)
+(s/fdef of-total-seconds :args ::of-total-seconds-args :ret ::zone-offset)
+
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L316
-(declare of-total-seconds)
 (s/def ::of-hours-minutes-seconds-args (args ::hours ::minutes ::seconds))
 (defn of-hours-minutes-seconds [hours minutes seconds]
   (--validate hours minutes seconds)
@@ -221,14 +225,6 @@
   (or (temporal-accessor/query temporal (temporal-queries/offset))
       (throw (ex DateTimeException (str "Unable to obtain ZoneOffset from TemporalAccessor: " temporal  " of type " (type temporal))))))
 (s/fdef from :args ::from-args :ret ::zone-offset)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L413
-(s/def ::of-total-seconds-args (s/tuple ::impl/total-seconds))
-(defn of-total-seconds [total-seconds]
-  (when (not (<= (- MAX_SECONDS) total-seconds MAX_SECONDS))
-    (throw (ex DateTimeException "Zone offset not in valid range: -18:00 to +18:00")))
-  (create total-seconds))
-(s/fdef of-total-seconds :args ::of-total-seconds-args :ret ::zone-offset)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L151
 (def UTC (of-total-seconds 0))

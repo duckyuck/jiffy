@@ -10,6 +10,8 @@
             [jiffy.temporal.temporal-amount :as temporal-amount]
             [jiffy.temporal.temporal :as temporal]
             [jiffy.temporal.temporal-field :as temporal-field]
+            [jiffy.temporal.temporal-queries :as temporal-queries]
+            [jiffy.temporal.temporal-query :as temporal-query]
             [jiffy.temporal.temporal-unit :as temporal-unit]))
 
 (s/def ::clock/clock
@@ -52,4 +54,15 @@
                                    ;; :jiffy.year-month/year-month
                                    ;; :jiffy.zoned-date-time/zoned-date-time
                                    ])))))
+
+(s/def ::temporal-query/temporal-query
+  (s/with-gen #(satisfies? temporal-query/ITemporalQuery %)
+    (fn [] (gen/one-of (map gen/return [temporal-queries/ZONE_ID
+                                        temporal-queries/CHRONO
+                                        temporal-queries/PRECISION
+                                        temporal-queries/ZONE
+                                        temporal-queries/OFFSET
+                                        temporal-queries/LOCAL_DATE
+                                        temporal-queries/LOCAL_TIME])))))
+
 

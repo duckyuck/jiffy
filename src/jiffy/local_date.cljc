@@ -62,8 +62,8 @@
   (to-epoch-second [this time offset])
   (compare-to0 [this other-date]))
 
-(def DAYS_PER_CYCLE 146097)
-(def DAYS_0000_TO_1970 (- (* DAYS_PER_CYCLE 5) ( + (* 30 365) 7)))
+(def DAYS_PER_CYCLE impl/DAYS_PER_CYCLE)
+(def DAYS_0000_TO_1970 impl/DAYS_0000_TO_1970)
 
 (s/def ::local-date ::impl/local-date)
 
@@ -441,34 +441,8 @@
 (s/fdef of-instant :args ::of-instant-args :ret ::local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L340
-(s/def ::of-epoch-day-args (args ::j/long))
-
-(defn --day-est [zero-day year-est]
-  (- zero-day (-> (* 365 year-est)
-                  (+ (/ year-est 4))
-                  (- (/ year-est 100))
-                  (+ (/ year-est 400)))))
-
-(defn of-epoch-day [epoch-day]
-  (let [[adjust zero-day] (let [zero-day (- (+ epoch-day DAYS_0000_TO_1970) 60)]
-                            (if-not (neg? zero-day)
-                              [0 zero-day]
-                              (let [adjust-cycles (/ (inc zero-day) (dec DAYS_PER_CYCLE))]
-                                [(* adjust-cycles 400)
-                                 (+ zero-day (* (- adjust-cycles) DAYS_PER_CYCLE))])))
-        [year-est day-est] (let [year-est (/ (+ (* 400 zero-day) 591) DAYS_PER_CYCLE)
-                                 day-est (--day-est zero-day year-est)]
-                             (if-not (neg? day-est)
-                               [year-est day-est]
-                               [(dec year-est) (--day-est zero-day (dec year-est))]))
-        year-est (+ year-est adjust)
-        march-doy-0 day-est
-        march-month-0 (/ (+ (* march-doy-0 5) 2) 153)
-        month (-> march-month-0 (+ 2) (mod 12) (+ 1))
-        dom (- march-doy-0 (-> march-month-0 (* 306) (+ 5) (/ 10) (+ 1)))
-        year-est (+ year-est (/ march-month-0 10))
-        year (chrono-field/check-valid-int-value chrono-field/YEAR year-est)]
-    (create year month dom)))
+(s/def ::of-epoch-day-args ::impl/of-epoch-day-args)
+(def of-epoch-day #'impl/of-epoch-day)
 (s/fdef of-epoch-day :args ::of-epoch-day-args :ret ::local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L391
