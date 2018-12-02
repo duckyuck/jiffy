@@ -30,6 +30,10 @@
       (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
     r))
 
+(defn to-int-exact [x]
+  ;; TODO: Something
+  (int x))
+
 (defn abs [x]
   (Math/abs x))
 
