@@ -1,4 +1,4 @@
-{:paths ["src" "target" "resources""dev-resources"]
+{:paths ["src" "test" "target" "resources""dev-resources"]
  :deps {org.clojure/clojure {:mvn/version "1.10.0-alpha8"}
         ;; org.clojure/test.check {:mvn/version "0.9.0"}
         org.clojure/test.check {:mvn/version "0.10.0-alpha3"}}
