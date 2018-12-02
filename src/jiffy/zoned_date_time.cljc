@@ -788,7 +788,7 @@
 
 #?(:clj
    (defmethod converstion/jiffy->java ZonedDateTime [{:keys [local-date zone offset]}]
-     (java.time.ZonedDateTime/of-local local-date zone offset)))
+     (java.time.ZonedDateTime/ofLocal local-date zone offset)))
 
 #?(:clj
    (defmethod converstion/same? ZonedDateTime
