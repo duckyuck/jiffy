@@ -1,12 +1,11 @@
 (ns jiffy.math
-  (:require [jiffy.exception :refer [JavaArithmeticException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]))
+  (:require [jiffy.exception :refer [JavaArithmeticException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
+            [jiffy.math-macros :as mm]))
 
-;; TODO: find proper value for min and max
-
-(def long-max-value 9223372036854775807)
-(def long-min-value -9223372036854775808)
-(def integer-min-value -0x7fffffff)
-(def integer-max-value 0x7fffffff)
+(def long-max-value (mm/long-max-value))
+(def long-min-value (mm/long-min-value))
+(def integer-min-value (mm/integer-min-value))
+(def integer-max-value (mm/integer-max-value))
 
 ;; TODO: decide whether to deviate from java.time and use arbitrary precision
 ;; math operations instead (clojure.core's +' and *')
