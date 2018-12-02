@@ -1,7 +1,6 @@
 (ns jiffy.instant
   (:require [clojure.spec.alpha :as s]
             [jiffy.clock :as clock]
-            [jiffy.dev.wip :refer [wip]]
             [jiffy.duration :as duration]
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.format.date-time-formatter :as date-time-formatter]
@@ -25,10 +24,12 @@
             [jiffy.instant-impl :refer [create #?@(:cljs [Instant])] :as impl]
             [jiffy.zone-id :as zone-id]
             [jiffy.zone-offset :as zone-offset]
-            [jiffy.specs :as j])
+            [jiffy.specs :as j]
+            [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults])
   #?(:clj (:import [jiffy.instant_impl Instant])))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java
+
 (defprotocol IInstant
   (get-epoch-second [this])
   (get-nano [this])
@@ -203,7 +204,8 @@
   time-comparable/ITimeComparable
   (compare-to [this other-instant] (-compare-to this other-instant)))
 
-(s/def ::with-args (args ::j/wip))
+(s/def ::with-args (s/or :arity-2 (s/tuple ::instant ::temporal-adjuster/temporal-adjuster)
+                         :arity-3 (s/tuple ::instant ::temporal-field/temporal-field ::j/long)))
 (defn -with
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L654
   ([this adjuster]
@@ -241,7 +243,8 @@
          (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:instant this :field field})))))))
 (s/fdef -with :args ::with-args :ret ::temporal/temporal)
 
-(s/def ::plus-args (args ::j/wip))
+(s/def ::plus-args (s/or :arity-2 (args ::temporal-amount/temporal-amount)
+                         :arity-3 (args ::j/long ::temporal-unit/temporal-unit)))
 (defn -plus
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L786
   ([this amount-to-add]
@@ -252,7 +255,7 @@
    (if (satisfies? chrono-unit/IChronoUnit unit)
      (condp = unit
        NANOS (plus-nanos this amount-to-add)
-       MICROS (--plus this (/ amount-to-add 1000000) (* (mod amount-to-add 1000000) 1000))
+       MICROS (--plus this (long (/ amount-to-add 1000000)) (* (rem amount-to-add 1000000) 1000))
        MILLIS (plus-millis this amount-to-add)
        SECONDS (plus-seconds this amount-to-add)
        MINUTES (plus-seconds this (math/multiply-exact amount-to-add SECONDS_PER_MINUTE))
@@ -263,7 +266,8 @@
      (temporal-unit/add-to unit this amount-to-add))))
 (s/fdef -plus :args ::plus-args :ret ::temporal/temporal)
 
-(s/def ::minus-args (args ::j/wip))
+(s/def ::minus-args (s/or :arity-2 (args ::temporal-amount/temporal-amount)
+                          :arity-3 (args ::j/long ::temporal-unit/temporal-unit)))
 (defn -minus
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L953
   ([this amount-to-subtract]
@@ -306,16 +310,17 @@
 (defn -until [this end-exclusive unit]
   (let [end (from end-exclusive)]
     (if (satisfies? chrono-unit/IChronoUnit unit)
-      (condp = unit
-        NANOS (nanos-until this end)
-        MICROS (-> (nanos-until this end) (/ 1000))
-        MILLIS (math/subtract-exact (to-epoch-milli end) (to-epoch-milli this))
-        SECONDS (seconds-until this end)
-        MINUTES (-> (seconds-until this end) (/ SECONDS_PER_MINUTE))
-        HOURS (-> (seconds-until this end) (/ SECONDS_PER_HOUR))
-        HALF_DAYS (-> (seconds-until this end) (/ (* 12 SECONDS_PER_HOUR)))
-        DAYS (-> (seconds-until this end) (/ SECONDS_PER_DAY))
-        (throw (ex UnsupportedTemporalTypeException (str "Unsupported unit: " unit) {:instant this :unit unit})))
+      (long
+       (condp = unit
+         NANOS (nanos-until this end)
+         MICROS (-> (nanos-until this end) (/ 1000))
+         MILLIS (math/subtract-exact (to-epoch-milli end) (to-epoch-milli this))
+         SECONDS (seconds-until this end)
+         MINUTES (-> (seconds-until this end) (/ SECONDS_PER_MINUTE))
+         HOURS (-> (seconds-until this end) (/ SECONDS_PER_HOUR))
+         HALF_DAYS (-> (seconds-until this end) (/ (* 12 SECONDS_PER_HOUR)))
+         DAYS (-> (seconds-until this end) (/ SECONDS_PER_DAY))
+         (throw (ex UnsupportedTemporalTypeException (str "Unsupported unit: " unit) {:instant this :unit unit}))))
       (temporal-unit/between unit this end))))
 (s/fdef -until :args ::until-args :ret ::j/long)
 
@@ -355,24 +360,25 @@
     (--is-supported-unit this field-or-unit)
 
     :else
-    (wip ::-is-supported)))
+    (throw (ex-info "Unsupported field or unit" {:instant this :field-or-unit field-or-unit}))))
 (s/fdef -is-supported :args ::is-supported-args :ret ::j/boolean)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L526
 (s/def ::range-args (args ::temporal-field/temporal-field))
 (defn -range [this field]
-  (temporal-accessor/range this field))
+  (temporal-accessor-defaults/-range this field))
 (s/fdef -range :args ::range-args :ret ::value-range/value-range)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L558
 (s/def ::get-args (args ::temporal-field/temporal-field))
 (defn -get [this field]
   (if (satisfies? chrono-field/IChronoField field)
-    (condp = field
-      NANO_OF_SECOND (:nanos this)
-      MICRO_OF_SECOND (/ (:nanos this) 1000)
-      MILLI_OF_SECOND (/ (:nanos this) 1000000)
-      (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:instant this :field field})))
+    (long
+     (condp = field
+       NANO_OF_SECOND (:nanos this)
+       MICRO_OF_SECOND (/ (:nanos this) 1000)
+       MILLI_OF_SECOND (/ (:nanos this) 1000000)
+       (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:instant this :field field}))))
     (value-range/check-valid-int-value
      (-range this field)
      (temporal-field/get-from field this)
@@ -383,12 +389,13 @@
 (s/def ::get-long-args (args ::temporal-field/temporal-field))
 (defn -get-long [this field]
   (if (satisfies? chrono-field/IChronoField field)
-    (condp = field
-      NANO_OF_SECOND (:nanos this)
-      MICRO_OF_SECOND (/ (:nanos this) 1000)
-      MILLI_OF_SECOND (/ (:nanos this) 1000000)
-      INSTANT_SECONDS (:seconds this)
-      (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:instant this :field field})))
+    (long
+     (condp = field
+       NANO_OF_SECOND (:nanos this)
+       MICRO_OF_SECOND (/ (:nanos this) 1000)
+       MILLI_OF_SECOND (/ (:nanos this) 1000000)
+       INSTANT_SECONDS (:seconds this)
+       (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:instant this :field field}))))
     (temporal-field/get-from field this)))
 (s/fdef -get-long :args ::get-long-args :ret ::j/long)
 
@@ -404,7 +411,7 @@
                                   (temporal-queries/local-date)
                                   (temporal-queries/local-time)])
       (temporal-query/query-from query this))))
-(s/fdef -query :args ::query-args :ret ::j/wip)
+(s/fdef -query :args ::query-args :ret ::j/any)
 
 (extend-type Instant
   temporal-accessor/ITemporalAccessor
@@ -426,7 +433,7 @@
   temporal-adjuster/ITemporalAdjuster
   (adjust-into [this temporal] (-adjust-into this temporal)))
 
-(s/def ::now-args (args ::j/wip))
+(s/def ::now-args (s/cat :clock (s/? ::clock/clock)))
 (defn now
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L272
   ([] (clock/instant (clock/system-utc)))
@@ -459,7 +466,7 @@
 (s/fdef from :args ::from-args :ret ::instant)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L394
-(s/def ::parse-args (args ::j/wip))
+(s/def ::parse-args (args ::j/char-sequence))
 (defn parse [text]
   (date-time-formatter/parse date-time-formatter/ISO_INSTANT text from))
 (s/fdef parse :args ::parse-args :ret ::instant)
