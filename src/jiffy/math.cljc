@@ -62,3 +62,8 @@
 
 (defn floor-mod [x y]
   (- x (* (floor-div x y) y)))
+
+(defn parse-int [s]
+  (when (string? s)
+    #?(:clj (Integer/parseInt s 10)
+       :cljs (js/parseInt s 10))))
