@@ -1,6 +1,7 @@
 (ns jiffy.math
   (:require [jiffy.exception :refer [JavaArithmeticException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
-            [jiffy.math-macros :as mm]))
+            #?(:clj [jiffy.math-macros :as mm]))
+  #?(:cljs (:require-macros [jiffy.math-macros :as mm])))
 
 (def long-max-value (mm/long-max-value))
 (def long-min-value (mm/long-min-value))
