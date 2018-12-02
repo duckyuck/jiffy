@@ -10,7 +10,7 @@
             [jiffy.duration :as duration]
             [jiffy.exception :refer [ex try* UnsupportedTemporalTypeException DateTimeException]]
             [jiffy.format.date-time-formatter :as date-time-formatter]
-            [jiffy.instant-impl :as instant]
+            [jiffy.instant-impl :as instant :refer [#?@(:cljs [Instant])]]
             [jiffy.local-date :as local-date]
             [jiffy.local-date-impl :refer [#?@(:cljs [LocalDate])]]
             [jiffy.local-date-time :as local-date-time]
@@ -42,8 +42,7 @@
             [jiffy.zone-offset-impl :refer [#?@(:cljs [ZoneOffset])]]
             [jiffy.zone.zone-offset-transition :as zone-offset-transition])
   #?(:clj (:import [jiffy.clock IClock]
-                   [jiffy.zoned_date_time_impl ZonedDateTime]
-                   [jiffy.zone_offset_impl ZoneOffset]
+                   [jiffy.instant_impl Instant]
                    [jiffy.local_date_impl LocalDate]
                    [jiffy.local_time LocalTime]
                    [jiffy.local_date_time_impl LocalDateTime]
@@ -52,7 +51,10 @@
                    [jiffy.temporal.chrono_unit ChronoUnit]
                    [jiffy.temporal.chrono_field ChronoField]
                    [jiffy.temporal.temporal_field ITemporalField]
-                   [jiffy.zone_id IZoneId])))
+                   [jiffy.temporal.temporal_unit ITemporalUnit]
+                   [jiffy.zone_id IZoneId]
+                   [jiffy.zone_offset_impl ZoneOffset]
+                   [jiffy.zoned_date_time_impl ZonedDateTime])))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java
 (defprotocol IZonedDateTime
@@ -473,7 +475,7 @@
 
 (defn- resolve-offset [this offset]
   (if (and (not= offset (:offset this))
-           (-> this :zone zone-id/get-rules (zone-rules/get-transition (:date-time this) offset)))
+           (-> this :zone zone-id/get-rules (zone-rules/is-valid-offset (:date-time this) offset)))
     (ZonedDateTime. (:date-time this) offset (:zone this))
     this))
 
@@ -495,7 +497,7 @@
      (of-local (offset-date-time/to-local-date-time adjuster) (:zone this) (offset-date-time/get-offset adjuster))
 
      (instance? Instant adjuster)
-     (-create (instant/get-epoch-second adjuster) (instant/get-nano adjuster) (:zone this))
+     (-create (instant/-get-epoch-second adjuster) (instant/-get-nano adjuster) (:zone this))
 
      (instance? ZoneOffset adjuster)
      (resolve-offset this adjuster)
@@ -511,18 +513,18 @@
 
        chrono-field/OFFSET_SECONDS
        (resolve-offset this (-> new-value
-                                temporal-field/check-valid-int-value
+                                (chrono-field/check-valid-int-value new-value)
                                 zone-offset/of-total-seconds))
 
-       :default (resolve-local (local-date-time/with (:date-time this) field new-value))))))
+       :default (resolve-local (temporal/with (:date-time this) field new-value))))))
 (s/fdef -with :args ::with-args :ret ::temporal/temporal)
 
 (s/def ::plus-args (args ::j/wip))
 (defn -plus
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1553
   ([this amount-to-add]
-   (if (instance? (Period amount-to-add))
-     (resolve-local this (local-date-time/plus (:date-time this) amount-to-add))
+   (if (instance? Period amount-to-add)
+     (resolve-local this (temporal/plus (:date-time this) amount-to-add))
      (do
        (asserts/require-non-nil amount-to-add "amount-to-add")
        (temporal-amount/add-to amount-to-add this))))
@@ -531,8 +533,8 @@
   ([this amount-to-add unit]
    (if (instance? ChronoUnit unit)
      (if (temporal-unit/is-date-based unit)
-       (resolve-local this (local-date-time/plus (:date-time this) amount-to-add unit))
-       (resolve-instant this (local-date-time/plus (:date-time this) amount-to-add unit)))
+       (resolve-local this (temporal/plus (:date-time this) amount-to-add unit))
+       (resolve-instant this (temporal/plus (:date-time this) amount-to-add unit)))
      (temporal-unit/add-to unit this amount-to-add))))
 (s/fdef -plus :args ::plus-args :ret ::temporal/temporal)
 
@@ -540,11 +542,11 @@
 (defn -minus
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1810
   ([this amount-to-subtract]
-   (if (instance? (Period amount-subtract))
-     (resolve-local this (local-date-time/minus (:date-time this) amount-subtract))
+   (if (instance? Period amount-to-subtract)
+     (resolve-local this (temporal/minus (:date-time this) amount-to-subtract))
      (do
        (asserts/require-non-nil amount-to-subtract "amount-to-subtract")
-       (temporal-amount/add-to amount-subtract this))))
+       (temporal-amount/add-to amount-to-subtract this))))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1853
   ([this amount-to-subtract unit]
@@ -564,8 +566,8 @@
     (if (instance? ChronoUnit unit)
       (let [end (-with-zone-same-instant this (:zone this))]
         (if (temporal-unit/is-date-based unit)
-          (local-date-time/until (:date-time this) (:date-time end) unit)
-          (offset-date-time/until (-to-offset-date-time this) (to-offset-date-time end) unit)))
+          (temporal/until (:date-time this) (:date-time end) unit)
+          (temporal/until (-to-offset-date-time this) (to-offset-date-time end) unit)))
       (temporal-unit/between unit this end))))
 (s/fdef -until :args ::until-args :ret ::j/long)
 
@@ -601,8 +603,8 @@
   (if (instance? ChronoField field)
     (if (or (= field chrono-field/INSTANT_SECONDS)
             (= field chrono-field/OFFSET_SECONDS))
-      (chrono-field/range field)
-      (local-date-time/range (:date-time this) field))
+      (temporal-field/range field)
+      (temporal-accessor/range (:date-time this) field))
     (temporal-field/range-refined-by field this)))
 (s/fdef -range :args ::range-args :ret ::value-range/value-range)
 
@@ -633,7 +635,7 @@
       (= chrono-field/OFFSET_SECONDS field)
       (-> this -get-offset zone-offset/get-total-seconds)
 
-      :default (temporal-accessor/get-long field))
+      :default (temporal-accessor/get-long (:date-time this) field))
     (temporal-field/get-from field this)))
 (s/fdef -get-long :args ::get-long-args :ret ::j/long)
 
@@ -722,16 +724,16 @@
   ([instant zone]
    (asserts/require-non-nil instant "instant")
    (asserts/require-non-nil zone "zone")
-   (-create (instant/get-epoch-second instant) (instant/get-nano instant) zone))
+   (-create (instant/-get-epoch-second instant) (instant/-get-nano instant) zone))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L432
   ([local-date-time offset zone]
    (asserts/require-non-nil local-date-time "LocalDateTime")
    (asserts/require-non-nil offset "offset")
    (asserts/require-non-nil zone "zone")
-   (if (-> zone zone-id/get-rules (zone-offset-transition/is-valid-offset local-date-time offset))
+   (if (-> zone zone-id/get-rules (zone-rules/is-valid-offset local-date-time offset))
      (ZonedDateTime. local-date-time offset zone)
-     (-create (local-date-time/to-epoch-second local-date-time offset zone)))))
+     (-create (chrono-local-date-time/to-epoch-second local-date-time offset) zone))))
 (s/fdef of-instant :args ::of-instant-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L475
@@ -741,7 +743,7 @@
   (asserts/require-non-nil offset "offset")
   (asserts/require-non-nil zone "zone")
   (let [rules (-> zone zone-id/get-rules)]
-    (if (-> rules (zone-offset-transition/is-valid-offset local-date-time offset) not)
+    (if (-> rules (zone-rules/is-valid-offset local-date-time offset) not)
       (let [trans (-> rules (zone-rules/get-transition local-date-time))]
         (if (and (not (nil? trans)) (zone-offset-transition/is-gap trans))
           (throw
@@ -760,11 +762,11 @@
     temporal
     (try*
       (let [zone (zone-id/from temporal)]
-        (if (temporal-accessor/is-supported chrono-field/INSTANT_SECONDS)
-          (-create (temporal-accessor/get-long chrono-field/INSTANT_SECONDS)
-                   (temporal-accessor/get chrono-field/NANO_OF_SECOND)
-                   (:zone this))
-          (of (local-date/fron temporal) (local-time/from temporal))))
+        (if (temporal-accessor/is-supported temporal chrono-field/INSTANT_SECONDS)
+          (-create (temporal-accessor/get-long temporal chrono-field/INSTANT_SECONDS)
+                   (temporal-accessor/get temporal chrono-field/NANO_OF_SECOND)
+                   zone)
+          (of (local-date/from temporal) (local-time/from temporal))))
       (catch :default e
         (throw (ex DateTimeException (str "Unable to obtain ZonedDateTime from TemporalAccessor: "
                                           temporal " of type "
@@ -781,7 +783,7 @@
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L596
   ([text formatter]
    (asserts/require-non-nil formatter "formatter")
-   (date-time-formatter/parse text zone-date-time/from)))
+   (date-time-formatter/parse text from)))
 (s/fdef parse :args ::parse-args :ret ::zoned-date-time)
 
 #?(:clj
