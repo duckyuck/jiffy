@@ -1,5 +1,6 @@
 (ns jiffy.specs
-  (:require [clojure.spec.alpha :as s]
+  (:require [jiffy.math :as math]
+            [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]))
 
 (s/def ::int int?)
@@ -23,7 +24,9 @@
 
 ;; divide by 1000 due to OpenJDK bug. toEpochMilli fails for MAX seconds
 (s/def ::second (s/int-in (/ -31557014167219200 1000) (/ 31556889864403200 1000)))
-(s/def ::year (int-in -999999999 1000000000))
+(s/def ::year (int-in math/integer-min-value math/integer-max-value))
+(s/def ::month (int-in math/integer-min-value math/integer-max-value))
+(s/def ::day (int-in math/integer-min-value math/integer-max-value))
 
 (s/def ::nano-of-second (int-in 0 1000000000))
 (s/def ::second-of-minute (int-in 0 60))

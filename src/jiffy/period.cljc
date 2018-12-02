@@ -36,7 +36,7 @@
 
 (defrecord Period [years months days])
 
-(s/def ::create-args (s/tuple ::j/int ::j/int ::j/int))
+(s/def ::create-args (s/tuple ::j/year ::j/month ::j/day))
 (defn create [years months days]
   (->Period years months days))
 (s/def ::period (j/constructor-spec Period create ::create-args))
@@ -84,22 +84,22 @@
 (s/def ::get-years-args (args))
 (defn -get-years [this]
   (:years this))
-(s/fdef -get-years :args ::get-years-args :ret ::j/int)
+(s/fdef -get-years :args ::get-years-args :ret ::j/year)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L437
 (s/def ::get-months-args (args))
 (defn -get-months [this]
   (:months this))
-(s/fdef -get-months :args ::get-months-args :ret ::j/int)
+(s/fdef -get-months :args ::get-months-args :ret ::j/month)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L439
 (s/def ::get-days-args (args))
 (defn -get-days [this]
   (:days this))
-(s/fdef -get-days :args ::get-days-args :ret ::j/int)
+(s/fdef -get-days :args ::get-days-args :ret ::j/day)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L558
-(s/def ::with-years-args (args ::j/int))
+(s/def ::with-years-args (args ::j/year))
 (defn -with-years [this years]
   (if (= years (:years this))
     this
@@ -107,7 +107,7 @@
 (s/fdef -with-years :args ::with-years-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L580
-(s/def ::with-months-args (args ::j/int))
+(s/def ::with-months-args (args ::j/month))
 (defn -with-months [this months]
   (if (= months (:months this))
     this
@@ -115,7 +115,7 @@
 (s/fdef -with-months :args ::with-months-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L598
-(s/def ::with-days-args (args ::j/int))
+(s/def ::with-days-args (args ::j/day))
 (defn -with-days [this days]
   (if (= days (:days this))
     this
@@ -123,7 +123,7 @@
 (s/fdef -with-days :args ::with-days-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L647
-(s/def ::plus-years-args (args ::j/long))
+(s/def ::plus-years-args (args ::j/year))
 (defn -plus-years [this years-to-add]
   (if (= years-to-add 0)
     this
@@ -181,7 +181,7 @@
 (s/def ::to-total-months-args (args))
 (defn -to-total-months [this]
   (+ (* (:years this) 12) (:months this)))
-(s/fdef -to-total-months :args ::to-total-months-args :ret ::j/long)
+(s/fdef -to-total-months :args ::to-total-months-args :ret ::j/month)
 
 (extend-type Period
   IPeriod
@@ -362,8 +362,10 @@
 
 (def ^:private PATTERN #"([-+]?)P(?:([-+]?[0-9]+)Y)?(?:([-+]?[0-9]+)M)?(?:([-+]?[0-9]+)W)?(?:([-+]?[0-9]+)D)?")
 
+(s/def ::iso8601-period (s/and string? #(re-find PATTERN %)))
+
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L325
-(s/def ::parse-args (args ::j/wip))
+(s/def ::parse-args (args ::iso8601-period))
 (defn parse [text]
   (asserts/require-non-nil text "text")
   (if-let [matches (re-find PATTERN text)]
