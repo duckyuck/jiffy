@@ -107,12 +107,11 @@
     (str (str/lower-case (str first-char))
          (apply str rest))))
 
-(defmacro gen-prop [jiffy-fn spec & [{:keys [static?]}]]
+(defmacro gen-prop [jiffy-fn java-fn spec & [{:keys [static?]}]]
   `(prop/for-all
     [args# (s/gen ~spec)]
     (same? (invoke-jiffy ~jiffy-fn args#)
-           (invoke-java '~(symbol (jiffy-ns->java-class (namespace jiffy-fn))
-                                  (jiffy-fn->java-fn (name jiffy-fn)))
+           (invoke-java ~java-fn
                         (map jiffy->java args#)
                         {:static? ~static?}))))
 
@@ -124,6 +123,8 @@
      (require '~(symbol impl-ns))
      (defspec ~(gen-test-name proto-fn) ~(or num-tests default-num-tests)
        (gen-prop ~proto-fn
+                 '~(symbol (jiffy-ns->java-class (str impl-ns))
+                           (jiffy-fn->java-fn (name proto-fn)))
                  (get-spec '~(symbol (str impl-ns) (name proto-fn)))
                  {:static? false}))))
 
@@ -132,6 +133,8 @@
      (require '~(symbol (namespace jiffy-fn)))
      (defspec ~(gen-test-name jiffy-fn) ~(or num-tests default-num-tests)
        (gen-prop ~jiffy-fn
+                 '~(symbol (jiffy-ns->java-class (namespace jiffy-fn))
+                           (jiffy-fn->java-fn (name jiffy-fn)))
                  (get-spec '~jiffy-fn)
                  {:static? true}))))
 
