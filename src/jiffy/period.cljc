@@ -5,6 +5,7 @@
             [jiffy.chrono.chrono-period :as chrono-period :refer [#?@(:cljs [IChronoPeriod])]]
             [jiffy.chrono.chronology :as chronology]
             [jiffy.chrono.iso-chronology-impl :as iso-chronology]
+            #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
             [jiffy.dev.wip :refer [wip]]
             [jiffy.exception :refer [ex try* DateTimeException DateTimeParseException UnsupportedTemporalTypeException]]
             [jiffy.local-date-impl :as local-date]
@@ -384,3 +385,13 @@
 (defn between [start-date-inclusive end-date-exclusive]
   (chrono-local-date/until start-date-inclusive end-date-exclusive))
 (s/fdef between :args ::between-args :ret ::period)
+
+#?(:clj
+   (defmethod jiffy->java Period [{:keys [years months days]}]
+     (java.time.Period/of years months days)))
+
+#?(:clj
+   (defmethod same? Period
+     [jiffy-object java-object]
+     (= (map #(% jiffy-object) [:years :months :days])
+        (map #(% java-object) [(memfn getYears) (memfn getMonths) (memfn getDays)]))))
