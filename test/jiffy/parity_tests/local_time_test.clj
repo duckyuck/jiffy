@@ -1,7 +1,5 @@
 (ns jiffy.parity-tests.local-time-test
-  (:require [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]
-            [jiffy.parity-tests.support :refer [test-proto-fn test-proto-fn!]]))
+  (:require [jiffy.parity-tests.support :refer [test-proto-fn test-proto-fn!]]))
 
 (test-proto-fn jiffy.local-time jiffy.local-time/to-nano-of-day)
 (test-proto-fn jiffy.local-time jiffy.local-time/to-second-of-day)
