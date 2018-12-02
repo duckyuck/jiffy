@@ -45,19 +45,37 @@
 
 (defn invoke-java [f args {:keys [static?]}]
   (let [obj (when-not static? (first args))
+        args (if static? args (rest args))
         method-name (name f)
-        method (->> (.getDeclaredMethods (Class/forName (namespace f)))
-                    (filter #(-> % .getName (= method-name)))
-                    (filter #(-> % .getParameterCount (= (count (if static? args (rest args))))))
-                    first)]
-    (when-not method
-      (throw (ex-info (str "Unable to find Java method " method-name " on object " obj) {})))
-    (try
-      (if static?
-        (.invoke method obj (into-array Object args))
-        (.invoke method obj (into-array Object (rest args))))
-      (catch java.lang.reflect.InvocationTargetException ite
-        (throw (.getCause ite))))))
+        methods (->> (.getDeclaredMethods (Class/forName (namespace f)))
+                     (filter #(-> % .getName (= method-name)))
+                     (filter #(-> % .getParameterCount (= (count args)))))]
+    (when-not (seq methods)
+      (throw (ex-info (str "Unable to find Java method " method-name " on object " obj)
+                      {:method-name method-name :obj obj})))
+    (let [results (for [method methods]
+                    (try
+                      [::result (.invoke method obj (into-array Object args))]
+                      (catch java.lang.reflect.InvocationTargetException e
+                        (if (and (.getMessage e) (str/starts-with? (.getMessage e) "java.lang.ClassCastException"))
+                          [::exception (.getCause e)]
+                          [::result (.getCause e)]))
+                      (catch java.lang.IllegalArgumentException e
+                        (if (and (.getMessage e) (str/starts-with? (.getMessage e) "java.lang.ClassCastException"))
+                          [::exception (.getCause e)]
+                          [::result (.getCause e)]))
+                      (catch IllegalAccessException e
+                        [::exception (or (.getCause e) e)])
+                      (catch Throwable e
+                        [::result e])))]
+      (if-let [result (first (sort-by #(nil? (second %)) (filter #(-> % first (= ::result)) results)))]
+        (second result)
+        (throw (ex-info (str "Unable to invoke java method " method-name)
+                        {:f f
+                         :obj obj
+                         :methods methods
+                         :args args
+                         :results results}))))))
 
 (def ns->class-anomalies
   {"jiffy.time-comparable" "java.lang.Comparable"})
