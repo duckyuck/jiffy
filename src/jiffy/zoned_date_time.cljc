@@ -8,6 +8,7 @@
             [jiffy.day-of-week :as day-of-week]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.duration :as duration]
+            [jiffy.exception :refer [ex try* UnsupportedTemporalTypeException DateTimeException]]
             [jiffy.format.date-time-formatter :as date-time-formatter]
             [jiffy.instant-impl :as instant]
             [jiffy.local-date :as local-date]
@@ -611,8 +612,7 @@
   (if (instance? ChronoField field)
     (cond
       (= chrono-field/INSTANT_SECONDS field)
-      (do ;;TODO throw new UnsupportedTemporalTypeException("Invalid field 'InstantSeconds' for get() method, use getLong() instead");
-        )
+      (throw (ex UnsupportedTemporalTypeException (str "Invalid field 'InstantSeconds' for get() method, use getLong() instead")))
 
       (= chrono-field/OFFSET_SECONDS field)
       (-> this -get-offset zone-offset/get-total-seconds)
@@ -744,13 +744,12 @@
     (if (-> rules (zone-offset-transition/is-valid-offset local-date-time offset) not)
       (let [trans (-> rules (zone-rules/get-transition local-date-time))]
         (if (and (not (nil? trans)) (zone-offset-transition/is-gap trans))
-          (do
-            ;; TODO: // error message says daylight savings for simplicity
-            ;; // even though there are other kinds of gaps
-            ;; throw new DateTimeException("LocalDateTime '" + localDateTime +
-            ;; "' does not exist in zone '" + zone +
-            ;; "' due to a gap in the local time-line, typically caused by daylight savings");
-            )
+          (throw
+           ;; error message says daylight savings for simplicity
+           ;; even though there are other kinds of gaps
+           (ex DateTimeException (str "LocalDateTime '" local-date-time
+                                      "' does not exist in zone '" zone
+                                      "' due to a gap in the local time-line, typically caused by daylight savings")))
           (ZonedDateTime. local-date-time offset zone))))))
 (s/fdef of-strict :args ::of-strict-args :ret ::zoned-date-time)
 
@@ -759,18 +758,18 @@
 (defn from [temporal]
   (if (instance? ZonedDateTime temporal)
     temporal
-    (try
+    (try*
       (let [zone (zone-id/from temporal)]
         (if (temporal-accessor/is-supported chrono-field/INSTANT_SECONDS)
           (-create (temporal-accessor/get-long chrono-field/INSTANT_SECONDS)
                    (temporal-accessor/get chrono-field/NANO_OF_SECOND)
                    (:zone this))
           (of (local-date/fron temporal) (local-time/from temporal))))
-      ;; TODO: } catch (DateTimeException ex) {
-      ;; throw new DateTimeException("Unable to obtain ZonedDateTime from TemporalAccessor: " +
-      ;; temporal + " of type " + temporal.getClass().getName(), ex);
-      ;; }
-      )))
+      (catch :default e
+        (throw (ex DateTimeException (str "Unable to obtain ZonedDateTime from TemporalAccessor: "
+                                          temporal " of type "
+                                          (name (type temporal))
+                                          e)))))))
 (s/fdef from :args ::from-args :ret ::zoned-date-time)
 
 (s/def ::parse-args (args ::j/wip))
