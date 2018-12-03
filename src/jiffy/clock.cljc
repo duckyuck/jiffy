@@ -89,7 +89,10 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L444
 (s/def ::instant-system-clock-args (sc-args))
 (defn -instant-system-clock [this]
-  (instant/of-epoch-milli (-millis-system-clock this)))
+  #?(:clj (let [java-instant (.instant (java.time.Clock/systemUTC))]
+            (instant/create (.getEpochSecond java-instant)
+                            (.getNano java-instant)))
+     :cljs (instant/of-epoch-milli (-millis-system-clock this))))
 (s/fdef -instant-system-clock :args ::instant-system-clock-args :ret ::instant/instant)
 
 (extend-type SystemClock
