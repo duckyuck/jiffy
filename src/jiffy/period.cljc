@@ -401,7 +401,7 @@
            [y m w d] (map #(some-> % math/parse-int (* factor)) nums)]
        (create y m (math/add-exact (or d 0) (math/multiply-exact (or w 0) 7))))
      (catch :default e
-       (ex DateTimeParseException "Text cannot be parsed to a Period" {:parsed-data text :error-index 0} e)))
+       (throw (ex DateTimeParseException "Text cannot be parsed to a Period" {:parsed-data text :error-index 0} e))))
     (throw (ex DateTimeParseException "Text cannot be parsed to a Period" {:parsed-data text :error-index 0}))))
 (s/fdef parse :args ::parse-args :ret ::period)
 
