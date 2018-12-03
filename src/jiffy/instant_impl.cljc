@@ -1,6 +1,5 @@
 (ns jiffy.instant-impl
   (:require [clojure.spec.alpha :as s]
-            #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
             [jiffy.exception :refer [DateTimeException ex]]
             [jiffy.local-time-impl :refer [NANOS_PER_SECOND]]
             [jiffy.math :as math]
@@ -62,13 +61,3 @@
     (math/add-exact epoch-second (math/floor-div nano-adjustment NANOS_PER_SECOND))
     (math/floor-mod nano-adjustment NANOS_PER_SECOND))))
 (s/fdef of-epoch-second :args ::of-epoch-second-args :ret ::instant)
-
-#?(:clj
-   (defmethod jiffy->java Instant [{:keys [seconds nanos]}]
-     (.plusNanos (java.time.Instant/ofEpochSecond seconds) nanos)))
-
-#?(:clj
-   (defmethod same? Instant
-     [jiffy-object java-object]
-     (= (map #(% jiffy-object) [:seconds :nanos])
-        (map #(% java-object) [(memfn getEpochSecond) (memfn getNano)]))))
