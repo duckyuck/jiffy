@@ -23,7 +23,7 @@
 (defn chrono-field? [o]
   (instance? ChronoField o))
 
-(s/def ::create-args ::j/wip)
+(s/def ::create-args (s/tuple ::j/long string? string? ::unit/chrono-unit ::unit/chrono-unit ::value-range/value-range (s/? ::j/string)))
 (defn create
   ([ordinal enum-name name base-unit range-unit range]
    (create ordinal enum-name name base-unit range-unit range nil))
