@@ -39,8 +39,7 @@
 (defrecord Period [years months days])
 
 (s/def ::create-args (s/tuple ::j/year ::j/month ::j/day))
-(defn create [years months days]
-  (->Period years months days))
+(def create ->Period)
 (s/def ::period (j/constructor-spec Period create ::create-args))
 (s/fdef create :args ::create-args :ret ::period)
 
@@ -129,8 +128,7 @@
 (defn -plus-years [this years-to-add]
   (if (= years-to-add 0)
     this
-    (create (math/to-int-exact (math/add-exact (:years this) years-to-add)) (:months this) (:days this))))
-
+    (create (math/to-int-exact (math/add-exact (long (:years this)) (long years-to-add))) (:months this) (:days this))))
 (s/fdef -plus-years :args ::plus-years-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L667
@@ -138,7 +136,7 @@
 (defn -plus-months [this months-to-add]
   (if (= months-to-add 0)
     this
-    (create (:years this) (math/to-int-exact (math/add-exact (:months this) months-to-add)) (:days this))))
+    (create (:years this) (math/to-int-exact (math/add-exact (long (:months this)) months-to-add)) (:days this))))
 (s/fdef -plus-months :args ::plus-months-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L687
@@ -146,7 +144,7 @@
 (defn -plus-days [this days-to-add]
   (if (= days-to-add 0)
     this
-    (create (:years this) (:months this) (math/to-int-exact (math/add-exact (:days this) days-to-add)))))
+    (create (:years this) (:months this) (math/to-int-exact (math/add-exact (long (:days this)) days-to-add)))))
 (s/fdef -plus-days :args ::plus-days-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L736
@@ -166,7 +164,7 @@
     (-> this
         (-plus-months math/long-min-value)
         (-plus-months 1))
-    (-plus-months this (- months-to-subtract))))
+    (-plus-months this (long (- months-to-subtract)))))
 (s/fdef -minus-months :args ::minus-months-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L770
@@ -242,9 +240,9 @@
 (defn -multiplied-by [this scalar]
   (if (or (= this ZERO) (= scalar 1))
     this
-    (create (math/multiply-exact (:years this) scalar)
-            (math/multiply-exact (:months this) scalar)
-            (math/multiply-exact (:days this) scalar))))
+    (create (math/multiply-exact (:years this) (int scalar))
+            (math/multiply-exact (:months this) (int scalar))
+            (math/multiply-exact (:days this) (int scalar)))))
 (s/fdef -multiplied-by :args ::multiplied-by-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L812
@@ -353,7 +351,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L205
 (s/def ::of-weeks-args (s/tuple ::j/int))
 (defn of-weeks [weeks]
-  (create 0 0 (math/multiply-exact weeks 7)))
+  (create 0 0 (math/multiply-exact weeks (int 7))))
 (s/fdef of-weeks :args ::of-weeks-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L218

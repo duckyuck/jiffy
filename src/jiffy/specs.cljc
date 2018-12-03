@@ -8,7 +8,7 @@
     (fn [] (gen/fmap int (s/gen (s/int-in from-inclusive to-exclusive))))))
 
 (s/def ::int (int-in math/integer-min-value (inc math/integer-max-value)))
-(s/def ::long int?)
+(s/def ::long (s/int-in math/long-min-value math/long-max-value))
 (s/def ::boolean boolean?)
 (s/def ::char char?)
 (s/def ::void nil?)

@@ -88,7 +88,7 @@
     this
     (of-epoch-second
      (-> (:seconds this)
-         (math/add-exact seconds-to-add)
+         (math/add-exact (long seconds-to-add))
          (math/add-exact (long (math/floor-div nanos-to-add NANOS_PER_SECOND))))
      (+ (:nanos this) (mod nanos-to-add NANOS_PER_SECOND)))))
 
@@ -263,7 +263,7 @@
        MINUTES (plus-seconds this (math/multiply-exact amount-to-add SECONDS_PER_MINUTE))
        HOURS (plus-seconds this (math/multiply-exact amount-to-add SECONDS_PER_HOUR))
        HALF_DAYS (plus-seconds this (math/multiply-exact amount-to-add (/ SECONDS_PER_DAY 2)))
-       DAYS (plus-seconds this (math/multiply-exact amount-to-add SECONDS_PER_DAY))
+       DAYS (plus-seconds this (math/multiply-exact amount-to-add (int SECONDS_PER_DAY)))
        (throw (ex UnsupportedTemporalTypeException (str "Unsupported unit: " unit))))
      (temporal-unit/add-to unit this amount-to-add))))
 (s/fdef -plus :args ::plus-args :ret ::temporal/temporal)

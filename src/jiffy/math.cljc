@@ -8,27 +8,46 @@
 (def integer-min-value (mm/integer-min-value))
 (def integer-max-value (mm/integer-max-value))
 
-;; TODO: decide whether to deviate from java.time and use arbitrary precision
-;; math operations instead (clojure.core's +' and *')
+(defmulti add-exact* (fn [x y] [(type x) (type y)]))
+(defn add-exact [x y] (add-exact* x y))
 
-(defn add-exact [x y]
-  (if (= (type x) java.lang.Integer)
-    (let [r (try* (int (+' x y))
-                  (catch :default e
-                    (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
-      ;; TODO: find out if this is nessecary on cljs.
-      ;; This case seems to be handled by Clojure itself (see try* above)
-      (when (neg? (bit-and (bit-xor x r) (bit-xor y r)))
-        (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
-      r)
-    (let [r (try* (long (+' x y))
-                  (catch :default e
-                    (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
-      ;; TODO: find out if this is nessecary on cljs.
-      ;; This case seems to be handled by Clojure itself (see try* above)
-      (when (neg? (bit-and (bit-xor x r) (bit-xor y r)))
-        (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
-      r)))
+#?(:clj
+   (defmethod add-exact* [java.lang.Integer java.lang.Integer]
+     [x y]
+     (let [r (try* (int (+' x y))
+                   (catch :default e
+                     (throw (ex JavaArithmeticException "integer overflow" {:x x :y y} e))))]
+       ;; TODO: find out if this is nessecary on cljs.
+       ;; This case seems to be handled by Clojure itself (see try* above)
+       (when (neg? (bit-and (bit-xor x r) (bit-xor y r)))
+         (throw (ex JavaArithmeticException "integer overflow" {:x x :y y})))
+       r)))
+
+#?(:clj
+   (defmethod add-exact* [java.lang.Long java.lang.Long]
+     [x y]
+     (let [r (try* (long (+' x y))
+                   (catch :default e
+                     (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
+       ;; TODO: find out if this is nessecary on cljs.
+       ;; This case seems to be handled by Clojure itself (see try* above)
+       (when (neg? (bit-and (bit-xor x r) (bit-xor y r)))
+         (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
+       r)))
+
+;; #?(:clj
+;;    (defmethod add-exact* [java.lang.Integer java.lang.Long]
+;;      [x y]
+;;      (add-exact*
+;;       x
+;;       (try* (int y) (catch :default e (throw (ex JavaArithmeticException "integer overflow" {:x x :y y} e)))))))
+
+;; #?(:clj
+;;    (defmethod add-exact* [java.lang.Long java.lang.Integer]
+;;      [x y]
+;;      (add-exact*
+;;       (try* (int x) (catch :default e (throw (ex JavaArithmeticException "integer overflow" {:x x :y y} e))))
+;;       y)))
 
 (defn subtract-exact [x y]
   (let [r (try* (- x y)
@@ -52,29 +71,42 @@
 (defn abs [x]
   (Math/abs x))
 
-(defn multiply-exact [x y]
-  (if (= (type x) java.lang.Integer)
-    (let [r (* (long x) (long y))]
-      (if (not= r (try*
-                   (int r)
+(defmulti multiply-exact* (fn [x y] [(type x) (type y)]))
+(defn multiply-exact [x y] (multiply-exact* x y))
+
+#?(:clj
+   (defmethod multiply-exact* [java.lang.Integer java.lang.Integer]
+     [x y]
+     (let [r (* (long x) (long y))]
+       (if (not= r (try*
+                    (int r)
+                    (catch :default e
+                      (throw (ex JavaArithmeticException "integer overflow")))))
+         (throw (ex JavaArithmeticException "integer overflow"))
+         (int r)))))
+
+#?(:clj
+   (defmethod multiply-exact* [java.lang.Long java.lang.Long]
+     [x y]
+     (let [r (try* (* x y)
                    (catch :default e
-                     (throw (ex JavaArithmeticException "integer overflow")))))
-        (throw (ex JavaArithmeticException "integer overflow"))
-        (int r)))
-    (let [r (try* (* x y)
-                  (catch :default e
-                    (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))
-          ax (abs x)
-          ay (abs y)]
-      ;; TODO: find out if this is nessecary on cljs.
-      ;; This case seems to be handled by Clojure itself (see try* above)
-      (when (and (not (zero? (unsigned-bit-shift-right (bit-or ax ay) 31)))
-                 (or (and (not (zero? y))
-                          (not (= x (/ r y))))
-                     (and (= x long-max-value)
-                          (= y -1))))
-        (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
-      r)))
+                     (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))
+           ax (abs x)
+           ay (abs y)]
+       ;; TODO: find out if this is nessecary on cljs.
+       ;; This case seems to be handled by Clojure itself (see try* above)
+       (when (and (not (zero? (unsigned-bit-shift-right (bit-or ax ay) 31)))
+                  (or (and (not (zero? y))
+                           (not (= x (/ r y))))
+                      (and (= x long-max-value)
+                           (= y -1))))
+         (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
+       r)))
+
+#?(:clj
+   (defmethod multiply-exact* [java.lang.Long java.lang.Integer]
+     [x y]
+     (multiply-exact* x (long y))))
 
 (defn floor-div [x y]
   (let [r (long (/ x y))]

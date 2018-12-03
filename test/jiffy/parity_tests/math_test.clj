@@ -4,8 +4,10 @@
             [clojure.test :as t]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
+            [jiffy.math :as math]
             [jiffy.math :as sut]
-            [jiffy.parity-tests.support :refer [same?]]))
+            [jiffy.parity-tests.support :refer [same?]]
+            [jiffy.specs :as j]))
 
 ;; FIXME: need to narrow this to int as we're unable to replicate implementation in java.lang.Math.
 ;; Change ::floor-int to int? to see the results.
@@ -24,7 +26,8 @@
                        (Math/floorMod x y))))
 
 (defspec add-exact-test 10000
-  (prop/for-all [[x y] (s/gen (s/tuple int? int?))]
+  (prop/for-all [[x y] (s/gen (s/or :ints (s/tuple ::j/int ::j/int)
+                                    :longs (s/tuple ::j/long ::j/long)))]
                 (same? (sut/add-exact x y)
                        (Math/addExact x y))))
 
@@ -34,6 +37,7 @@
                        (Math/subtractExact (long x) (long y)))))
 
 (defspec multiply-exact-test 1000
-  (prop/for-all [[x y] (s/gen (s/tuple int? int?))]
+  (prop/for-all [[x y] (s/gen (s/tuple ::j/long
+                                       (s/or :int ::j/int :long ::j/long)))]
                 (same? (sut/multiply-exact x y)
                        (Math/multiplyExact x y))))
