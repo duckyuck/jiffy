@@ -418,7 +418,8 @@
 #?(:clj
    (defmethod same? Period
      [jiffy-object java-object]
-     (= (map #(% jiffy-object) [:years :months :days])
-        (map #(% java-object) [(memfn getYears)
-                               (memfn getMonths)
-                               (memfn getDays)]))))
+     (and (= (type java-object) java.time.Period)
+          (= (map #(% jiffy-object) [:years :months :days])
+             (map #(% java-object) [(memfn getYears)
+                                    (memfn getMonths)
+                                    (memfn getDays)])))))
