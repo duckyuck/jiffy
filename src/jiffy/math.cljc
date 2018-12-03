@@ -11,6 +11,9 @@
 (defmulti add-exact* (fn [x y] [(type x) (type y)]))
 (defn add-exact [x y] (add-exact* x y))
 
+#?(:cljs
+   (defmethod add-exact* :default [x y] (+ x y)))
+
 #?(:clj
    (defmethod add-exact* [java.lang.Integer java.lang.Integer]
      [x y]
@@ -73,6 +76,9 @@
 
 (defmulti multiply-exact* (fn [x y] [(type x) (type y)]))
 (defn multiply-exact [x y] (multiply-exact* x y))
+
+#?(:cljs
+   (defmethod multiply-exact* :default [x y] (* x y)))
 
 #?(:clj
    (defmethod multiply-exact* [java.lang.Integer java.lang.Integer]
