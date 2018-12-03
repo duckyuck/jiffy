@@ -20,6 +20,8 @@
   [coll]
   (mapv jiffy->java coll))
 
-(defmethod same? clojure.lang.PersistentVector
-  [jiffy-coll java-coll]
+(defn same-coll? [jiffy-coll java-coll]
   (every? true? (map same? jiffy-coll java-coll)))
+
+(defmethod same? clojure.lang.PersistentVector [& args] (apply same-coll? args))
+(defmethod same? clojure.lang.ArraySeq [& args] (apply same-coll? args))

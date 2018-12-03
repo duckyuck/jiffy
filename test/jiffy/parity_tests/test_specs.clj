@@ -51,6 +51,10 @@
   (s/with-gen #(satisfies? chrono-unit/IChronoUnit %)
     (fn [] (gen/one-of (map gen/return (chrono-unit/values))))))
 
+(s/def ::month/month
+  (s/with-gen #(satisfies? month/IMonth %)
+    (fn [] (gen/one-of (map gen/return (month/values))))))
+
 (s/def ::temporal-unit/temporal-unit ::chrono-unit/chrono-unit)
 
 (s/def ::temporal-amount/temporal-amount

@@ -1,0 +1,25 @@
+(ns jiffy.parity-tests.month-test
+  (:require [jiffy.parity-tests.support :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support]))
+
+(test-proto-fn jiffy.month jiffy.month/get-value)
+;; (test-proto-fn! jiffy.month jiffy.month/get-display-name)
+(test-proto-fn jiffy.month jiffy.month/plus)
+(test-proto-fn jiffy.month jiffy.month/minus)
+(test-proto-fn jiffy.month jiffy.month/length)
+(test-proto-fn jiffy.month jiffy.month/min-length)
+(test-proto-fn jiffy.month jiffy.month/max-length)
+(test-proto-fn jiffy.month jiffy.month/first-day-of-year)
+(test-proto-fn jiffy.month jiffy.month/first-month-of-quarter)
+
+(test-proto-fn jiffy.month jiffy.temporal.temporal-accessor/is-supported)
+(test-proto-fn jiffy.month jiffy.temporal.temporal-accessor/range)
+(test-proto-fn jiffy.month jiffy.temporal.temporal-accessor/get)
+(test-proto-fn jiffy.month jiffy.temporal.temporal-accessor/get-long)
+;; (test-proto-fn! jiffy.month jiffy.temporal.temporal-accessor/query)
+;; (test-proto-fn! jiffy.month jiffy.temporal.temporal-adjuster/adjust-into)
+
+;; TODO: fix test of value-of. currently tests invalid values (i.e. random strings)
+(test-static-fn jiffy.month/value-of)
+(test-static-fn jiffy.month/values)
+(test-static-fn jiffy.month/of)
+;; (test-static-fn! jiffy.month/from)
