@@ -1,5 +1,6 @@
 (ns jiffy.period
   (:require [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]
             [jiffy.asserts :as asserts]
             [jiffy.chrono.chrono-local-date :as chrono-local-date]
             [jiffy.chrono.chrono-period :as chrono-period :refer [#?@(:cljs [IChronoPeriod])]]
@@ -369,7 +370,25 @@
 
 (def ^:private PATTERN #"([-+]?)P(?:([-+]?[0-9]+)Y)?(?:([-+]?[0-9]+)M)?(?:([-+]?[0-9]+)W)?(?:([-+]?[0-9]+)D)?")
 
-(s/def ::iso8601-period (s/and string? #(re-find PATTERN %)))
+(defn- period-part [n p]
+  (when-not (zero? n)
+    (str n p)))
+
+(s/def ::iso8601-period
+  (s/with-gen (s/and string? #(re-find PATTERN %))
+    (fn []
+      (clojure.test.check.generators/let
+          [prefix (s/gen #{"" "-" "+"})
+           year (s/gen (s/int-in 0 math/integer-max-value))
+           month (s/gen (s/int-in 0 math/integer-max-value))
+           week (s/gen (s/int-in 0 math/integer-max-value))
+           day (s/gen (s/int-in 0 math/integer-max-value))]
+        (str prefix
+             "P"
+             (period-part year "Y")
+             (period-part month "M")
+             (period-part week "W")
+             (period-part day "D"))))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L325
 (s/def ::parse-args (s/tuple ::iso8601-period))
