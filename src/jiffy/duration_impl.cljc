@@ -48,7 +48,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L280
 (defn of-nanos [nanos]
-  (let [nos (int (mod nanos NANOS_PER_SECOND))
+  (let [nos (int (rem nanos NANOS_PER_SECOND))
         secs (cond-> (long (/ nanos NANOS_PER_SECOND)) (neg? nos) dec)
         nos (cond-> nos (neg? nos) (+ NANOS_PER_SECOND))]
     (create secs nos)))

@@ -40,23 +40,19 @@
 (test-proto-fn jiffy.duration jiffy.duration/to-seconds-part)
 (test-proto-fn jiffy.duration jiffy.duration/to-millis-part)
 (test-proto-fn jiffy.duration jiffy.duration/to-nanos-part)
-
-;; (test-proto-fn! jiffy.duration jiffy.duration/truncated-to)
-
+(test-proto-fn jiffy.duration jiffy.duration/truncated-to)
 (test-proto-fn jiffy.duration jiffy.time-comparable/compare-to)
 (test-proto-fn jiffy.duration jiffy.temporal.temporal-amount/get)
+(test-proto-fn jiffy.duration jiffy.temporal.temporal-amount/get-units)
+(test-proto-fn jiffy.duration jiffy.temporal.temporal-amount/add-to)
+(test-proto-fn jiffy.duration jiffy.temporal.temporal-amount/subtract-from)
 
-;; (test-proto-fn! jiffy.duration jiffy.temporal.temporal-amount/get-units)
-;; (test-proto-fn! jiffy.duration jiffy.temporal.temporal-amount/add-to)
-;; (test-proto-fn! jiffy.duration jiffy.temporal.temporal-amount/subtract-from)
-
-;; (test-static-fn! jiffy.duration/between)
+(test-static-fn! jiffy.duration/between)
 ;; (test-static-fn! jiffy.duration/parse)
-;; (test-static-fn! jiffy.duration/from)
-;; (test-static-fn! jiffy.duration/of)
-;; (test-static-fn! jiffy.duration/of-nanos)
-;; (test-static-fn! jiffy.duration/of-millis)
-
+(test-static-fn jiffy.duration/from)
+(test-static-fn jiffy.duration/of)
+(test-static-fn! jiffy.duration/of-nanos)
+(test-static-fn! jiffy.duration/of-millis)
 (test-static-fn jiffy.duration/of-seconds)
 (test-static-fn jiffy.duration/of-minutes)
 (test-static-fn jiffy.duration/of-hours)

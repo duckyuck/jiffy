@@ -410,7 +410,7 @@
 (s/def ::truncated-to-args (args ::temporal-unit/temporal-unit))
 (defn -truncated-to [this unit]
   (let [unit-dur (temporal-unit/get-duration unit)
-        dur (to-nanos this)]
+        dur (delay (to-nanos unit-dur))]
     (cond
       (and (= unit chrono-unit/SECONDS)
            (or (>= (:seconds this) 0)
@@ -423,7 +423,7 @@
       (> (get-seconds unit-dur) SECONDS_PER_DAY)
       (throw (ex UnsupportedTemporalTypeException "Unit is too large to be used for truncation" {:duration this :unit unit}))
 
-      (-> NANOS_PER_DAY (rem dur) zero? not)
+      (-> NANOS_PER_DAY (rem @dur) zero? not)
       (throw (ex UnsupportedTemporalTypeException "Unit must divide into a standard day without remainder" {:duration this :unit unit}))
 
       :else
@@ -432,8 +432,9 @@
                     (* NANOS_PER_SECOND)
                     (+ (:nanos this)))
             result  (-> nod
-                        (/ dur)
-                        (* dur))]
+                        (/ @dur)
+                        long
+                        (* @dur))]
         (plus-nanos this (- result nod))))))
 (s/fdef -truncated-to :args ::truncated-to-args :ret ::duration)
 
@@ -563,8 +564,8 @@
 (s/def ::of-millis-args (s/tuple ::j/long))
 (defn of-millis [millis]
   (let [mos (int (rem millis 1000))
-        secs (cond-> (/ millis 1000) (neg? mos) dec)
-        mos (cond-> mos neg? (+ 1000))]
+        secs (cond-> (long (/ millis 1000)) (neg? mos) dec)
+        mos (cond-> mos (neg? mos) (+ 1000))]
     (create secs (* mos 1000000))))
 (s/fdef of-millis :args ::of-millis-args :ret ::duration)
 
@@ -580,7 +581,7 @@
 (s/fdef of :args ::of-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L334
-(s/def ::from-args (args ::temporal-amount/temporal-amount))
+(s/def ::from-args (s/tuple ::temporal-amount/temporal-amount))
 (defn from [amount]
   (reduce #(plus %1 (temporal-amount/get amount %2) %2)
           ZERO
