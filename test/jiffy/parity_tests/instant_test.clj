@@ -3,7 +3,7 @@
 
 (test-proto-fn jiffy.instant jiffy.instant/get-epoch-second)
 (test-proto-fn jiffy.instant jiffy.instant/get-nano)
-;; (test-proto-fn! jiffy.instant jiffy.instant/truncated-to)
+(test-proto-fn jiffy.instant jiffy.instant/truncated-to)
 (test-proto-fn jiffy.instant jiffy.instant/plus-seconds)
 (test-proto-fn jiffy.instant jiffy.instant/plus-millis)
 (test-proto-fn jiffy.instant jiffy.instant/plus-nanos)
@@ -11,17 +11,14 @@
 (test-proto-fn jiffy.instant jiffy.instant/minus-millis)
 (test-proto-fn jiffy.instant jiffy.instant/minus-nanos)
 (test-proto-fn jiffy.instant jiffy.instant/to-epoch-milli)
-;; (test-proto-fn jiffy.instant jiffy.instant/at-offset)
-;; (test-proto-fn jiffy.instant jiffy.instant/at-zone)
+;; (test-proto-fn! jiffy.instant jiffy.instant/at-offset)
+;; (test-proto-fn! jiffy.instant jiffy.instant/at-zone)
 (test-proto-fn jiffy.instant jiffy.instant/is-after)
 (test-proto-fn jiffy.instant jiffy.instant/is-before)
-
 (test-proto-fn jiffy.instant jiffy.time-comparable/compare-to)
-
-;; (test-proto-fn! jiffy.instant jiffy.temporal.temporal/with)
-;; (test-proto-fn! jiffy.instant jiffy.temporal.temporal/plus)
-;; (test-proto-fn! jiffy.instant jiffy.temporal.temporal/minus)
-
+(test-proto-fn jiffy.instant jiffy.temporal.temporal/with)
+(test-proto-fn jiffy.instant jiffy.temporal.temporal/plus)
+(test-proto-fn jiffy.instant jiffy.temporal.temporal/minus)
 (test-proto-fn jiffy.instant jiffy.temporal.temporal/until)
 (test-proto-fn jiffy.instant jiffy.temporal.temporal-accessor/is-supported)
 (test-proto-fn jiffy.instant jiffy.temporal.temporal-accessor/range)
@@ -32,5 +29,6 @@
 
 (test-static-fn jiffy.instant/of-epoch-second)
 (test-static-fn jiffy.instant/of-epoch-milli)
+(test-static-fn jiffy.instant/from)
+
 ;; (test-static-fn! jiffy.instant/now)
-;; (test-static-fn jiffy.instant/from)

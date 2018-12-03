@@ -517,10 +517,10 @@
 (defn -add-to [this temporal]
   (cond-> temporal
     (not (zero? (:seconds this)))
-    (plus (:seconds this) SECONDS)
+    (temporal/plus (:seconds this) SECONDS)
 
     (not (zero? (:nanos this)))
-    (plus (:seconds this) NANOS)))
+    (temporal/plus (:nanos this) NANOS)))
 (s/fdef -add-to :args ::add-to-args :ret ::temporal/temporal)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1135
@@ -531,7 +531,7 @@
     (temporal/minus (:seconds this) SECONDS)
 
     (not (zero? (:nanos this)))
-    (temporal/minus (:seconds this) NANOS)))
+    (temporal/minus (:nanos this) NANOS)))
 (s/fdef -subtract-from :args ::subtract-from-args :ret ::temporal/temporal)
 
 (extend-type Duration

@@ -69,3 +69,7 @@
 (s/def ::previous-or-same-args (s/tuple ::day-of-week/day-of-week))
 (defn previous-or-same [day-of-week] (wip ::previous-or-same))
 (s/fdef previous-or-same :args ::previous-or-same-args :ret ::temporal-adjuster/temporal-adjuster)
+
+;; TODO: Implement specs / constructors for methods in TemporalAdjusters
+;; Used by `jiffy.parity-tests.test-specs`.
+(def temporal-adjusters-specs [])

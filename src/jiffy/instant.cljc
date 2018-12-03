@@ -55,9 +55,10 @@
 (defmacro args [& x] `(s/tuple ::instant ~@x))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L747
+(s/def ::truncated-to-args (args ::temporal-unit/temporal-unit))
 (defn -truncated-to [this unit]
   (let [unit-dur (temporal-unit/get-duration unit)
-        dur (duration/to-nanos unit-dur)]
+        dur (delay (duration/to-nanos unit-dur))]
     (cond
       (= unit NANOS)
       this
@@ -65,7 +66,7 @@
       (> (duration/get-seconds unit-dur) SECONDS_PER_DAY)
       (throw (ex UnsupportedTemporalTypeException "Unit is too large to be used for truncation" {:instant this :unit unit}))
 
-      (-> NANOS_PER_DAY (mod dur) zero? not)
+      (-> NANOS_PER_DAY (mod @dur) zero? not)
       (throw (ex UnsupportedTemporalTypeException "Unit must divide into a standard day without remainder" {:instant this :unit unit}))
 
       :else
@@ -73,8 +74,8 @@
                     (* NANOS_PER_SECOND)
                     (+ (:nanos this)))
             result (-> nod
-                       (math/floor-div dur)
-                       (* dur))]
+                       (math/floor-div @dur)
+                       (* @dur))]
         (plus-nanos this (- result nod))))))
 
 (s/def ::of-epoch-second-args ::impl/of-epoch-second-args)
@@ -204,8 +205,8 @@
   time-comparable/ITimeComparable
   (compare-to [this other-instant] (-compare-to this other-instant)))
 
-(s/def ::with-args (s/or :arity-2 (s/tuple ::instant ::temporal-adjuster/temporal-adjuster)
-                         :arity-3 (s/tuple ::instant ::temporal-field/temporal-field ::j/long)))
+(s/def ::with-args (s/or :arity-2 (args ::temporal-adjuster/temporal-adjuster)
+                         :arity-3 (args ::temporal-field/temporal-field ::j/long)))
 (defn -with
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L654
   ([this adjuster]
@@ -448,7 +449,7 @@
 (s/fdef of-epoch-milli :args ::of-epoch-milli-args :ret ::instant)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L367
-(s/def ::from-args (args ::temporal-accessor/temporal-accessor))
+(s/def ::from-args (s/tuple ::temporal-accessor/temporal-accessor))
 (defn from [temporal]
   (if (satisfies? IInstant temporal)
     temporal
