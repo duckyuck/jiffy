@@ -33,5 +33,5 @@
 (test-static-fn! jiffy.period/of-weeks)
 (test-static-fn! jiffy.period/of-days)
 (test-static-fn! jiffy.period/of)
-;; (test-static-fn! jiffy.period/parse)
+(test-static-fn jiffy.period/parse)
 ;; (test-static-fn! jiffy.period/between)

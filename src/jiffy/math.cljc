@@ -12,14 +12,23 @@
 ;; math operations instead (clojure.core's +' and *')
 
 (defn add-exact [x y]
-  (let [r (try* (+ x y)
-                (catch :default e
-                  (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
-    ;; TODO: find out if this is nessecary on cljs.
-    ;; This case seems to be handled by Clojure itself (see try* above)
-    (when (neg? (bit-and (bit-xor x r) (bit-xor y r)))
-      (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
-    r))
+  (if (= (type x) java.lang.Integer)
+    (let [r (try* (int (+' x y))
+                  (catch :default e
+                    (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
+      ;; TODO: find out if this is nessecary on cljs.
+      ;; This case seems to be handled by Clojure itself (see try* above)
+      (when (neg? (bit-and (bit-xor x r) (bit-xor y r)))
+        (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
+      r)
+    (let [r (try* (long (+' x y))
+                  (catch :default e
+                    (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
+      ;; TODO: find out if this is nessecary on cljs.
+      ;; This case seems to be handled by Clojure itself (see try* above)
+      (when (neg? (bit-and (bit-xor x r) (bit-xor y r)))
+        (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
+      r)))
 
 (defn subtract-exact [x y]
   (let [r (try* (- x y)
