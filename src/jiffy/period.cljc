@@ -399,7 +399,7 @@
      (let [[_ prefix & nums] matches
            factor (if (= "-" prefix) -1 1)
            [y m w d] (map #(some-> % math/parse-int (* factor)) nums)]
-       (create y m (math/add-exact (or d 0) (math/multiply-exact (or w 0) 7))))
+       (create (int (or y 0)) (int (or m 0)) (math/add-exact (int (or d 0)) (math/multiply-exact (int (or w 0)) 7))))
      (catch :default e
        (throw (ex DateTimeParseException "Text cannot be parsed to a Period" {:parsed-data text :error-index 0} e))))
     (throw (ex DateTimeParseException "Text cannot be parsed to a Period" {:parsed-data text :error-index 0}))))
