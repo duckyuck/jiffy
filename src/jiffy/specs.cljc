@@ -3,8 +3,11 @@
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]))
 
-(s/def ::int (s/with-gen int?
-               (fn [] (gen/fmap int (s/gen int?)))))
+(defn int-in [from-inclusive to-exclusive]
+  (s/with-gen int?
+    (fn [] (gen/fmap int (s/gen (s/int-in from-inclusive to-exclusive))))))
+
+(s/def ::int (int-in math/integer-min-value (inc math/integer-max-value)))
 (s/def ::long int?)
 (s/def ::boolean boolean?)
 (s/def ::char char?)
@@ -12,9 +15,7 @@
 (s/def ::any any?)
 (s/def ::char-sequence string?)
 
-(defn int-in [from-inclusive to-exclusive]
-  (s/with-gen int?
-    (fn [] (gen/fmap int (s/gen (s/int-in from-inclusive to-exclusive))))))
+
 
 ;; TODO:
 ;; These specs are currently only used for generating data used in API

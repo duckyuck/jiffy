@@ -49,14 +49,14 @@
 (def ZERO (create 0 0 0))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L257
-(s/def ::from-args (args ::temporal-amount/temporal-amount))
+(s/def ::from-args (s/tuple ::temporal-amount/temporal-amount))
 (defn from [amount]
   (asserts/require-non-nil amount "amount")
   (cond
     (instance? Period amount)
     amount
 
-    (and (satisfies? IChronoPeriod amount)
+    (and (satisfies? chrono-period/IChronoPeriod amount)
          (not= iso-chronology/INSTANCE (chrono-period/get-chronology amount)))
     (throw (ex DateTimeException (str "Period requires ISO chronology: " amount)))
 
@@ -256,7 +256,7 @@
 (s/def ::normalized-args (args))
 (defn -normalized [this]
   (let [total-months (to-total-months this)
-        split-years (/ total-months 12)
+        split-years (long (/ total-months 12))
         split-months (int (rem total-months 12))]
     (create (math/to-int-exact split-years) split-months (:days this))))
 (s/fdef -normalized :args ::normalized-args :ret ::chrono-period/chrono-period)
@@ -301,12 +301,15 @@
   (let [total-months (to-total-months this)]
     (cond-> temporal
       (and (= (:months this) 0)
-           (not= (:year this) 0)) (temporal/plus (:years this) chrono-unit/YEARS)
+           (not= (:years this) 0))
+      (temporal/plus (:years this) chrono-unit/YEARS)
 
       (and (not= (:months this) 0)
-           (not= total-months 0)) (temporal/plus total-months chrono-unit/MONTHS)
+           (not= total-months 0))
+      (temporal/plus total-months chrono-unit/MONTHS)
 
-      (not= (:days this) 0) (temporal/plus (:days this) chrono-unit/DAYS))))
+      (not= (:days this) 0)
+      (temporal/plus (:days this) chrono-unit/DAYS))))
 (s/fdef -add-to :args ::add-to-args :ret ::temporal/temporal)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L947
@@ -315,13 +318,16 @@
   (validate-chrono temporal)
   (let [total-months (to-total-months this)]
     (cond-> temporal
-      (and (= (:months this) 0)
-           (not= (:year this) 0)) (temporal/minus (:years this) chrono-unit/YEARS)
+      (and (zero? (:months this))
+           (not (zero? (:years this))))
+      (temporal/minus (:years this) chrono-unit/YEARS)
 
       (and (not= (:months this) 0)
-           (not= total-months 0)) (temporal/minus total-months chrono-unit/MONTHS)
+           (not= total-months 0))
+      (temporal/minus total-months chrono-unit/MONTHS)
 
-      (not= (:days this) 0) (temporal/minus (:days this) chrono-unit/DAYS))))
+      (not= (:days this) 0)
+      (temporal/minus (:days this) chrono-unit/DAYS))))
 (s/fdef -subtract-from :args ::subtract-from-args :ret ::temporal/temporal)
 
 (extend-type Period
@@ -332,31 +338,31 @@
   (subtract-from [this temporal] (-subtract-from this temporal)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L178
-(s/def ::of-years-args (args ::j/int))
+(s/def ::of-years-args (s/tuple ::j/int))
 (defn of-years [years]
   (create years 0 0))
 (s/fdef of-years :args ::of-years-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L191
-(s/def ::of-months-args (args ::j/int))
+(s/def ::of-months-args (s/tuple ::j/int))
 (defn of-months [months]
   (create 0 months 0))
 (s/fdef of-months :args ::of-months-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L205
-(s/def ::of-weeks-args (args ::j/int))
+(s/def ::of-weeks-args (s/tuple ::j/int))
 (defn of-weeks [weeks]
   (create 0 0 (math/multiply-exact weeks 7)))
 (s/fdef of-weeks :args ::of-weeks-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L218
-(s/def ::of-days-args (args ::j/int))
+(s/def ::of-days-args (s/tuple ::j/int))
 (defn of-days [days]
   (create 0 0 days))
 (s/fdef of-days :args ::of-days-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L233
-(s/def ::of-args (args ::j/int ::j/int ::j/int))
+(s/def ::of-args (s/tuple ::j/int ::j/int ::j/int))
 (defn of [years months days]
   (create years months days))
 (s/fdef of :args ::of-args :ret ::period)
@@ -366,7 +372,7 @@
 (s/def ::iso8601-period (s/and string? #(re-find PATTERN %)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L325
-(s/def ::parse-args (args ::iso8601-period))
+(s/def ::parse-args (s/tuple ::iso8601-period))
 (defn parse [text]
   (asserts/require-non-nil text "text")
   (if-let [matches (re-find PATTERN text)]
@@ -381,7 +387,7 @@
 (s/fdef parse :args ::parse-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L386
-(s/def ::between-args (args ::local-date/local-date ::local-date/local-date))
+(s/def ::between-args (s/tuple ::local-date/local-date ::local-date/local-date))
 (defn between [start-date-inclusive end-date-exclusive]
   (chrono-local-date/until start-date-inclusive end-date-exclusive))
 (s/fdef between :args ::between-args :ret ::period)
@@ -394,4 +400,6 @@
    (defmethod same? Period
      [jiffy-object java-object]
      (= (map #(% jiffy-object) [:years :months :days])
-        (map #(% java-object) [(memfn getYears) (memfn getMonths) (memfn getDays)]))))
+        (map #(% java-object) [(memfn getYears)
+                               (memfn getMonths)
+                               (memfn getDays)]))))

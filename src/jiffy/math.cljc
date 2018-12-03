@@ -32,27 +32,40 @@
     r))
 
 (defn to-int-exact [x]
-  ;; TODO: Something
-  (int x))
+  (let [int-x (try*
+               (int x)
+               (catch :default e
+                 (throw (ex JavaArithmeticException "integer overflow"))))]
+    (if (= int-x x)
+      int-x
+      (throw (ex JavaArithmeticException "integer overflow")))))
 
 (defn abs [x]
   (Math/abs x))
 
 (defn multiply-exact [x y]
-  (let [r (try* (* x y)
-                (catch :default e
-                  (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))
-        ax (abs x)
-        ay (abs y)]
-    ;; TODO: find out if this is nessecary on cljs.
-    ;; This case seems to be handled by Clojure itself (see try* above)
-    (when (and (not (zero? (unsigned-bit-shift-right (bit-or ax ay) 31)))
-               (or (and (not (zero? y))
-                        (not (= x (/ r y))))
-                   (and (= x long-max-value)
-                        (= y -1))))
-      (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
-    r))
+  (if (= (type x) java.lang.Integer)
+    (let [r (* (long x) (long y))]
+      (if (not= r (try*
+                   (int r)
+                   (catch :default e
+                     (throw (ex JavaArithmeticException "integer overflow")))))
+        (throw (ex JavaArithmeticException "integer overflow"))
+        (int r)))
+    (let [r (try* (* x y)
+                  (catch :default e
+                    (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))
+          ax (abs x)
+          ay (abs y)]
+      ;; TODO: find out if this is nessecary on cljs.
+      ;; This case seems to be handled by Clojure itself (see try* above)
+      (when (and (not (zero? (unsigned-bit-shift-right (bit-or ax ay) 31)))
+                 (or (and (not (zero? y))
+                          (not (= x (/ r y))))
+                     (and (= x long-max-value)
+                          (= y -1))))
+        (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
+      r)))
 
 (defn floor-div [x y]
   (let [r (long (/ x y))]
