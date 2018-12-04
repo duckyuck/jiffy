@@ -33,8 +33,5 @@
 (test-static-fn jiffy.period/of-weeks)
 (test-static-fn jiffy.period/of-days)
 (test-static-fn jiffy.period/of)
-
-;; FIXME: jiffy considers "P" a valid period. It is not. Fails intermittently.
-;; (test-static-fn jiffy.period/parse)
-
+(test-static-fn jiffy.period/parse)
 ;; (test-static-fn! jiffy.period/between)

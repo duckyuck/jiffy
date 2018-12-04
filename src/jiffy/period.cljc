@@ -397,8 +397,10 @@
     (try*
      (let [[_ prefix & nums] matches
            factor (if (= "-" prefix) -1 1)
-           [y m w d] (map #(some-> % math/parse-int (* factor)) nums)]
-       (create (int (or y 0)) (int (or m 0)) (math/add-exact (int (or d 0)) (int (math/multiply-exact (int (or w 0)) 7)))))
+           [y m w d] (map #(-> (or (math/parse-int %) 0) (* factor) math/to-int-exact) nums)]
+       (when (= y m w d 0)
+         (throw (ex DateTimeParseException "Text cannot be parsed to a Period" {:parsed-data text :error-index 0})))
+       (create y m (math/add-exact d (int (math/multiply-exact w (int 7))))))
      (catch JavaArithmeticException e
        (throw e))
      (catch :default e
