@@ -38,10 +38,15 @@
 (defmacro trycatch [& exprs]
   `(try* ~@exprs (catch :default e# e#)))
 
-(defmacro same? [call-jiffy-form call-java-form]
-  `(conversion/same?
-    (trycatch ~call-jiffy-form)
-    (trycatch ~call-java-form)))
+(defmacro matching-types? [jiffy-result java-result]
+  `(not (and (not (ex-data ~jiffy-result))
+             (instance? Throwable ~java-result))))
+
+(defmacro same? [jiffy-expr java-expr]
+  `(let [jiffy-result# (trycatch ~jiffy-expr)
+         java-result# (trycatch ~java-expr)]
+     (and (matching-types? jiffy-result# java-result#)
+          (conversion/same? jiffy-result# java-result#))))
 
 (defn invoke-java [f args {:keys [static?]}]
   (let [obj (when-not static? (first args))
