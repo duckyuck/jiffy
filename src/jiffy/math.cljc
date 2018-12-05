@@ -128,3 +128,8 @@
   (when (string? s)
     #?(:clj (Integer/parseInt s 10)
        :cljs (js/parseInt s 10))))
+
+(defn parse-long [s]
+  (when (string? s)
+    #?(:clj (Long/parseLong s 10)
+       :cljs (js/parseLong s 10))))

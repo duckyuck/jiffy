@@ -1,11 +1,13 @@
 (ns jiffy.duration
   (:require [clojure.spec.alpha :as s]
+            [clojure.test.check.generators]
+            [jiffy.asserts :refer [require-non-nil]]
             [jiffy.big-decimal :as big-decimal]
             #?(:clj [jiffy.conversion :as conversion])
             [jiffy.dev.wip :refer [wip]]
             [jiffy.duration-impl :refer [create #?@(:cljs [Duration])] :as impl]
             [jiffy.exception :refer [DateTimeParseException JavaArithmeticException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
-            [jiffy.local-time-impl :refer [NANOS_PER_SECOND NANOS_PER_DAY SECONDS_PER_DAY SECONDS_PER_MINUTE SECONDS_PER_HOUR SECONDS_PER_MINUTE NANOS_PER_MILLI MINUTES_PER_HOUR]]
+            [jiffy.local-time-impl :refer [NANOS_PER_SECOND NANOS_PER_DAY SECONDS_PER_DAY SECONDS_PER_MINUTE SECONDS_PER_HOUR NANOS_PER_MILLI MINUTES_PER_HOUR]]
             [jiffy.math :as math]
             [jiffy.temporal.chrono-field :as chrono-field :refer [NANO_OF_SECOND]]
             [jiffy.temporal.chrono-unit :as chrono-unit :refer [DAYS MICROS MILLIS NANOS SECONDS]]
@@ -268,28 +270,20 @@
     (plus-nanos this (- nanos-to-subtract))))
 (s/fdef -minus-nanos :args ::minus-nanos-args :ret ::duration)
 
-(defn to-big-decimal-seconds [this]
-  (big-decimal/add (big-decimal/value-of (:seconds this))
-                   (big-decimal/value-of (:nanos this) 9)))
-
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L970
-(s/def ::multiplied-by-args (args ::j/long))
-(defn -multiplied-by [this multiplicand]
-  (condp = multiplicand
-      0 ZERO
-      1 this
-      (create (big-decimal/multiply (to-big-decimal-seconds this) (big-decimal/value-of multiplicand)))))
+(s/def ::multiplied-by-args ::impl/multiplied-by-args)
+(def -multiplied-by #'impl/-multiplied-by)
 (s/fdef -multiplied-by :args ::multiplied-by-args :ret ::duration)
 
 (defn --divided-by-long [this divisor]
   (condp = divisor
     0 (throw (ex JavaArithmeticException "Cannot divide by zero" {:duration this :divisor divisor}))
     1 this
-    (create (big-decimal/divide (to-big-decimal-seconds this) (big-decimal/value-of divisor) :rounding.mode/down))))
+    (create (big-decimal/divide (impl/to-big-decimal-seconds this) (big-decimal/value-of divisor) :rounding.mode/down))))
 
 (defn --divided-by-duration [this duration]
-  (-> (to-big-decimal-seconds this)
-      (big-decimal/divide-to-integral-value (to-big-decimal-seconds duration))
+  (-> (impl/to-big-decimal-seconds this)
+      (big-decimal/divide-to-integral-value (impl/to-big-decimal-seconds duration))
       big-decimal/long-value-exact))
 
 ;; NB! This method is overloaded!
@@ -303,10 +297,9 @@
 (s/fdef -divided-by :args ::divided-by-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1055
-(s/def ::negated-args (args))
-(defn -negated [this]
-  (multiplied-by this -1))
-(s/fdef -negated :args ::negated-args  :ret ::duration)
+(s/def ::negated-args ::impl/negated-args)
+(def -negated #'impl/-negated)
+(s/fdef -negated :args ::negated-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1070
 (s/def ::abs-args (args))
@@ -590,14 +583,78 @@
 
 (def PATTERN (delay (re-pattern (str "(?i)([-+]?)P(?:([-+]?[0-9]+)D)?(T(?:([-+]?[0-9]+)H)?(?:([-+]?[0-9]+)M)?(?:([-+]?[0-9]+)(?:[.,]([0-9]{0,9}))?S)?)?"))))
 
+(defn- duration-part [[[sign] n] & [suffix]]
+  (when (and n (not (zero? n)))
+    (str (str sign n) suffix)))
+
+(s/def ::iso8601-duration
+  #?(:cljs (s/and string? #(re-find @PATTERN %))
+     :clj (s/with-gen (s/and string? #(re-find @PATTERN %))
+            (fn []
+              (let [sign #{"" "-" "+"}
+                    signed-long (s/nilable (s/tuple (s/? sign) ::j/pos-long))
+                    ->str (fn [[[sign] n]] (str sign n))]
+                (clojure.test.check.generators/let
+                    [prefix (s/gen sign)
+                     days (s/gen signed-long)
+                     hours (s/gen signed-long)
+                     minutes (s/gen signed-long)
+                     seconds (s/gen signed-long)
+                     second-fraction (s/gen (s/nilable ::j/pos-int))]
+                  (str prefix
+                       "P"
+                       (duration-part days "D")
+                       (when (some #(some-> % ->str) [hours minutes seconds])
+                         "T")
+                       (duration-part hours "H")
+                       (duration-part minutes "M")
+                       (when (ffirst seconds)
+                         (str (duration-part seconds)
+                              (when second-fraction
+                                (str "." second-fraction))
+                              "S")))))))))
+
+(defn num-digits [n]
+  (count (str (Math/abs n))))
+
+(defn second-fraction [n]
+  (let [trailing-zeros (- 9 (num-digits n))]
+   (* n (reduce * (repeat trailing-zeros 10)))))
+
+(defn parse-fraction [s]
+  (let [n (or (math/parse-int s) 0)
+        leading-zeros (- (count s) (num-digits n))
+        trailing-zeros (- 9 leading-zeros (num-digits n))]
+    (try*
+      (math/multiply-exact n (math/to-int-exact (reduce * (repeat trailing-zeros 10))))
+      (catch :default e
+        (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text s}))))))
+
+(defn parse-number [multiplier s]
+  (try*
+   (math/multiply-exact (or (math/parse-long s) 0) multiplier)
+   (catch :default e
+     (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text s :multiplier multiplier})))))
+
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L388
-(s/def ::parse-args (s/tuple ::j/char-sequence))
+(s/def ::parse-args (s/tuple ::iso8601-duration))
 (defn parse [text]
-  (wip ::parse)
   (let [matches (re-matches @PATTERN text)]
     (if-not matches
       (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text text}))
-      matches)))
+      (let [[_ prefix days T & [hours minutes seconds fraction :as more]] matches
+            nums (cons days more)
+            factor (if (= "-" prefix) -1 1)
+            multiplicands [(partial parse-number SECONDS_PER_DAY)
+                           (partial parse-number SECONDS_PER_HOUR)
+                           (partial parse-number SECONDS_PER_MINUTE)
+                           (partial parse-number 1)
+                           (partial parse-fraction)]
+            [d h m s f :as parts] (map #(%1 %2) multiplicands nums)]
+        (when (or (and T (not (some some? more)))
+                  (= d h m s f 0))
+          (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text text :error-index 0})))
+        (create (neg? factor) d h m s (if (neg? s) (- f) f))))))
 (s/fdef parse :args ::parse-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L486

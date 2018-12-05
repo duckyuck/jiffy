@@ -1,7 +1,5 @@
 (ns jiffy.parity-tests.duration-test
-  (:require [jiffy.big-decimal :as big-decimal]
-            [jiffy.duration :as duration]
-            [jiffy.math :as math]
+  (:require [jiffy.duration :as duration]
             [jiffy.parity-tests.support :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!]]))
 
 (test-proto-fn jiffy.duration jiffy.duration/is-zero)
@@ -46,9 +44,8 @@
 (test-proto-fn jiffy.duration jiffy.temporal.temporal-amount/get-units)
 (test-proto-fn jiffy.duration jiffy.temporal.temporal-amount/add-to)
 (test-proto-fn jiffy.duration jiffy.temporal.temporal-amount/subtract-from)
-
-(test-static-fn! jiffy.duration/between)
-;; (test-static-fn! jiffy.duration/parse)
+(test-static-fn jiffy.duration/between)
+(test-static-fn! jiffy.duration/parse)
 (test-static-fn jiffy.duration/from)
 (test-static-fn jiffy.duration/of)
 (test-static-fn jiffy.duration/of-nanos)
