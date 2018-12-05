@@ -368,26 +368,31 @@
 
 (def ^:private PATTERN #"([-+]?)P(?:([-+]?[0-9]+)Y)?(?:([-+]?[0-9]+)M)?(?:([-+]?[0-9]+)W)?(?:([-+]?[0-9]+)D)?")
 
-(defn- period-part [n p]
-  (when-not (zero? n)
-    (str n p)))
+(defn- period-part [prefix n postfix]
+  (when-not (nil? n)
+    (str prefix n postfix)))
 
 (s/def ::iso8601-period
   #?(:cljs (s/and string? #(re-find PATTERN %))
      :clj (s/with-gen (s/and string? #(re-find PATTERN %))
             (fn []
-              (clojure.test.check.generators/let
-                  [prefix (s/gen #{"" "-" "+"})
-                   year (s/gen (s/int-in 0 math/integer-max-value))
-                   month (s/gen (s/int-in 0 math/integer-max-value))
-                   week (s/gen (s/int-in 0 math/integer-max-value))
-                   day (s/gen (s/int-in 0 math/integer-max-value))]
-                (str prefix
-                     "P"
-                     (period-part year "Y")
-                     (period-part month "M")
-                     (period-part week "W")
-                     (period-part day "D")))))))
+              (let [spec (s/or :nil nil? :int (s/int-in 0 math/integer-max-value))]
+                (clojure.test.check.generators/let
+                    [prefix (s/gen #{"" "-" "+"})
+                     year (s/gen spec)
+                     year-prefix (s/gen #{"" "-" "+"})
+                     month (s/gen spec)
+                     month-prefix (s/gen #{"" "-" "+"})
+                     week (s/gen spec)
+                     week-prefix (s/gen #{"" "-" "+"})
+                     day (s/gen spec)
+                     day-prefix (s/gen #{"" "-" "+"})]
+                  (str prefix
+                       "P"
+                       (period-part year-prefix year "Y")
+                       (period-part month-prefix month "M")
+                       (period-part week-prefix week "W")
+                       (period-part day-prefix day "D"))))))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L325
 (s/def ::parse-args (s/tuple ::iso8601-period))
@@ -398,7 +403,7 @@
      (let [[_ prefix & nums] matches
            factor (if (= "-" prefix) -1 1)
            [y m w d] (map #(-> (or (math/parse-int %) 0) (* factor) math/to-int-exact) nums)]
-       (when (= y m w d 0)
+       (when (apply = nil nums)
          (throw (ex DateTimeParseException "Text cannot be parsed to a Period" {:parsed-data text :error-index 0})))
        (create y m (math/add-exact d (int (math/multiply-exact w (int 7))))))
      (catch JavaArithmeticException e
