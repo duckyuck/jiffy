@@ -55,6 +55,10 @@
   (s/with-gen #(satisfies? month/IMonth %)
     (fn [] (gen/one-of (map gen/return (month/values))))))
 
+(s/def ::day-of-week/day-of-week
+  (s/with-gen #(satisfies? day-of-week/IDayOfWeek %)
+    (fn [] (gen/one-of (map gen/return (day-of-week/values))))))
+
 (s/def ::temporal-unit/temporal-unit ::chrono-unit/chrono-unit)
 
 (s/def ::temporal-amount/temporal-amount

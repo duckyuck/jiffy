@@ -17,8 +17,6 @@
 (s/def ::any any?)
 (s/def ::char-sequence string?)
 
-
-
 ;; TODO:
 ;; These specs are currently only used for generating data used in API
 ;; parity tests, and they are limited in ways to accomodate for testing.
@@ -53,3 +51,4 @@
 
 ;; Placeholder for incomplete specs
 (s/def ::wip (s/and keyword? #(= % ::wip)))
+(s/def ::locale any?)
