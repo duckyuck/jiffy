@@ -16,7 +16,8 @@
             [jiffy.temporal.chrono-field :as chrono-field]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [clojure.string :as str]
-            [jiffy.local-time-impl :as local-time])
+            [jiffy.local-time-impl :as local-time]
+            [jiffy.dev.wip :refer [wip]])
   #?(:clj (:import [jiffy.zone_offset_impl ZoneOffset])))
 
 ;; TODO: implement caching via ID_CACHE (see java.time source code)
@@ -137,9 +138,41 @@
   temporal-adjuster/ITemporalAdjuster
   (adjust-into [this temporal] (-adjust-into this temporal)))
 
-(s/def ::hours (s/int-in -18 19))
-(s/def ::minutes (s/int-in -59 60))
-(s/def ::seconds (s/int-in -59 60))
+(defn- --parse-number [offset-id pos preceded-by-colon]
+  (wip ::parse-number))
+
+(defn --total-seconds [hours minutes seconds]
+  (+ (* hours local-time/SECONDS_PER_HOUR)
+     (* minutes local-time/SECONDS_PER_MINUTE)
+     seconds))
+
+(s/def ::hours (j/int-in -18 19))
+(s/def ::minutes (j/int-in -59 60))
+(s/def ::seconds (j/int-in -59 60))
+(defn --validate [hours minutes seconds]
+  (cond
+    (not (<= -18 hours 18))
+    (throw (ex DateTimeException (str "Zone offset hours not in valid range: value " hours " is not in the range -18 to 18")))
+
+    (and (pos? hours) (or (neg? minutes) (neg? seconds)))
+    (throw (ex DateTimeException "Zone offset minutes and seconds must be positive because hours is positive"))
+
+    (and (neg? hours) (or (pos? minutes) (pos? seconds)))
+    (throw (ex DateTimeException "Zone offset minutes and seconds must be negative because hours is negative"))
+
+    (or (and (pos? minutes) (neg? seconds))
+        (and (neg? minutes) (pos? seconds)))
+    (throw (ex DateTimeException "Zone offset minutes and seconds must have the same sign"))
+
+    (not (<= -59 minutes 59))
+    (throw (ex DateTimeException (str "Zone offset minutes not in valid range: value " minutes  " is not in the range -59 to 59")))
+
+    (not (<= -59 seconds 59))
+    (throw (ex DateTimeException (str "Zone offset seconds not in valid range: value " seconds " is not in the range -59 to 59")))
+
+    (and (= (Math/abs hours) 18)
+         (not (zero? (bit-or minutes seconds))))
+    (throw (ex DateTimeException "Zone offset not in valid range: -18:00 to +18:00"))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L413
 (s/def ::of-total-seconds-args ::impl/of-total-seconds-args)
@@ -147,13 +180,14 @@
 (s/fdef of-total-seconds :args ::of-total-seconds-args :ret ::zone-offset)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L316
-(s/def ::of-hours-minutes-seconds-args (args ::hours ::minutes ::seconds))
+(s/def ::of-hours-minutes-seconds-args (s/tuple ::hours ::minutes ::seconds))
 (defn of-hours-minutes-seconds [hours minutes seconds]
   (impl/of-hours-minutes-seconds hours minutes seconds))
 (s/fdef of-hours-minutes-seconds :args ::of-hours-minutes-seconds-args :ret ::zone-offset)
 
+(s/def ::zone-id (partial = :wip))
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L202
-(s/def ::of-args (args string?))
+(s/def ::of-args (s/tuple ::zone-id))
 (defn of [offset-id]
   (impl/of offset-id))
 (s/fdef of :args ::of-args :ret ::zone-offset)

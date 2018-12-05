@@ -25,7 +25,7 @@
              (str (if (< abs-seconds 10) ":0" ":")
                   abs-seconds))))))
 
-(s/def ::total-seconds (s/int-in -64800 64801))
+(s/def ::total-seconds (j/int-in -64800 64801))
 (s/def ::create-args (s/tuple ::total-seconds))
 (defn create [total-seconds]
   (->ZoneOffset (build-id total-seconds) total-seconds))
