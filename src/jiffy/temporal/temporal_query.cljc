@@ -7,6 +7,7 @@
   (query-from [this temporal]))
 
 (s/def ::temporal-query #(satisfies? ITemporalQuery %))
+(s/def ::result any?)
 
 (defrecord TemporalQuery [name query-from-fn]
   ITemporalQuery
