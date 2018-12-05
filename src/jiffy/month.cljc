@@ -171,7 +171,7 @@
 (defn -get [this field]
   (if (= field chrono-field/MONTH_OF_YEAR)
     (get-value this)
-    (temporal-accessor-defaults/-range this field)))
+    (temporal-accessor-defaults/-get this field)))
 (s/fdef -get :args ::get-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java#L371
@@ -200,7 +200,7 @@
     chrono-unit/MONTHS
 
     (temporal-accessor-defaults/-query this query)))
-(s/fdef -query :args ::query-args :ret ::j/wip)
+(s/fdef -query :args ::query-args :ret ::temporal-query/result)
 
 (extend-type Month
   temporal-accessor/ITemporalAccessor
@@ -226,7 +226,7 @@
 (s/def ::value-of-args (s/tuple string?))
 (defn value-of [enum-name]
   (or (@enums enum-name)
-      (throw (ex JavaIllegalArgumentException (str "no enum constant jiffy.month/" enum-name)))))
+      (throw (ex JavaIllegalArgumentException (str "no enum constant " (symbol (str *ns*) (str enum-name)))))))
 (s/fdef value-of :args ::value-of-args :ret ::month)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java#L185
