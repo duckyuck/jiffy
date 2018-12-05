@@ -1,6 +1,6 @@
 (ns jiffy.zone-region
   (:require [clojure.spec.alpha :as s]
-            [jiffy.dev.wip :refer [wip]]
+            [jiffy.asserts :as assert]
             [jiffy.exception :refer [ex try* DateTimeException]]
             [jiffy.specs :as j]
             [jiffy.zone-id :as zone-id]
@@ -45,7 +45,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneRegion.java#L114
 (s/def ::of-id-args (args string? ::j/boolean))
 (defn of-id [zone-id check-available]
-  ;; TODO: Objects.requireNonNull(zoneId, "zoneId");
+  (assert/require-non-nil zone-id "zone-id")
   (check-name zone-id)
   (try*
    (create zone-id (zone-rules-provider/get-rules zone-id true))
