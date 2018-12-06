@@ -11,7 +11,7 @@
 (test-proto-fn jiffy.local-time jiffy.local-time/with-minute)
 (test-proto-fn jiffy.local-time jiffy.local-time/with-second)
 (test-proto-fn jiffy.local-time jiffy.local-time/with-nano)
-;;(test-proto-fn jiffy.local-time jiffy.local-time/truncated-to)
+(test-proto-fn jiffy.local-time jiffy.local-time/truncated-to)
 (test-proto-fn jiffy.local-time jiffy.local-time/plus-hours)
 (test-proto-fn jiffy.local-time jiffy.local-time/plus-minutes)
 (test-proto-fn jiffy.local-time jiffy.local-time/plus-seconds)

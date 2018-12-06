@@ -178,13 +178,13 @@
 (defn -truncated-to [this unit]
   (if (= unit chrono-unit/NANOS)
     this
-    (let [unit-dur (temporal-unit/get-duration unit)
-          dur (duration/to-nanos unit-dur)]
+    (let [unit-dur (temporal-unit/get-duration unit)]
       (when (> (duration/get-seconds unit-dur) SECONDS_PER_DAY)
         (throw (ex UnsupportedTemporalTypeException "Unit is too large to be used for truncation" {:local-time this :unit unit})))
-      (when (not= 0 (mod NANOS_PER_DAY dur))
-        (throw (ex UnsupportedTemporalTypeException "Unit must divide into a standard day without remainder" {:local-time this :unit unit})))
-      (of-nano-of-day (* dur (int (/ (-to-nano-of-day this) dur)))))))
+      (let [dur (duration/to-nanos unit-dur)]
+        (when (not= 0 (mod NANOS_PER_DAY dur))
+          (throw (ex UnsupportedTemporalTypeException "Unit must divide into a standard day without remainder" {:local-time this :unit unit})))
+        (of-nano-of-day (* dur (long (/ (-to-nano-of-day this) dur))))))))
 (s/fdef -truncated-to :args ::truncated-to-args :ret ::local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1094
