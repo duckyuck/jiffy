@@ -3,10 +3,10 @@
             [jiffy.dev.wip :refer [wip]]
             [jiffy.duration :as duration]
             [jiffy.instant-impl :as instant]
-            [jiffy.local-date-time :as local-date-time]
+            [jiffy.local-date-time-impl :as local-date-time]
             [jiffy.specs :as j]
             [jiffy.time-comparable :as time-comparable]
-            [jiffy.zone-offset :as zone-offset]))
+            [jiffy.zone-offset-impl :as zone-offset]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneOffsetTransition.java
 (defprotocol IZoneOffsetTransition
