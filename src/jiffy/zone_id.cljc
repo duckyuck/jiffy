@@ -7,7 +7,7 @@
             [jiffy.temporal.temporal-accessor :as temporal-accessor]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.zone-offset-impl :as zone-offset]
-            [jiffy.zone-region :as zone-region]))
+            [jiffy.zone-region-impl :as zone-region]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java
 (defprotocol IZoneId
