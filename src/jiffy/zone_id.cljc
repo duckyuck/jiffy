@@ -6,7 +6,7 @@
             [jiffy.specs :as j]
             [jiffy.temporal.temporal-accessor :as temporal-accessor]
             [jiffy.temporal.temporal-queries :as temporal-queries]
-            [jiffy.zone-offset :as zone-offset]
+            [jiffy.zone-offset-impl :as zone-offset]
             [jiffy.zone-region :as zone-region]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java
@@ -94,7 +94,7 @@
          (not= prefix "UT"))
     (throw (ex JavaIllegalArgumentException (str "prefix should be GMT, UTC or UT, is: " prefix)))
 
-    (not= 0 (zone-offset/get-total-seconds offset))
+    (not= 0 (:total-seconds offset))
     (zone-region/create (str prefix (get-id offset)) (get-rules offset))
 
     :default
