@@ -1,47 +1,16 @@
 (ns jiffy.format.date-time-formatter-builder
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chrono-local-date :as chrono-local-date]
-            [jiffy.chrono.chronology :as chronology]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.date-time-formatter :as date-time-formatter]
-            [jiffy.format.format-style :as format-style]
-            [jiffy.format.resolver-style :as resolver-style]
-            [jiffy.format.sign-style :as sign-style]
-            [jiffy.format.text-style :as text-style]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal-field :as temporal-field]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatterBuilder.java
-(defprotocol IDateTimeFormatterBuilder
-  (parse-case-sensitive [this])
-  (parse-case-insensitive [this])
-  (parse-strict [this])
-  (parse-lenient [this])
-  (parse-defaulting [this field value])
-  (append-value [this field] [this field width] [this field min-width max-width sign-style])
-  (append-value-reduced [this append-value-reduced--overloaded-param-1 append-value-reduced--overloaded-param-2 append-value-reduced--overloaded-param-3 append-value-reduced--overloaded-param-4])
-  (append-fraction [this field min-width max-width decimal-point])
-  (append-text [this field] [this append-text--overloaded-param-1 append-text--overloaded-param-2])
-  (append-instant [this] [this fractional-digits])
-  (append-offset-id [this])
-  (append-offset [this pattern no-offset-text])
-  (append-localized-offset [this style])
-  (append-zone-id [this])
-  (append-zone-region-id [this])
-  (append-zone-or-offset-id [this])
-  (append-zone-text [this text-style] [this text-style preferred-zones])
-  (append-generic-zone-text [this text-style] [this text-style preferred-zones])
-  (append-chronology-id [this])
-  (append-chronology-text [this text-style])
-  (append-localized [this date-style time-style])
-  (append-literal [this append-literal--overloaded-param])
-  (append [this formatter])
-  (append-optional [this formatter])
-  (optional-start [this])
-  (optional-end [this])
-  (append-pattern [this pattern])
-  (pad-next [this pad-width] [this pad-width pad-char])
-  (to-formatter [this] [this locale] [this resolver-style chrono]))
+            [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
+            [jiffy.protocols.format.date-time-formatter-builder :as date-time-formatter-builder]
+            [jiffy.protocols.format.format-style :as format-style]
+            [jiffy.protocols.format.resolver-style :as resolver-style]
+            [jiffy.protocols.format.sign-style :as sign-style]
+            [jiffy.protocols.format.text-style :as text-style]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.specs :as j]))
 
 (defrecord DateTimeFormatterBuilder [])
 
@@ -235,7 +204,7 @@
 (s/fdef -to-formatter :args ::to-formatter-args :ret ::date-time-formatter/date-time-formatter)
 
 (extend-type DateTimeFormatterBuilder
-  IDateTimeFormatterBuilder
+  date-time-formatter-builder/IDateTimeFormatterBuilder
   (parse-case-sensitive [this] (-parse-case-sensitive this))
   (parse-case-insensitive [this] (-parse-case-insensitive this))
   (parse-strict [this] (-parse-strict this))

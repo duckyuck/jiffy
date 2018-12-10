@@ -1,6 +1,7 @@
 (ns jiffy.format.resolver-style
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
+            [jiffy.protocols.format.resolver-style :as resolver-style]
             [jiffy.specs :as j]))
 
 (defrecord ResolverStyle [])

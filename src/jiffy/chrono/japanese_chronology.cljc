@@ -1,31 +1,31 @@
 (ns jiffy.chrono.japanese-chronology
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.abstract-chronology :as abstract-chronology]
-            [jiffy.chrono.chrono-local-date :as chrono-local-date]
-            [jiffy.chrono.chrono-local-date-time :as chrono-local-date-time]
-            [jiffy.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
-            [jiffy.chrono.chronology :as chronology]
-            [jiffy.chrono.era :as era]
-            [jiffy.chrono.japanese-chronology-impl :refer [create #?@(:cljs [JapaneseChronology])] :as impl]
-            [jiffy.chrono.japanese-date :as japanese-date]
-            [jiffy.chrono.japanese-era :as japanese-era]
-            [jiffy.clock :as clock]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.resolver-style :as resolver-style]
-            [jiffy.instant :as instant]
-            [jiffy.specs :as j]
+            [jiffy.protocols.chrono.abstract-chronology :as abstract-chronology]
+            [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
+            [jiffy.protocols.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.protocols.chrono.era :as era]
+            [jiffy.protocols.chrono.japanese-chronology :as japanese-chronology]
+            [jiffy.protocols.chrono.japanese-era :as japanese-era]
+            [jiffy.protocols.clock :as clock]
+            [jiffy.chrono.japanese-date :as japanese-date]
+            [jiffy.protocols.format.resolver-style :as resolver-style]
+            [jiffy.protocols.instant :as instant]
             [jiffy.temporal.chrono-field :as chrono-field]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.value-range :as value-range]
-            [jiffy.time-comparable :as time-comparable]
-            [jiffy.zone-id :as zone-id])
-  #?(:clj (:import [jiffy.chrono.japanese_chronology_impl JapaneseChronology])))
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.specs :as j]))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/JapaneseChronology.java
-(defprotocol IJapaneseChronology
-  (get-current-era [this]))
+(defrecord JapaneseChronology [])
 
-(s/def ::japanese-chronology ::impl/japanese-chronology)
+(s/def ::create-args ::j/wip)
+(defn create [])
+(s/def ::japanese-chronology (j/constructor-spec JapaneseChronology create ::create-args))
+(s/fdef create :args ::create-args :ret ::japanese-chronology)
 
 (defmacro args [& x] `(s/tuple ::japanese-chronology ~@x))
 
@@ -35,7 +35,7 @@
 (s/fdef -get-current-era :args ::get-current-era-args :ret ::japanese-era/japanese-era)
 
 (extend-type JapaneseChronology
-  IJapaneseChronology
+  japanese-chronology/IJapaneseChronology
   (get-current-era [this] (-get-current-era this)))
 
 ;; FIXME: no implementation found from inherited class interface java.lang.Comparable

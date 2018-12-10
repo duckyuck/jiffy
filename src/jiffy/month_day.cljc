@@ -1,34 +1,21 @@
 (ns jiffy.month-day
   (:refer-clojure :exclude [format ])
   (:require [clojure.spec.alpha :as s]
-            [jiffy.clock :as clock]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.date-time-formatter :as date-time-formatter]
-            [jiffy.local-date :as local-date]
+            [jiffy.protocols.clock :as clock]
+            [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
+            [jiffy.protocols.local-date :as local-date]
             [jiffy.month :as month]
+            [jiffy.protocols.month-day :as month-day]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.protocols.zone-id :as zone-id]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.temporal.value-range :as value-range]
-            [jiffy.time-comparable :as time-comparable]
-            [jiffy.zone-id :as zone-id]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java
-(defprotocol IMonthDay
-  (get-month [this])
-  (get-month-value [this])
-  (get-day-of-month [this])
-  (is-valid-year [this year])
-  (with-month [this month])
-  (with [this month])
-  (with-day-of-month [this day-of-month])
-  (format [this formatter])
-  (at-year [this year])
-  (is-after [this other])
-  (is-before [this other]))
+            [jiffy.temporal.temporal-query :as temporal-query]))
 
 (defrecord MonthDay [])
 
@@ -95,7 +82,7 @@
 (s/fdef -is-before :args ::is-before-args :ret ::j/boolean)
 
 (extend-type MonthDay
-  IMonthDay
+  month-day/IMonthDay
   (get-month [this] (-get-month this))
   (get-month-value [this] (-get-month-value this))
   (get-day-of-month [this] (-get-day-of-month this))

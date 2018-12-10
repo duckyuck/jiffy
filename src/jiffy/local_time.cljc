@@ -1,32 +1,36 @@
 (ns jiffy.local-time
   (:refer-clojure :exclude [format])
-  (:require [clojure.spec.alpha :as s]
-            #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
+  (:require #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
+            [clojure.spec.alpha :as s]
             [jiffy.asserts :refer [require-non-nil]]
-            [jiffy.chrono.chrono-local-date :as chrono-local-date]
-            [jiffy.clock :as clock]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.duration :as duration]
             [jiffy.exception :refer [ex JavaNullPointerException UnsupportedTemporalTypeException]]
-            [jiffy.format.date-time-formatter :as date-time-formatter]
-            [jiffy.instant-impl :as instant]
-            [jiffy.local-date-impl :as local-date]
-            [jiffy.local-date-time-impl :as local-date-time]
+            [jiffy.clock :as clock-impl]
+            [jiffy.local-date-time-impl :as local-date-time-impl]
             [jiffy.local-time-impl :refer [create #?@(:cljs [LocalTime])] :as impl]
-            [jiffy.offset-time-impl :as offset-time]
+            [jiffy.offset-time-impl :as offset-time-impl]
+            [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.protocols.clock :as clock]
+            [jiffy.protocols.duration :as duration]
+            [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
+            [jiffy.protocols.instant :as instant]
+            [jiffy.protocols.local-date :as local-date]
+            [jiffy.protocols.local-date-time :as local-date-time]
+            [jiffy.protocols.local-time :as local-time]
+            [jiffy.protocols.offset-time :as offset-time]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.specs :as j]
             [jiffy.temporal.chrono-field :as chrono-field]
             [jiffy.temporal.chrono-unit :as chrono-unit]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.temporal.temporal-unit :as temporal-unit]
-            [jiffy.temporal.value-range :as value-range]
-            [jiffy.time-comparable :as time-comparable]
-            [jiffy.zone-id :as zone-id]
-            [jiffy.zone-offset :as zone-offset])
+            [jiffy.temporal.temporal-query :as temporal-query])
   #?(:clj (:import [jiffy.local_time_impl LocalTime])))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L132
@@ -54,34 +58,6 @@
 (def NANOS_PER_MINUTE impl/NANOS_PER_MINUTE)
 (def NANOS_PER_HOUR impl/NANOS_PER_HOUR)
 (def NANOS_PER_DAY impl/NANOS_PER_DAY)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java
-(defprotocol ILocalTime
-  (to-nano-of-day [this])
-  (to-second-of-day [this])
-  (get-hour [this])
-  (get-minute [this])
-  (get-second [this])
-  (get-nano [this])
-  (with-hour [this hour])
-  (with-minute [this minute])
-  (with-second [this second])
-  (with-nano [this nano-of-second])
-  (truncated-to [this unit])
-  (plus-hours [this hours-to-add])
-  (plus-minutes [this minutes-to-add])
-  (plus-seconds [this secondsto-add])
-  (plus-nanos [this nanos-to-add])
-  (minus-hours [this hours-to-subtract])
-  (minus-minutes [this minutes-to-subtract])
-  (minus-seconds [this seconds-to-subtract])
-  (minus-nanos [this nanos-to-subtract])
-  (format [this formatter])
-  (at-date [this date])
-  (at-offset [this offset])
-  (to-epoch-second [this date offset])
-  (is-after [this other])
-  (is-before [this other]))
 
 (s/def ::local-time ::impl/local-time)
 
@@ -292,13 +268,13 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1448
 (s/def ::at-date-args (args ::local-date/local-date))
 (defn -at-date [this date]
-  (local-date-time/of date this))
+  (local-date-time-impl/of date this))
 (s/fdef -at-date :args ::at-date-args :ret ::local-date-time/local-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1461
 (s/def ::at-offset-args (args ::zone-offset/zone-offset))
 (defn -at-offset [this offset]
-  (offset-time/of this offset))
+  (offset-time-impl/of this offset))
 (s/fdef -at-offset :args ::at-offset-args :ret ::offset-time/offset-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1508
@@ -324,7 +300,7 @@
 (s/fdef -is-before :args ::is-before-args :ret ::j/boolean)
 
 (extend-type LocalTime
-  ILocalTime
+  local-time/ILocalTime
   (to-nano-of-day [this] (-to-nano-of-day this))
   (to-second-of-day [this] (-to-second-of-day this))
   (get-hour [this] (-get-hour this))
@@ -362,6 +338,10 @@
   time-comparable/ITimeComparable
   (compare-to [this other] (-compare-to this other)))
 
+(declare -plus-seconds
+         -plus-minutes
+         -plus-hours)
+
 (s/def ::with-args (s/or :arity-2 (s/tuple ::local-time ::temporal-adjuster/temporal-adjuster)
                          :arity-3 (s/tuple ::local-time ::temporal-field/temporal-field ::j/long)))
 (defn -with
@@ -383,14 +363,14 @@
            (= field chrono-field/MILLI_OF_SECOND) (-with-nano this (* (int new-value) 1000000))
            (= field chrono-field/MILLI_OF_DAY) (of-nano-of-day (* new-value 1000000))
            (= field chrono-field/SECOND_OF_MINUTE) (-with-second this (int new-value))
-           (= field chrono-field/SECOND_OF_DAY) (plus-seconds this (- new-value (-to-second-of-day this)))
+           (= field chrono-field/SECOND_OF_DAY) (-plus-seconds this (- new-value (-to-second-of-day this)))
            (= field chrono-field/MINUTE_OF_HOUR) (-with-minute this (int new-value))
-           (= field chrono-field/MINUTE_OF_DAY) (plus-minutes this (- new-value (+ (* (:hour this) 60) (:minute this))))
-           (= field chrono-field/HOUR_OF_AMPM) (plus-hours this (- new-value (mod (:hour this) 12)))
-           (= field chrono-field/CLOCK_HOUR_OF_AMPM) (plus-hours this (- (if (= 12 new-value) 0 new-value) (mod (:hour this) 12)))
+           (= field chrono-field/MINUTE_OF_DAY) (-plus-minutes this (- new-value (+ (* (:hour this) 60) (:minute this))))
+           (= field chrono-field/HOUR_OF_AMPM) (-plus-hours this (- new-value (mod (:hour this) 12)))
+           (= field chrono-field/CLOCK_HOUR_OF_AMPM) (-plus-hours this (- (if (= 12 new-value) 0 new-value) (mod (:hour this) 12)))
            (= field chrono-field/HOUR_OF_DAY) (-with-hour this (int new-value))
            (= field chrono-field/CLOCK_HOUR_OF_DAY) (-with-hour this (int (if (= 24 new-value) 0 new-value)))
-           (= field chrono-field/AMPM_OF_DAY) (plus-hours this (* 12 (- new-value (/ (:hour this) 12))))
+           (= field chrono-field/AMPM_OF_DAY) (-plus-hours this (* 12 (- new-value (/ (:hour this) 12))))
            :else (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:local-time this :field field :new-value new-value}))))
      (temporal-field/adjust-into field this new-value))))
 (s/fdef -with :args ::with-args :ret ::temporal/temporal)
@@ -481,13 +461,13 @@
 
 (s/def ::now-args (args ::j/wip))
 (defn now
-  ([] (now (clock/system-default-zone)))
+  ([] (now (clock-impl/system-default-zone)))
 
   ;; NB! This method is overloaded!
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L263
   ([zone-or-clock]
    (case (type zone-or-clock)
-     ZoneId (now (clock/system zone-or-clock))
+     ZoneId (now (clock-impl/system zone-or-clock))
      Clock (of-instant (clock/instant zone-or-clock)
                        (clock/get-zone zone-or-clock)))))
 (s/fdef now :ret ::local-time)

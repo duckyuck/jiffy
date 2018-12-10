@@ -1,43 +1,23 @@
 (ns jiffy.year-month
   (:refer-clojure :exclude [format ])
   (:require [clojure.spec.alpha :as s]
-            [jiffy.clock :as clock]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.date-time-formatter :as date-time-formatter]
-            [jiffy.local-date :as local-date]
+            [jiffy.protocols.clock :as clock]
+            [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
+            [jiffy.protocols.local-date :as local-date]
             [jiffy.month :as month]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.protocols.year-month :as year-month]
+            [jiffy.protocols.zone-id :as zone-id]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-amount :as temporal-amount]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.temporal.temporal-unit :as temporal-unit]
-            [jiffy.temporal.value-range :as value-range]
-            [jiffy.time-comparable :as time-comparable]
-            [jiffy.zone-id :as zone-id]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java
-(defprotocol IYearMonth
-  (get-year [this])
-  (get-month-value [this])
-  (get-month [this])
-  (is-leap-year [this])
-  (is-valid-day [this day-of-month])
-  (length-of-month [this])
-  (length-of-year [this])
-  (with-year [this year])
-  (with-month [this month])
-  (plus-years [this years-to-add])
-  (plus-months [this months-to-add])
-  (minus-years [this years-to-subtract])
-  (minus-months [this months-to-subtract])
-  (format [this formatter])
-  (at-day [this day-of-month])
-  (at-end-of-month [this])
-  (is-after [this other])
-  (is-before [this other]))
+            [jiffy.temporal.temporal-query :as temporal-query]))
 
 (defrecord YearMonth [])
 
@@ -139,7 +119,7 @@
 (s/fdef -is-before :args ::is-before-args :ret ::j/boolean)
 
 (extend-type YearMonth
-  IYearMonth
+  year-month/IYearMonth
   (get-year [this] (-get-year this))
   (get-month-value [this] (-get-month-value this))
   (get-month [this] (-get-month this))

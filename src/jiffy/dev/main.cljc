@@ -10,7 +10,6 @@
             jiffy.chrono.chrono-period-impl
             jiffy.chrono.chrono-zoned-date-time
             jiffy.chrono.chrono-zoned-date-time-impl
-            jiffy.chrono.era
             jiffy.chrono.hijrah-chronology
             jiffy.chrono.hijrah-date
             jiffy.chrono.hijrah-era
@@ -26,6 +25,8 @@
             jiffy.chrono.thai-buddhist-date
             jiffy.chrono.thai-buddhist-era
             jiffy.clock
+            jiffy.clock
+            jiffy.protocols.clock
             jiffy.day-of-week
             jiffy.dev.wip
             [jiffy.duration :as duration]
@@ -55,18 +56,10 @@
             jiffy.temporal.chrono-unit
             jiffy.temporal.iso-fields
             jiffy.temporal.julian-fields
-            jiffy.temporal.temporal
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            jiffy.temporal.temporal-adjuster
             jiffy.temporal.temporal-adjusters
-            jiffy.temporal.temporal-amount
-            jiffy.temporal.temporal-field
             jiffy.temporal.temporal-queries
             jiffy.temporal.temporal-query
-            jiffy.temporal.temporal-unit
-            jiffy.temporal.value-range
             jiffy.temporal.week-fields
-            jiffy.time-comparable
             jiffy.year
             jiffy.year-impl
             jiffy.year-month

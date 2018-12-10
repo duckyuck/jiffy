@@ -1,87 +1,33 @@
 (ns jiffy.offset-date-time
   (:refer-clojure :exclude [format ])
   (:require [clojure.spec.alpha :as s]
-            [jiffy.clock :as clock]
             [jiffy.day-of-week :as day-of-week]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.date-time-formatter :as date-time-formatter]
-            [jiffy.instant-impl :as instant]
-            [jiffy.local-date :as local-date]
-            [jiffy.local-date-time :as local-date-time]
-            [jiffy.local-time :as local-time]
-            [jiffy.month :as month]
+            [jiffy.local-date-time :as local-date-time-impl]
             [jiffy.offset-date-time-impl :refer [create #?@(:cljs [OffsetDateTime])] :as impl]
-            [jiffy.offset-time :as offset-time]
-            [jiffy.offset-time-impl :as offset-time-impl]
+            [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
+            [jiffy.protocols.instant :as instant]
+            [jiffy.protocols.local-date :as local-date]
+            [jiffy.protocols.local-date-time :as local-date-time]
+            [jiffy.protocols.local-time :as local-time]
+            [jiffy.month :as month]
+            [jiffy.protocols.offset-date-time :as offset-date-time]
+            [jiffy.protocols.offset-time :as offset-time]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.protocols.zoned-date-time :as zoned-date-time]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.protocols.zone-offset :as zone-offset]
+            [jiffy.protocols.zone.zone-rules :as zone-rules]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-amount :as temporal-amount]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.temporal.temporal-unit :as temporal-unit]
-            [jiffy.temporal.value-range :as value-range]
-            [jiffy.time-comparable :as time-comparable]
-            [jiffy.zone-id :as zone-id]
-            [jiffy.zone-offset-impl :as zone-offset]
-            [jiffy.zoned-date-time-impl :as zoned-date-time]
-            [jiffy.zone.zone-rules :as zone-rules])
+            [jiffy.temporal.temporal-query :as temporal-query])
   #?(:clj (:import [jiffy.offset_date_time_impl OffsetDateTime])))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java
-(defprotocol IOffsetDateTime
-  (get-offset [this])
-  (to-epoch-second [this])
-  (with-offset-same-local [this offset])
-  (with-offset-same-instant [this offset])
-  (to-local-date-time [this])
-  (to-local-date [this])
-  (get-year [this])
-  (get-month-value [this])
-  (get-month [this])
-  (get-day-of-month [this])
-  (get-day-of-year [this])
-  (get-day-of-week [this])
-  (to-local-time [this])
-  (get-hour [this])
-  (get-minute [this])
-  (get-second [this])
-  (get-nano [this])
-  (with-year [this year])
-  (with-month [this month])
-  (with-day-of-month [this day-of-month])
-  (with-day-of-year [this day-of-year])
-  (with-hour [this hour])
-  (with-minute [this minute])
-  (with-second [this second])
-  (with-nano [this nano-of-second])
-  (truncated-to [this unit])
-  (plus-years [this years])
-  (plus-months [this months])
-  (plus-weeks [this weeks])
-  (plus-days [this days])
-  (plus-hours [this hours])
-  (plus-minutes [this minutes])
-  (plus-seconds [this seconds])
-  (plus-nanos [this nanos])
-  (minus-years [this years])
-  (minus-months [this months])
-  (minus-weeks [this weeks])
-  (minus-days [this days])
-  (minus-hours [this hours])
-  (minus-minutes [this minutes])
-  (minus-seconds [this seconds])
-  (minus-nanos [this nanos])
-  (format [this formatter])
-  (at-zone-same-instant [this zone])
-  (at-zone-similar-local [this zone])
-  (to-offset-time [this])
-  (to-zoned-date-time [this])
-  (to-instant [this])
-  (is-after [this other])
-  (is-before [this other])
-  (is-equal [this other]))
 
 (s/def ::offset-date-time ::impl/offset-date-time)
 
@@ -343,7 +289,7 @@
 (s/fdef -is-equal :args ::is-equal-args :ret ::j/boolean)
 
 (extend-type OffsetDateTime
-  IOffsetDateTime
+  offset-date-time/IOffsetDateTime
   (get-offset [this] (-get-offset this))
   (to-epoch-second [this] (-to-epoch-second this))
   (with-offset-same-local [this offset] (-with-offset-same-local this offset))
@@ -525,8 +471,8 @@
 (defn of-instant [instant zone]
   (let [rules (zone-id/get-rules zone)
         offset (zone-rules/get-offset rules instant)
-        ldt (local-date-time/of-epoch-second (instant/-get-epoch-second instant)
-                                             (instant/-get-nano instant)
+        ldt (local-date-time-impl/of-epoch-second (instant/get-epoch-second instant)
+                                             (instant/get-nano instant)
                                              offset)]
     (impl/create ldt offset)))
 (s/fdef of-instant :args ::of-instant-args :ret ::offset-date-time)

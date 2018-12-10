@@ -1,12 +1,10 @@
 (ns jiffy.format.format-style
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
+            [jiffy.protocols.format.format-style :as format-style]
             [jiffy.specs :as j]))
 
-(defprotocol IFormatStyle)
-
-(defrecord FormatStyle []
-  IFormatStyle)
+(defrecord FormatStyle [])
 
 (s/def ::create-args ::j/wip)
 (defn create [])

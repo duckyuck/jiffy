@@ -1,27 +1,17 @@
 (ns jiffy.chrono.chrono-local-date-impl
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chrono-local-date :as chrono-local-date]
-            [jiffy.chrono.chronology :as chronology]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-amount :as temporal-amount]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.temporal-unit :as temporal-unit]
-            [jiffy.time-comparable :as time-comparable]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateImpl.java
-(defprotocol IChronoLocalDateImpl
-  (plus-years [this years-to-add])
-  (plus-months [this months-to-add])
-  (plus-weeks [this weeks-to-add])
-  (plus-days [this days-to-add])
-  (minus-years [this years-to-subtract])
-  (minus-months [this months-to-subtract])
-  (minus-weeks [this weeks-to-subtract])
-  (minus-days [this days-to-subtract]))
+            [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.protocols.chrono.chrono-local-date-impl :as chrono-local-date-impl]
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.specs :as j]))
 
 (defrecord ChronoLocalDateImpl [])
 
@@ -73,7 +63,7 @@
 (s/fdef -minus-days :args ::minus-days-args :ret ::chrono-local-date/chrono-local-date)
 
 (extend-type ChronoLocalDateImpl
-  IChronoLocalDateImpl
+  chrono-local-date-impl/IChronoLocalDateImpl
   (plus-years [this years-to-add] (-plus-years this years-to-add))
   (plus-months [this months-to-add] (-plus-months this months-to-add))
   (plus-weeks [this weeks-to-add] (-plus-weeks this weeks-to-add))

@@ -1,12 +1,12 @@
 (ns jiffy.chrono.chrono-period-impl
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chrono-period :as chrono-period]
-            [jiffy.chrono.chronology :as chronology]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-amount :as temporal-amount]
-            [jiffy.temporal.temporal-unit :as temporal-unit]))
+            [jiffy.protocols.chrono.chrono-period :as chrono-period]
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
+            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
+            [jiffy.specs :as j]))
 
 (defrecord ChronoPeriodImpl [])
 

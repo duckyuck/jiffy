@@ -1,44 +1,31 @@
 (ns jiffy.chrono.hijrah-chronology
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.abstract-chronology :as abstract-chronology]
-            [jiffy.chrono.chrono-local-date :as chrono-local-date]
-            [jiffy.chrono.chrono-local-date-time :as chrono-local-date-time]
-            [jiffy.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
-            [jiffy.chrono.chronology :as chronology]
-            [jiffy.chrono.era :as era]
-            [jiffy.chrono.hijrah-chronology-impl :refer [create #?@(:cljs [HijrahChronology])] :as impl]
-            [jiffy.chrono.hijrah-date :as hijrah-date]
-            [jiffy.chrono.hijrah-era :as hijrah-era]
-            [jiffy.clock :as clock]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.resolver-style :as resolver-style]
-            [jiffy.instant :as instant]
-            [jiffy.specs :as j]
+            [jiffy.protocols.chrono.abstract-chronology :as abstract-chronology]
+            [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
+            [jiffy.protocols.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.protocols.chrono.era :as era]
+            [jiffy.protocols.chrono.hijrah-chronology :as hijrah-chronology]
+            [jiffy.protocols.chrono.hijrah-date :as hijrah-date]
+            [jiffy.protocols.chrono.hijrah-era :as hijrah-era]
+            [jiffy.protocols.clock :as clock]
+            [jiffy.protocols.format.resolver-style :as resolver-style]
+            [jiffy.protocols.instant :as instant]
             [jiffy.temporal.chrono-field :as chrono-field]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.value-range :as value-range]
-            [jiffy.time-comparable :as time-comparable]
-            [jiffy.zone-id :as zone-id])
-  #?(:clj (:import [jiffy.chrono.hijrah_chronology_impl HijrahChronology])))
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.specs :as j]))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/HijrahChronology.java
-(defprotocol IHijrahChronology
-  (get-minimum-year [this])
-  (get-maximum-year [this])
-  (get-maximum-month-length [this])
-  (get-minimum-month-length [this])
-  (get-maximum-day-of-year [this])
-  (check-valid-year [this proleptic-year])
-  (check-valid-day-of-year [this day-of-year])
-  (check-valid-month [this month])
-  (get-hijrah-date-info [this epoch-day])
-  (get-epoch-day [this proleptic-year month-of-year day-of-month])
-  (get-day-of-year [this proleptic-year month])
-  (get-month-length [this proleptic-year month-of-year])
-  (get-year-length [this proleptic-year])
-  (get-smallest-maximum-day-of-year [this]))
+(defrecord HijrahChronology [])
 
-(s/def ::hijrah-chronology ::impl/hijrah-chronology)
+(s/def ::create-args ::j/wip)
+(defn create [])
+(s/def ::hijrah-chronology (j/constructor-spec HijrahChronology create ::create-args))
+(s/fdef create :args ::create-args :ret ::hijrah-chronology)
 
 (defmacro args [& x] `(s/tuple ::hijrah-chronology ~@x))
 
@@ -113,7 +100,7 @@
 (s/fdef -get-smallest-maximum-day-of-year :args ::get-smallest-maximum-day-of-year-args :ret ::j/int)
 
 (extend-type HijrahChronology
-  IHijrahChronology
+  hijrah-chronology/IHijrahChronology
   (get-minimum-year [this] (-get-minimum-year this))
   (get-maximum-year [this] (-get-maximum-year this))
   (get-maximum-month-length [this] (-get-maximum-month-length this))

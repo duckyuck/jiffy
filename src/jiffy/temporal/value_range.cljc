@@ -3,21 +3,9 @@
             #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
             [jiffy.specs :as j]
             [jiffy.exception :refer [DateTimeException JavaIllegalArgumentException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
-            [jiffy.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
             [jiffy.math :as math]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java
-(defprotocol IValueRange
-  (is-fixed [this])
-  (get-minimum [this])
-  (get-largest-minimum [this])
-  (get-smallest-maximum [this])
-  (get-maximum [this])
-  (is-int-value [this])
-  (is-valid-value [this value])
-  (is-valid-int-value [this value])
-  (check-valid-value [this value field])
-  (check-valid-int-value [this value field]))
 
 (defrecord ValueRange [min-smallest min-largest max-smallest max-largest])
 
@@ -56,6 +44,10 @@
 
      (> max-smallest max-largest)
      (throw (ex JavaIllegalArgumentException "Smallest maximum value must be less than largest maximum value" {:min-smallest min-smallest :min-largest min-largest :max-smallest max-smallest :max-largest max-largest}))
+;; [jiffy.dev.wip :refer [wip]]
+;; [jiffy.protocols.temporal.temporal-field :as temporal-field]
+;; [jiffy.protocols.temporal.value-range :as value-range]
+;; [jiffy.specs :as j]
 
      (> min-largest max-largest)
      (throw (ex JavaIllegalArgumentException "Minimum value must be less than maximum value" {:min-smallest min-smallest :min-largest min-largest :max-smallest max-smallest :max-largest max-largest}))
@@ -140,7 +132,7 @@
 (s/fdef -check-valid-int-value :args ::check-valid-int-value-args :ret ::j/int)
 
 (extend-type ValueRange
-  IValueRange
+  value-range/IValueRange
   (is-fixed [this] (-is-fixed this))
   (get-minimum [this] (-get-minimum this))
   (get-largest-minimum [this] (-get-largest-minimum this))

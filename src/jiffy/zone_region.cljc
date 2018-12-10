@@ -3,17 +3,13 @@
             [jiffy.asserts :as assert]
             [jiffy.exception :refer [ex DateTimeException #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.specs :as j]
-            [jiffy.zone-id :as zone-id]
+            [jiffy.protocols.zone-id :as zone-id]
             [jiffy.zone-region-impl :as impl :refer [#?@(:cljs [ZoneRegion])]]
-            [jiffy.zone.zone-rules :as zone-rules]
+            [jiffy.protocols.zone.zone-rules :as zone-rules]
             [jiffy.zone.zone-rules-provider :as zone-rules-provider])
   #?(:clj (:import [jiffy.zone_region_impl ZoneRegion])))
 
-(s/def ::create-args (s/tuple ::j/zone-id ::zone-rules/zone-rules))
-(defn create [id rules]
-  (impl/create id rules))
-(s/def ::zone-region (j/constructor-spec ZoneRegion create ::create-args))
-(s/fdef create :args ::create-args :ret ::zone-region)
+(s/def ::zone-region ::impl/zone-region)
 
 (defmacro args [& x] `(s/tuple ::zone-region ~@x))
 

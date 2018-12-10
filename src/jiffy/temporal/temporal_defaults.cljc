@@ -1,12 +1,15 @@
 (ns jiffy.temporal.temporal-defaults
   (:require [clojure.spec.alpha :as s]
-            [jiffy.dev.wip :refer [wip]]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-amount :as temporal-amount]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.temporal-unit :as temporal-unit]))
+            [jiffy.dev.wip :refer [wip]]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]))
+
+(s/def ::temporal ::temporal/temporal)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/Temporal.java#L189
 (s/def ::with-args ::j/wip)

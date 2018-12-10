@@ -12,53 +12,14 @@
             [jiffy.temporal.chrono-field :as chrono-field :refer [NANO_OF_SECOND]]
             [jiffy.temporal.chrono-unit :as chrono-unit :refer [DAYS MICROS MILLIS NANOS SECONDS]]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-amount :as temporal-amount]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-amount :as temporal-amount]
-            [jiffy.temporal.temporal-unit :as temporal-unit]
-            [jiffy.time-comparable :as time-comparable])
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
+            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.protocols.duration :as duration])
   #?(:clj (:import [jiffy.duration_impl Duration])))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java
-(defprotocol IDuration
-  (is-zero [this])
-  (is-negative [this])
-  (get-seconds [this])
-  (get-nano [this])
-  (with-seconds [this seconds])
-  (with-nanos [this nano-of-second])
-  (plus [this duration] [this amount-to-add unit])
-  (plus-days [this days-to-add])
-  (plus-hours [this hours-to-add])
-  (plus-minutes [this minutes-to-add])
-  (plus-seconds [this seconds-to-add])
-  (plus-millis [this millis-to-add])
-  (plus-nanos [this nanos-to-add])
-  (minus [this duration] [this amount-to-subtract unit])
-  (minus-days [this days-to-subtract])
-  (minus-hours [this hours-to-subtract])
-  (minus-minutes [this minutes-to-subtract])
-  (minus-seconds [this seconds-to-subtract])
-  (minus-millis [this millis-to-subtract])
-  (minus-nanos [this nanos-to-subtract])
-  (multiplied-by [this multiplicand])
-  (divided-by [this divided-by--overloaded-param])
-  (negated [this])
-  (abs [this])
-  (to-days [this])
-  (to-hours [this])
-  (to-minutes [this])
-  (to-seconds [this])
-  (to-millis [this])
-  (to-nanos [this])
-  (to-days-part [this])
-  (to-hours-part [this])
-  (to-minutes-part [this])
-  (to-seconds-part [this])
-  (to-millis-part [this])
-  (to-nanos-part [this])
-  (truncated-to [this unit]))
 
 (def ZERO impl/ZERO)
 
@@ -106,6 +67,19 @@
 (def of-seconds #'impl/of-seconds)
 (s/fdef of-seconds :args ::of-seconds-args :ret ::duration)
 
+(declare -plus
+         -plus-nanos
+         -plus-millis
+         -plus-seconds
+         -plus-minutes
+         -plus-hours
+         -multiplied-by
+         -negated
+         -to-hours
+         -to-minutes
+         -to-nanos
+         -get-seconds)
+
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L825
 (defn- --plus [this seconds-to-add nanos-to-add]
   (if (zero? (bit-or seconds-to-add nanos-to-add))
@@ -137,21 +111,21 @@
      (zero? amount-to-add)
      this
 
-     (satisfies? chrono-unit/IChronoUnit unit)
+     (chrono-unit/chrono-unit? unit)
      (condp = unit
-       NANOS (plus-nanos this amount-to-add)
+       NANOS (duration/plus-nanos this amount-to-add)
        MICROS (-> this
-                  (plus-seconds (-> amount-to-add (/ (* 1000000 1000)) long (* 1000)))
-                  (plus-nanos (-> amount-to-add (rem (* 1000000 1000)) (* 1000))))
-       MILLIS (plus-millis this amount-to-add)
-       SECONDS (plus-seconds this amount-to-add)
-       (plus-seconds this (-> unit temporal-unit/get-duration :seconds (math/multiply-exact amount-to-add))))
+                  (duration/plus-seconds (-> amount-to-add (/ (* 1000000 1000)) long (* 1000)))
+                  (duration/plus-nanos (-> amount-to-add (rem (* 1000000 1000)) (* 1000))))
+       MILLIS (duration/plus-millis this amount-to-add)
+       SECONDS (duration/plus-seconds this amount-to-add)
+       (duration/plus-seconds this (-> unit temporal-unit/get-duration :seconds (math/multiply-exact amount-to-add))))
 
      :else
-     (let [duration (-> unit temporal-unit/get-duration (multiplied-by amount-to-add))]
+     (let [duration (-> unit temporal-unit/get-duration (duration/multiplied-by amount-to-add))]
        (-> this
-           (plus-seconds (:seconds duration))
-           (plus-nanos (:nanos duration)))))))
+           (duration/plus-seconds (:seconds duration))
+           (duration/plus-nanos (:nanos duration)))))))
 (s/fdef -plus :args ::plus-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L746
@@ -205,9 +179,9 @@
   ([this amount-to-subtract unit]
    (if (= amount-to-subtract math/long-min-value)
      (-> this
-         (plus math/long-max-value unit)
-         (plus 1 unit))
-     (plus this (- amount-to-subtract) unit))))
+         (duration/plus math/long-max-value unit)
+         (duration/plus 1 unit))
+     (duration/plus this (- amount-to-subtract) unit))))
 (s/fdef -minus :args ::minus-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L887
@@ -215,9 +189,9 @@
 (defn -minus-days [this days-to-subtract]
   (if (= days-to-subtract math/long-min-value)
     (-> this
-        (plus-days math/long-max-value)
-        (plus-days 1))
-    (plus-days this (- days-to-subtract))))
+        (duration/plus-days math/long-max-value)
+        (duration/plus-days 1))
+    (duration/plus-days this (- days-to-subtract))))
 (s/fdef -minus-days :args ::minus-days-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L902
@@ -225,9 +199,9 @@
 (defn -minus-hours [this hours-to-subtract]
   (if (= hours-to-subtract math/long-min-value)
     (-> this
-        (plus-hours math/long-max-value)
-        (plus-hours 1))
-    (plus-hours this (- hours-to-subtract))))
+        (-plus-hours math/long-max-value)
+        (-plus-hours 1))
+    (-plus-hours this (- hours-to-subtract))))
 (s/fdef -minus-hours :args ::minus-hours-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L917
@@ -235,9 +209,9 @@
 (defn -minus-minutes [this minutes-to-subtract]
   (if (= minutes-to-subtract math/long-min-value)
     (-> this
-        (plus-minutes math/long-max-value)
-        (plus-minutes 1))
-    (plus-minutes this (- minutes-to-subtract))))
+        (-plus-minutes math/long-max-value)
+        (-plus-minutes 1))
+    (-plus-minutes this (- minutes-to-subtract))))
 (s/fdef -minus-minutes :args ::minus-minutes-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L930
@@ -245,9 +219,9 @@
 (defn -minus-seconds [this seconds-to-subtract]
   (if (= seconds-to-subtract math/long-min-value)
     (-> this
-        (plus-seconds math/long-max-value)
-        (plus-seconds 1))
-    (plus-seconds this (- seconds-to-subtract))))
+        (-plus-seconds math/long-max-value)
+        (-plus-seconds 1))
+    (-plus-seconds this (- seconds-to-subtract))))
 (s/fdef -minus-seconds :args ::minus-seconds-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L943
@@ -255,9 +229,9 @@
 (defn -minus-millis [this millis-to-subtract]
   (if (= millis-to-subtract math/long-min-value)
     (-> this
-        (plus-millis math/long-max-value)
-        (plus-millis 1))
-    (plus-millis this (- millis-to-subtract))))
+        (-plus-millis math/long-max-value)
+        (-plus-millis 1))
+    (-plus-millis this (- millis-to-subtract))))
 (s/fdef -minus-millis :args ::minus-millis-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L956
@@ -265,9 +239,9 @@
 (defn -minus-nanos [this nanos-to-subtract]
   (if (= nanos-to-subtract math/long-min-value)
     (-> this
-        (plus-nanos math/long-max-value)
-        (plus-nanos 1))
-    (plus-nanos this (- nanos-to-subtract))))
+        (-plus-nanos math/long-max-value)
+        (-plus-nanos 1))
+    (-plus-nanos this (- nanos-to-subtract))))
 (s/fdef -minus-nanos :args ::minus-nanos-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L970
@@ -291,7 +265,7 @@
 (s/def ::divided-by-args (s/or :long (args ::j/long)
                                :duration (args ::duration)))
 (defn -divided-by [this divisor]
-  (if (satisfies? IDuration divisor)
+  (if (satisfies? duration/IDuration divisor)
     (--divided-by-duration this divisor)
     (--divided-by-long this divisor)))
 (s/fdef -divided-by :args ::divided-by-args :ret ::duration)
@@ -304,8 +278,8 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1070
 (s/def ::abs-args (args))
 (defn -abs [this]
-  (if (is-negative this)
-    (negated this)
+  (if (-is-negative this)
+    (-negated this)
     this))
 (s/fdef -abs :args ::abs-args :ret ::duration)
 
@@ -372,13 +346,13 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1281
 (s/def ::to-hours-part-args (args))
 (defn -to-hours-part [this]
-  (int (rem (to-hours this) 24)))
+  (int (rem (-to-hours this) 24)))
 (s/fdef -to-hours-part :args ::to-hours-part-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1297
 (s/def ::to-minutes-part-args (args))
 (defn -to-minutes-part [this]
-  (int (rem (to-minutes this) MINUTES_PER_HOUR)))
+  (int (rem (-to-minutes this) MINUTES_PER_HOUR)))
 (s/fdef -to-minutes-part :args ::to-minutes-part-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1313
@@ -403,7 +377,7 @@
 (s/def ::truncated-to-args (args ::temporal-unit/temporal-unit))
 (defn -truncated-to [this unit]
   (let [unit-dur (temporal-unit/get-duration unit)
-        dur (delay (to-nanos unit-dur))]
+        dur (delay (-to-nanos unit-dur))]
     (cond
       (and (= unit chrono-unit/SECONDS)
            (or (>= (:seconds this) 0)
@@ -413,7 +387,7 @@
       (= unit chrono-unit/NANOS)
       this
 
-      (> (get-seconds unit-dur) SECONDS_PER_DAY)
+      (> (-get-seconds unit-dur) SECONDS_PER_DAY)
       (throw (ex UnsupportedTemporalTypeException "Unit is too large to be used for truncation" {:duration this :unit unit}))
 
       (-> NANOS_PER_DAY (rem @dur) zero? not)
@@ -428,11 +402,11 @@
                         (/ @dur)
                         long
                         (* @dur))]
-        (plus-nanos this (- result nod))))))
+        (-plus-nanos this (- result nod))))))
 (s/fdef -truncated-to :args ::truncated-to-args :ret ::duration)
 
 (extend-type Duration
-  IDuration
+  duration/IDuration
   (is-zero [this] (-is-zero this))
   (is-negative [this] (-is-negative this))
   (get-seconds [this] (-get-seconds this))
@@ -570,13 +544,13 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L309
 (s/def ::of-args (s/tuple ::j/long ::temporal-unit/temporal-unit))
 (defn of [amount unit]
-  (plus ZERO amount unit))
+  (-plus ZERO amount unit))
 (s/fdef of :args ::of-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L334
 (s/def ::from-args (s/tuple ::temporal-amount/temporal-amount))
 (defn from [amount]
-  (reduce #(plus %1 (temporal-amount/get amount %2) %2)
+  (reduce #(-plus %1 (temporal-amount/get amount %2) %2)
           ZERO
           (temporal-amount/get-units amount)))
 (s/fdef from :args ::from-args :ret ::duration)

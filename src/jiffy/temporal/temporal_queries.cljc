@@ -2,7 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.temporal.chrono-field :as chrono-field]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
             [jiffy.temporal.temporal-query :as temporal-query #?@(:clj [:refer [defquery]] #?@(:cljs [:refer-macros [defquery]]))]
             [jiffy.zone-offset-impl :as zone-offset]
             [jiffy.local-time-impl :as local-time]

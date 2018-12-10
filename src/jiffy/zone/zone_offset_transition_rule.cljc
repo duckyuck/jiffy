@@ -1,25 +1,13 @@
 (ns jiffy.zone.zone-offset-transition-rule
   (:require [clojure.spec.alpha :as s]
-            [jiffy.day-of-week :as day-of-week]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.local-time :as local-time]
+            [jiffy.day-of-week :as day-of-week]
+            [jiffy.protocols.local-time :as local-time]
             [jiffy.month :as month]
-            [jiffy.specs :as j]
-            [jiffy.zone-offset :as zone-offset]
-            [jiffy.zone.zone-offset-transition :as zone-offset-transition]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneOffsetTransitionRule.java
-(defprotocol IZoneOffsetTransitionRule
-  (get-month [this])
-  (get-day-of-month-indicator [this])
-  (get-day-of-week [this])
-  (get-local-time [this])
-  (is-midnight-end-of-day [this])
-  (get-time-definition [this])
-  (get-standard-offset [this])
-  (get-offset-before [this])
-  (get-offset-after [this])
-  (create-transition [this year]))
+            [jiffy.protocols.zone-offset :as zone-offset]
+            [jiffy.protocols.zone.zone-offset-transition :as zone-offset-transition]
+            [jiffy.protocols.zone.zone-offset-transition-rule :as zone-offset-transition-rule]
+            [jiffy.specs :as j]))
 
 (defrecord ZoneOffsetTransitionRule [])
 
@@ -81,7 +69,7 @@
 (s/fdef -create-transition :args ::create-transition-args :ret ::zone-offset-transition/zone-offset-transition)
 
 (extend-type ZoneOffsetTransitionRule
-  IZoneOffsetTransitionRule
+  zone-offset-transition-rule/IZoneOffsetTransitionRule
   (get-month [this] (-get-month this))
   (get-day-of-month-indicator [this] (-get-day-of-month-indicator this))
   (get-day-of-week [this] (-get-day-of-week this))

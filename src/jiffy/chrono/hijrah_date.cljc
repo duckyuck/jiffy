@@ -1,30 +1,26 @@
 (ns jiffy.chrono.hijrah-date
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chrono-local-date :as chrono-local-date]
-            [jiffy.chrono.chrono-local-date-impl :as chrono-local-date-impl]
-            [jiffy.chrono.chrono-local-date-time :as chrono-local-date-time]
-            [jiffy.chrono.chrono-period :as chrono-period]
-            [jiffy.chrono.chronology :as chronology]
-            [jiffy.chrono.era :as era]
-            [jiffy.chrono.hijrah-chronology-impl :as hijrah-chronology]
-            [jiffy.chrono.hijrah-era :as hijrah-era]
-            [jiffy.clock :as clock]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.local-time :as local-time]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-amount :as temporal-amount]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.temporal-unit :as temporal-unit]
-            [jiffy.temporal.value-range :as value-range]
-            [jiffy.time-comparable :as time-comparable]
-            [jiffy.zone-id :as zone-id]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/HijrahDate.java
-(defprotocol IHijrahDate
-  (with-variant [this chronology]))
+            [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.protocols.chrono.chrono-local-date-impl :as chrono-local-date-impl]
+            [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.protocols.chrono.chrono-period :as chrono-period]
+            [jiffy.protocols.chrono.era :as era]
+            [jiffy.protocols.chrono.hijrah-chronology :as hijrah-chronology]
+            [jiffy.protocols.chrono.hijrah-date :as hijrah-date]
+            [jiffy.protocols.clock :as clock]
+            [jiffy.protocols.local-time :as local-time]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.specs :as j]))
 
 (defrecord HijrahDate [])
 
@@ -41,7 +37,7 @@
 (s/fdef -with-variant :args ::with-variant-args :ret ::hijrah-date)
 
 (extend-type HijrahDate
-  IHijrahDate
+  hijrah-date/IHijrahDate
   (with-variant [this chronology] (-with-variant this chronology)))
 
 ;; FIXME: no implementation found from inherited class interface java.lang.Comparable
@@ -149,9 +145,9 @@
   (minus-days [this days-to-subtract] (-minus-days this days-to-subtract)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/HijrahDate.java
-(s/def ::until-args (args ::temporal/temporal ::temporal-unit/temporal-unit))
-(defn -until-temporal [this until--unknown-param-name-1 until--unknown-param-name-2] (wip ::-until))
-(s/fdef -until-temporal :args ::until-args :ret ::j/long)
+(s/def ::until--temporal--args (args ::temporal/temporal ::temporal-unit/temporal-unit))
+(defn -until--temporal [this until--unknown-param-name-1 until--unknown-param-name-2] (wip ::-until--temporal))
+(s/fdef -until--temporal :args ::until--temporal--args :ret ::j/long)
 
 (s/def ::with-args (args ::j/wip))
 (defn -with
@@ -182,7 +178,7 @@
 
 (extend-type HijrahDate
   temporal/ITemporal
-  (until [this until--unknown-param-name-1 until--unknown-param-name-2] (-until-temporal this until--unknown-param-name-1 until--unknown-param-name-2))
+  (until [this until--unknown-param-name-1 until--unknown-param-name-2] (-until--temporal this until--unknown-param-name-1 until--unknown-param-name-2))
   (with
     ([this adjuster] (-with this adjuster))
     ([this field new-value] (-with this field new-value)))

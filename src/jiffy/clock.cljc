@@ -1,20 +1,14 @@
 (ns jiffy.clock
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.duration-impl :as duration]
-            [jiffy.instant-impl :as instant]
-            [jiffy.specs :as j]
-            [jiffy.zone-id :as zone-id]
-            [jiffy.zone-offset :as zone-offset]))
+            [jiffy.protocols.clock :as clock]
+            [jiffy.protocols.duration :as duration]
+            [jiffy.protocols.instant :as instant]
+            [jiffy.instant-impl :as instant-impl]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.specs :as j]))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java
-(defprotocol IClock
-  (get-zone [this])
-  (with-zone [this zone])
-  (millis [this])
-  (instant [this]))
-
-(s/def ::clock #(satisfies? IClock %))
+(s/def ::clock ::clock/clock)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L183
 (defn system-default-zone [] (wip ::system-default-zone))
@@ -90,13 +84,13 @@
 (s/def ::instant-system-clock-args (sc-args))
 (defn -instant-system-clock [this]
   #?(:clj (let [java-instant (.instant (java.time.Clock/systemUTC))]
-            (instant/create (.getEpochSecond java-instant)
+            (instant-impl/create (.getEpochSecond java-instant)
                             (.getNano java-instant)))
-     :cljs (instant/of-epoch-milli (-millis-system-clock this))))
+     :cljs (instant-impl/of-epoch-milli (-millis-system-clock this))))
 (s/fdef -instant-system-clock :args ::instant-system-clock-args :ret ::instant/instant)
 
 (extend-type SystemClock
-  IClock
+  clock/IClock
   (get-zone [this] (-get-zone-system-clock this))
   (with-zone [this zone] (-with-zone-system-clock this zone))
   (millis [this] (-millis-system-clock this))

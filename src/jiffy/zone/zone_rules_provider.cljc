@@ -1,15 +1,9 @@
 (ns jiffy.zone.zone-rules-provider
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.specs :as j]
-            [jiffy.zone.zone-rules-impl :as zone-rules]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRulesProvider.java
-(defprotocol IZoneRulesProvider
-  (provide-zone-ids [this])
-  (provide-rules [this zone-id for-caching])
-  (provide-versions [this zone-id])
-  (provide-refresh [this]))
+            [jiffy.protocols.zone.zone-rules :as zone-rules]
+            [jiffy.protocols.zone.zone-rules-provider :as zone-rules-provider]
+            [jiffy.specs :as j]))
 
 (defrecord ZoneRulesProvider [])
 
@@ -41,7 +35,7 @@
 (s/fdef -provide-refresh :args ::provide-refresh-args :ret ::j/boolean)
 
 (extend-type ZoneRulesProvider
-  IZoneRulesProvider
+  zone-rules-provider/IZoneRulesProvider
   (provide-zone-ids [this] (-provide-zone-ids this))
   (provide-rules [this zone-id for-caching] (-provide-rules this zone-id for-caching))
   (provide-versions [this zone-id] (-provide-versions this zone-id))

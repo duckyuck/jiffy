@@ -1,33 +1,37 @@
 (ns jiffy.chrono.thai-buddhist-chronology
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.abstract-chronology :as abstract-chronology]
-            [jiffy.chrono.chrono-local-date :as chrono-local-date]
-            [jiffy.chrono.chrono-local-date-time :as chrono-local-date-time]
-            [jiffy.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
-            [jiffy.chrono.chronology :as chronology]
-            [jiffy.chrono.era :as era]
-            [jiffy.chrono.thai-buddhist-chronology-impl :refer [create #?@(:cljs [ThaiBuddhistChronology])] :as impl]
-            [jiffy.chrono.thai-buddhist-date :as thai-buddhist-date]
-            [jiffy.chrono.thai-buddhist-era :as thai-buddhist-era]
-            [jiffy.clock :as clock]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.resolver-style :as resolver-style]
-            [jiffy.instant :as instant]
-            [jiffy.specs :as j]
+            [jiffy.protocols.chrono.abstract-chronology :as abstract-chronology]
+            [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
+            [jiffy.protocols.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.protocols.chrono.era :as era]
+            [jiffy.protocols.chrono.thai-buddhist-chronology :as thai-buddhist-chronology]
+            [jiffy.protocols.chrono.thai-buddhist-date :as thai-buddhist-date]
+            [jiffy.protocols.chrono.thai-buddhist-era :as thai-buddhist-era]
+            [jiffy.protocols.clock :as clock]
+            [jiffy.protocols.format.resolver-style :as resolver-style]
+            [jiffy.protocols.instant :as instant]
             [jiffy.temporal.chrono-field :as chrono-field]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.value-range :as value-range]
-            [jiffy.time-comparable :as time-comparable]
-            [jiffy.zone-id :as zone-id])
-  #?(:clj (:import [jiffy.chrono.thai_buddhist_chronology_impl ThaiBuddhistChronology])))
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.specs :as j]))
+
+(defrecord ThaiBuddhistChronology [])
+
+(s/def ::create-args ::j/wip)
+(defn create [])
+(s/def ::thai-buddhist-chronology (j/constructor-spec ThaiBuddhistChronology create ::create-args))
+(s/fdef create :args ::create-args :ret ::thai-buddhist-chronology)
+
+(defmacro args [& x] `(s/tuple ::thai-buddhist-chronology ~@x))
 
 ;; FIXME: no implementation found from inherited class interface java.lang.Comparable
 
 ;; FIXME: no implementation found from inherited class class java.time.chrono.AbstractChronology
-
-(s/def ::thai-buddhist-chronology ::impl/thai-buddhist-chronology)
-
-(defmacro args [& x] `(s/tuple ::thai-buddhist-chronology ~@x))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ThaiBuddhistChronology.java#L177
 (s/def ::get-id-args (args))

@@ -1,9 +1,10 @@
 (ns jiffy.zone.tzdb-zone-rules-provider
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.specs :as j]
-            [jiffy.zone.zone-rules :as zone-rules]
-            [jiffy.zone.zone-rules-provider :as zone-rules-provider]))
+            [jiffy.protocols.zone.tzdb-zone-rules-provider :as tzdb-zone-rules-provider]
+            [jiffy.protocols.zone.zone-rules :as zone-rules]
+            [jiffy.protocols.zone.zone-rules-provider :as zone-rules-provider]
+            [jiffy.specs :as j]))
 
 (defrecord TzdbZoneRulesProvider [])
 

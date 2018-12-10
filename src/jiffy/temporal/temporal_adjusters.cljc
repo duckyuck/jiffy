@@ -1,10 +1,11 @@
 (ns jiffy.temporal.temporal-adjusters
   (:refer-clojure :exclude [next ])
   (:require [clojure.spec.alpha :as s]
-            [jiffy.day-of-week :as day-of-week]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]))
+            [jiffy.day-of-week :as day-of-week]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal-adjusters :as temporal-adjusters]
+            [jiffy.specs :as j]))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalAdjusters.java#L139
 (s/def ::of-date-adjuster-args (s/tuple ::j/wip))

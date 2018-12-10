@@ -1,75 +1,38 @@
 (ns jiffy.local-date-time
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chrono-local-date :as chrono-local-date]
-            [jiffy.chrono.chrono-local-date-time :as chrono-local-date-time]
-            [jiffy.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
-            [jiffy.clock :as clock]
-            [jiffy.day-of-week :as day-of-week]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.date-time-formatter :as date-time-formatter]
-            [jiffy.instant-impl :as instant]
-            [jiffy.local-date :as local-date]
-            [jiffy.local-date-time-impl :refer [create #?@(:cljs [LocalDateTime])] :as impl]
-            [jiffy.local-time :as local-time]
+            [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
+            [jiffy.protocols.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
+            [jiffy.protocols.clock :as clock]
+            [jiffy.day-of-week :as day-of-week]
+            [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
+            [jiffy.protocols.instant :as instant]
+            [jiffy.protocols.local-date :as local-date]
+            [jiffy.protocols.local-date-time :as local-date-time]
+            [jiffy.protocols.local-time :as local-time]
             [jiffy.month :as month]
-            [jiffy.offset-date-time-impl :as offset-date-time]
+            [jiffy.protocols.offset-date-time :as offset-date-time]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.protocols.zoned-date-time :as zoned-date-time]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-amount :as temporal-amount]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.temporal.temporal-unit :as temporal-unit]
-            [jiffy.temporal.value-range :as value-range]
-            [jiffy.time-comparable :as time-comparable]
-            [jiffy.zone-id :as zone-id]
-            [jiffy.zone-offset :as zone-offset]
-            [jiffy.zoned-date-time-impl :as zoned-date-time]
-            [jiffy.temporal.chrono-field :as chrono-field]
-            [jiffy.math :as math])
-  #?(:clj (:import [jiffy.local_date_time_impl LocalDateTime])))
+            [jiffy.temporal.temporal-query :as temporal-query]))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java
-(defprotocol ILocalDateTime
-  (get-year [this])
-  (get-month-value [this])
-  (get-month [this])
-  (get-day-of-month [this])
-  (get-day-of-year [this])
-  (get-day-of-week [this])
-  (get-hour [this])
-  (get-minute [this])
-  (get-second [this])
-  (get-nano [this])
-  (with-year [this year])
-  (with-month [this month])
-  (with-day-of-month [this day-of-month])
-  (with-day-of-year [this day-of-year])
-  (with-hour [this hour])
-  (with-minute [this minute])
-  (with-second [this second])
-  (with-nano [this nano-of-second])
-  (truncated-to [this unit])
-  (plus-years [this years])
-  (plus-months [this months])
-  (plus-weeks [this weeks])
-  (plus-days [this days])
-  (plus-hours [this hours])
-  (plus-minutes [this minutes])
-  (plus-seconds [this seconds])
-  (plus-nanos [this nanos])
-  (minus-years [this years])
-  (minus-months [this months])
-  (minus-weeks [this weeks])
-  (minus-days [this days])
-  (minus-hours [this hours])
-  (minus-minutes [this minutes])
-  (minus-seconds [this seconds])
-  (minus-nanos [this nanos])
-  (at-offset [this offset]))
+(defrecord LocalDateTime [])
 
-(s/def ::local-date-time ::impl/local-date-time)
+(s/def ::create-args ::j/wip)
+(defn create [])
+(s/def ::local-date-time (j/constructor-spec LocalDateTime create ::create-args))
+(s/fdef create :args ::create-args :ret ::local-date-time)
 
 (defmacro args [& x] `(s/tuple ::local-date-time ~@x))
 
@@ -254,7 +217,7 @@
 (s/fdef -at-offset :args ::at-offset-args :ret ::offset-date-time/offset-date-time)
 
 (extend-type LocalDateTime
-  ILocalDateTime
+  local-date-time/ILocalDateTime
   (get-year [this] (-get-year this))
   (get-month-value [this] (-get-month-value this))
   (get-month [this] (-get-month this))
@@ -445,8 +408,22 @@
   ([now--overloaded-param] (wip ::now)))
 (s/fdef now :args ::now-args :ret ::local-date-time)
 
-(s/def ::of-args ::impl/of-args)
-(def of #'impl/of)
+(s/def ::of-args (args ::j/wip))
+(defn of
+  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L373
+  ([date time] (wip ::of))
+
+  ;; NB! This method is overloaded!
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L235
+  ([of--overloaded-param-1 of--overloaded-param-2 of--overloaded-param-3 of--overloaded-param-4 of--overloaded-param-5] (wip ::of))
+
+  ;; NB! This method is overloaded!
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L260
+  ([of--overloaded-param-1 of--overloaded-param-2 of--overloaded-param-3 of--overloaded-param-4 of--overloaded-param-5 of--overloaded-param-6] (wip ::of))
+
+  ;; NB! This method is overloaded!
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L285
+  ([of--overloaded-param-1 of--overloaded-param-2 of--overloaded-param-3 of--overloaded-param-4 of--overloaded-param-5 of--overloaded-param-6 of--overloaded-param-7] (wip ::of)))
 (s/fdef of :args ::of-args :ret ::local-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L393
@@ -456,14 +433,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L416
 (s/def ::of-epoch-second-args (args ::j/long ::j/int ::zone-offset/zone-offset))
-(defn of-epoch-second [epoch-second nano-of-second offset]
-  (chrono-field/check-valid-value chrono-field/NANO_OF_SECOND nano-of-second)
-  (let [local-second (+ epoch-second (zone-offset/get-total-seconds offset)) ;; overflow caught later
-        local-epoch-day (math/floor-div local-second local-time/SECONDS_PER_DAY)
-        secs-of-day (math/floor-mod local-second local-time/SECONDS_PER_DAY)]
-    (create (local-date/of-epoch-day local-epoch-day)
-            (local-time/of-nano-of-day (+ (* secs-of-day local-time/NANOS_PER_SECOND)
-                                          nano-of-second)))))
+(defn of-epoch-second [epoch-second nano-of-second offset] (wip ::of-epoch-second))
 (s/fdef of-epoch-second :args ::of-epoch-second-args :ret ::local-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L447

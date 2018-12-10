@@ -1,4 +1,4 @@
-(ns jiffy.enum)
+(ns jiffy.enums)
 
 (defmacro defenum [constructor-fn enums]
   (let [ordinal (atom -1)

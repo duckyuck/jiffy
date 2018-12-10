@@ -1,20 +1,12 @@
 (ns jiffy.format.date-time-print-context
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.decimal-style :as decimal-style]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.temporal-query :as temporal-query]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimePrintContext.java
-(defprotocol IDateTimePrintContext
-  (get-temporal [this])
-  (get-locale [this])
-  (get-decimal-style [this])
-  (start-optional [this])
-  (end-optional [this])
-  (get-value [this get-value--overloaded-param]))
+            [jiffy.protocols.format.date-time-print-context :as date-time-print-context]
+            [jiffy.protocols.format.decimal-style :as decimal-style]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.specs :as j]))
 
 (defrecord DateTimePrintContext [])
 
@@ -57,7 +49,7 @@
 (s/fdef -get-value :args ::get-value-args :ret ::j/wip)
 
 (extend-type DateTimePrintContext
-  IDateTimePrintContext
+  date-time-print-context/IDateTimePrintContext
   (get-temporal [this] (-get-temporal this))
   (get-locale [this] (-get-locale this))
   (get-decimal-style [this] (-get-decimal-style this))

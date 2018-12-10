@@ -1,27 +1,24 @@
 (ns jiffy.month
-  (:require [clojure.spec.alpha :as s]
-            #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
+  (:require #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
+            [clojure.spec.alpha :as s]
+            [jiffy.chrono.chronology :as chronology]
+            [jiffy.chrono.iso-chronology-impl :as iso-chronology]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.enum #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]
+            [jiffy.enums #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException JavaIllegalArgumentException ex #?(:clj try*)]  #?@(:cljs [:refer-macros [try*]])]
-            [jiffy.format.text-style :as text-style]
+            [jiffy.protocols.format.text-style :as text-style]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.value-range :as value-range]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.temporal.value-range :as value-range]
             [jiffy.temporal.chrono-field :as chrono-field]
+            [jiffy.temporal.chrono-unit :as chrono-unit]
             [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
             [jiffy.temporal.temporal-queries :as temporal-queries]
-            [jiffy.chrono.iso-chronology-impl :as iso-chronology]
-            [jiffy.temporal.chrono-unit :as chrono-unit]
-            [jiffy.chrono.chronology :as chronology]
-            ;; [jiffy.local-date-impl :as local-date]
-            ))
+            [jiffy.temporal.temporal-query :as temporal-query]))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java
 (defprotocol IMonth
   (get-value [this])
   (get-display-name [this style locale])
@@ -34,6 +31,8 @@
   (first-month-of-quarter [this]))
 
 (defrecord Month [ordinal enum-name])
+
+(def month? (partial instance? Month))
 
 (s/def ::create-args (s/tuple ::j/long string?))
 (def create ->Month)
@@ -170,7 +169,7 @@
 (s/def ::get-args (args ::temporal-field/temporal-field))
 (defn -get [this field]
   (if (= field chrono-field/MONTH_OF_YEAR)
-    (get-value this)
+    (-get-value this)
     (temporal-accessor-defaults/-get this field)))
 (s/fdef -get :args ::get-args :ret ::j/int)
 
@@ -179,7 +178,7 @@
 (defn -get-long [this field]
   (cond
     (= field chrono-field/MONTH_OF_YEAR)
-    (get-value this)
+    (-get-value this)
 
     (chrono-field/chrono-field? field)
     (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field)
@@ -215,7 +214,7 @@
 (defn -adjust-into [this temporal]
   (if (not= (chronology/from temporal) iso-chronology/INSTANCE)
     (throw (ex DateTimeException "Adjustment only supported on ISO date-time"))
-    (temporal/with temporal chrono-field/MONTH_OF_YEAR (get-value this))))
+    (temporal/with temporal chrono-field/MONTH_OF_YEAR (-get-value this))))
 (s/fdef -adjust-into :args ::adjust-into-args :ret ::temporal/temporal)
 
 (extend-type Month

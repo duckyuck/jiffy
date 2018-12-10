@@ -2,16 +2,12 @@
   (:refer-clojure :exclude [resolve ])
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.resolver-style :as resolver-style]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.temporal-query :as temporal-query]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/Parsed.java
-(defprotocol IParsed
-  (copy [this])
-  (resolve [this resolver-style resolver-fields]))
+            [jiffy.protocols.format.parsed :as parsed]
+            [jiffy.protocols.format.resolver-style :as resolver-style]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.specs :as j]))
 
 (defrecord Parsed [])
 
@@ -33,7 +29,7 @@
 (s/fdef -resolve :args ::resolve-args :ret ::temporal-accessor/temporal-accessor)
 
 (extend-type Parsed
-  IParsed
+  parsed/IParsed
   (copy [this] (-copy this))
   (resolve [this resolver-style resolver-fields] (-resolve this resolver-style resolver-fields)))
 

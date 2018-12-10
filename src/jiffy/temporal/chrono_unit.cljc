@@ -1,19 +1,19 @@
 (ns jiffy.temporal.chrono-unit
-  (:require [clojure.spec.alpha :as s]
-            #?(:clj [jiffy.conversion :as conversion])
-            [jiffy.duration-impl :as duration]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-unit :as temporal-unit]
+  (:require #?(:clj [jiffy.conversion :as conversion])
+            [clojure.spec.alpha :as s]
+            [jiffy.duration-impl :as duration-impl]
+            [jiffy.enums #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]
             [jiffy.math :as math]
-            [jiffy.enum #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]
-            [jiffy.time-comparable :as time-comparable]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]))
+            [jiffy.protocols.duration :as duration]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.specs :as j]))
 
-(defprotocol IChronoUnit)
+(defrecord ChronoUnit [ordinal enum-name name duration])
 
-(defrecord ChronoUnit [ordinal enum-name name duration]
-  IChronoUnit)
+(def chrono-unit? (partial instance? ChronoUnit))
 
 (s/def ::create-args (s/tuple ::j/int string? string? ::duration/duration))
 (def create ->ChronoUnit)
@@ -22,22 +22,22 @@
 (s/fdef create :args ::create-args :ret ::chrono-unit)
 
 (defenum create
-  [NANOS ["Nanos" (duration/of-nanos 1)]
-   MICROS ["Micros" (duration/of-nanos 1000)]
-   MILLIS ["Millis" (duration/of-nanos 1000000)]
-   SECONDS ["Seconds" (duration/of-seconds 1)]
-   MINUTES ["Minutes" (duration/of-seconds 60)]
-   HOURS ["Hours" (duration/of-seconds 3600)]
-   HALF_DAYS ["HalfDays" (duration/of-seconds 43200)]
-   DAYS ["Days" (duration/of-seconds 86400)]
-   WEEKS ["Weeks" (duration/of-seconds (* 7 86400))]
-   MONTHS ["Months" (duration/of-seconds (/ 31556952 12))]
-   YEARS ["Years" (duration/of-seconds 31556952)]
-   DECADES ["Decades" (duration/of-seconds (* 31556952 10))]
-   CENTURIES ["Centuries" (duration/of-seconds (* 31556952 100))]
-   MILLENNIA ["Millennia" (duration/of-seconds (* 31556952 1000))]
-   ERAS ["Eras" (duration/of-seconds (* 31556952 1000000000))]
-   FOREVER ["Forever" (duration/of-seconds math/long-max-value 999999999)]])
+  [NANOS ["Nanos" (duration-impl/of-nanos 1)]
+   MICROS ["Micros" (duration-impl/of-nanos 1000)]
+   MILLIS ["Millis" (duration-impl/of-nanos 1000000)]
+   SECONDS ["Seconds" (duration-impl/of-seconds 1)]
+   MINUTES ["Minutes" (duration-impl/of-seconds 60)]
+   HOURS ["Hours" (duration-impl/of-seconds 3600)]
+   HALF_DAYS ["HalfDays" (duration-impl/of-seconds 43200)]
+   DAYS ["Days" (duration-impl/of-seconds 86400)]
+   WEEKS ["Weeks" (duration-impl/of-seconds (* 7 86400))]
+   MONTHS ["Months" (duration-impl/of-seconds (/ 31556952 12))]
+   YEARS ["Years" (duration-impl/of-seconds 31556952)]
+   DECADES ["Decades" (duration-impl/of-seconds (* 31556952 10))]
+   CENTURIES ["Centuries" (duration-impl/of-seconds (* 31556952 100))]
+   MILLENNIA ["Millennia" (duration-impl/of-seconds (* 31556952 1000))]
+   ERAS ["Eras" (duration-impl/of-seconds (* 31556952 1000000000))]
+   FOREVER ["Forever" (duration-impl/of-seconds math/long-max-value 999999999)]])
 
 (defmacro args [& x] `(s/tuple ::chrono-unit ~@x))
 

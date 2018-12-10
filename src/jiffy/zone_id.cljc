@@ -3,20 +3,14 @@
             [jiffy.asserts :as assert]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.exception :refer [try* ex DateTimeException JavaNullPointerException JavaIllegalArgumentException]]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.zone-id :as zone-id]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.zone-offset-impl :as zone-offset]
             [jiffy.zone-region-impl :as zone-region]))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java
-(defprotocol IZoneId
-  (normalized [this])
-  (get-id [this])
-  (get-display-name [this style locale])
-  (get-rules [this]))
-
-(s/def ::zone-id #(satisfies? IZoneId %))
+(s/def ::zone-id ::zone-id/zone-id)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L271
 (defn system-default [] (wip ::system-default))
@@ -95,10 +89,10 @@
     (throw (ex JavaIllegalArgumentException (str "prefix should be GMT, UTC or UT, is: " prefix)))
 
     (not= 0 (:total-seconds offset))
-    (zone-region/create (str prefix (get-id offset)) (get-rules offset))
+    (zone-region/create (str prefix (zone-id/get-id offset)) (zone-id/get-rules offset))
 
     :default
-    (zone-region/create prefix (get-rules offset))))
+    (zone-region/create prefix (zone-id/get-rules offset))))
 (s/fdef of-offset :args ::of-offset-args :ret ::zone-id)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L459

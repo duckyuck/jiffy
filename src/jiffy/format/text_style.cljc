@@ -1,15 +1,8 @@
 (ns jiffy.format.text-style
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
+            [jiffy.protocols.format.text-style :as text-style]
             [jiffy.specs :as j]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/TextStyle.java
-(defprotocol ITextStyle
-  (is-standalone [this])
-  (as-standalone [this])
-  (as-normal [this])
-  (to-calendar-style [this])
-  (zone-name-style-index [this]))
 
 (defrecord TextStyle [])
 
@@ -46,7 +39,7 @@
 (s/fdef -zone-name-style-index :args ::zone-name-style-index-args :ret ::j/int)
 
 (extend-type TextStyle
-  ITextStyle
+  text-style/ITextStyle
   (is-standalone [this] (-is-standalone this))
   (as-standalone [this] (-as-standalone this))
   (as-normal [this] (-as-normal this))

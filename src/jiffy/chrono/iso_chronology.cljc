@@ -1,34 +1,38 @@
 (ns jiffy.chrono.iso-chronology
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.abstract-chronology :as abstract-chronology]
-            [jiffy.chrono.chrono-local-date :as chrono-local-date]
-            [jiffy.chrono.chrono-local-date-time :as chrono-local-date-time]
-            [jiffy.chrono.chrono-period :as chrono-period]
-            [jiffy.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
-            [jiffy.chrono.chronology :as chronology]
-            [jiffy.chrono.era :as era]
-            [jiffy.chrono.iso-chronology-impl :refer [create #?@(:cljs [IsoChronology])] :as impl]
-            [jiffy.chrono.iso-era :as iso-era]
-            [jiffy.clock :as clock]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.resolver-style :as resolver-style]
-            [jiffy.instant-impl :as instant]
-            [jiffy.local-date :as local-date]
-            [jiffy.local-date-time :as local-date-time]
-            [jiffy.period :as period]
-            [jiffy.specs :as j]
+            [jiffy.protocols.chrono.abstract-chronology :as abstract-chronology]
+            [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
+            [jiffy.protocols.chrono.chrono-period :as chrono-period]
+            [jiffy.protocols.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.protocols.chrono.era :as era]
+            [jiffy.protocols.chrono.iso-chronology :as iso-chronology]
+            [jiffy.protocols.chrono.iso-era :as iso-era]
+            [jiffy.protocols.clock :as clock]
+            [jiffy.protocols.format.resolver-style :as resolver-style]
+            [jiffy.protocols.instant :as instant]
+            [jiffy.protocols.local-date :as local-date]
+            [jiffy.protocols.local-date-time :as local-date-time]
+            [jiffy.protocols.period :as period]
             [jiffy.temporal.chrono-field :as chrono-field]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.value-range :as value-range]
-            [jiffy.time-comparable :as time-comparable]
-            [jiffy.zone-id :as zone-id]
-            [jiffy.zone-offset :as zone-offset]
-            [jiffy.zoned-date-time :as zoned-date-time])
-  #?(:clj (:import [jiffy.chrono.iso_chronology_impl IsoChronology])))
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.protocols.zone-offset :as zone-offset]
+            [jiffy.protocols.zoned-date-time :as zoned-date-time]
+            [jiffy.specs :as j]))
+
+(defrecord IsoChronology [])
+
+(s/def ::create-args ::j/wip)
+(defn create [])
+(s/def ::iso-chronology (j/constructor-spec IsoChronology create ::create-args))
+(s/fdef create :args ::create-args :ret ::iso-chronology)
 
 (defmacro args [& x] `(s/tuple ::iso-chronology ~@x))
-
-(s/def ::iso-chronology ::impl/iso-chronology)
 
 ;; FIXME: no implementation found from inherited class interface java.lang.Comparable
 
@@ -181,5 +185,6 @@
   (range [this field] (-range this field))
   (period [this years months days] (-period this years months days)))
 
+
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/IsoChronology.java#L131
-(def INSTANCE impl/INSTANCE)
+(def INSTANCE ::INSTANCE--not-implemented)

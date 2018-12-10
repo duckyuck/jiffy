@@ -1,31 +1,20 @@
 (ns jiffy.zone.zone-rules
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.duration-impl :as duration]
-            [jiffy.instant-impl :as instant]
-            [jiffy.local-date-time :as local-date-time]
-            [jiffy.specs :as j]
-            [jiffy.zone-offset-impl :as zone-offset]
-            [jiffy.zone.zone-rules-impl :refer [create #?@(:cljs [ZoneRules])] :as impl]
-            [jiffy.zone.zone-offset-transition :as zone-offset-transition])
-  #?(:clj (:import [jiffy.zone.zone_rules_impl ZoneRules])))
+            [jiffy.protocols.duration :as duration]
+            [jiffy.protocols.instant :as instant]
+            [jiffy.protocols.local-date-time :as local-date-time]
+            [jiffy.protocols.zone-offset :as zone-offset]
+            [jiffy.protocols.zone.zone-offset-transition :as zone-offset-transition]
+            [jiffy.protocols.zone.zone-rules :as zone-rules]
+            [jiffy.specs :as j]))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRules.java
-(defprotocol IZoneRules
-  (is-fixed-offset [this])
-  (get-offset [this get-offset--overloaded-param])
-  (get-valid-offsets [this local-date-time])
-  (get-transition [this local-date-time])
-  (get-standard-offset [this instant])
-  (get-daylight-savings [this instant])
-  (is-daylight-savings [this instant])
-  (is-valid-offset [this local-date-time offset])
-  (next-transition [this instant])
-  (previous-transition [this instant])
-  (get-transitions [this])
-  (get-transition-rules [this]))
+(defrecord ZoneRules [])
 
-(s/def ::zone-rules ::impl/zone-rules)
+(s/def ::create-args ::j/wip)
+(defn create [])
+(s/def ::zone-rules (j/constructor-spec ZoneRules create ::create-args))
+(s/fdef create :args ::create-args :ret ::zone-rules)
 
 (defmacro args [& x] `(s/tuple ::zone-rules ~@x))
 
@@ -91,7 +80,7 @@
 (s/fdef -get-transition-rules :args ::get-transition-rules-args :ret ::j/wip)
 
 (extend-type ZoneRules
-  IZoneRules
+  zone-rules/IZoneRules
   (is-fixed-offset [this] (-is-fixed-offset this))
   (get-offset [this get-offset--overloaded-param] (-get-offset this get-offset--overloaded-param))
   (get-valid-offsets [this local-date-time] (-get-valid-offsets this local-date-time))

@@ -1,12 +1,18 @@
 (ns jiffy.zone-region-impl
-  (:require [jiffy.asserts :as assert]
+  (:require [clojure.spec.alpha :as s]
+            [jiffy.specs :as j]
+            [jiffy.asserts :as assert]
             [jiffy.exception :refer [try* ex DateTimeException]]
-            [jiffy.zone.zone-rules-provider :as zone-rules-provider]))
+            [jiffy.zone.zone-rules-provider :as zone-rules-provider]
+            [jiffy.protocols.zone.zone-rules :as zone-rules]))
 
 (defrecord ZoneRegion [id rules])
 
+(s/def ::create-args (s/tuple ::j/zone-id ::zone-rules/zone-rules))
 (defn create [id rules]
   (->ZoneRegion id rules))
+(s/def ::zone-region (j/constructor-spec ZoneRegion create ::create-args))
+(s/fdef create :args ::create-args :ret ::zone-region)
 
 (defn- check-name [zone-id]
   (when (< (count zone-id) 2)

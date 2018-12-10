@@ -1,13 +1,13 @@
 (ns jiffy.temporal.temporal-accessor-defaults
   (:require [clojure.spec.alpha :as s]
             [jiffy.specs :as j]
-            [jiffy.temporal.chrono-field :as chrono-field]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.value-range :as value-range]
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.temporal.chrono-field :as chrono-field]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.temporal.temporal-query :as temporal-query]
             [jiffy.temporal.temporal-queries :as temporal-queries]
-            [jiffy.temporal.temporal-query :as temporal-query]))
+            [jiffy.protocols.temporal.value-range :as value-range]))
 
 (defmacro args [& x] `(s/tuple ::temporal-accessor/temporal-accessor ~@x))
 

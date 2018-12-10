@@ -1,22 +1,26 @@
 (ns jiffy.chrono.chronology-defaults
+  (:refer-clojure :exclude [range ])
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chrono-local-date-defaults :as chrono-local-date]
-            [jiffy.chrono.chrono-local-date-time-defaults :as chrono-local-date-time]
-            [jiffy.chrono.chrono-period :as chrono-period]
-            [jiffy.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
-            [jiffy.chrono.era :as era]
-            [jiffy.clock :as clock]
-            [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.resolver-style :as resolver-style]
-            [jiffy.format.text-style :as text-style]
-            [jiffy.instant :as instant]
             [jiffy.specs :as j]
+            [jiffy.dev.wip :refer [wip]]
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.protocols.clock :as clock]
+            [jiffy.protocols.instant :as instant]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.protocols.zone-offset :as zone-offset]
+            [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
+            [jiffy.protocols.chrono.chrono-period :as chrono-period]
+            [jiffy.protocols.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
+            [jiffy.protocols.chrono.era :as era]
+            [jiffy.protocols.format.resolver-style :as resolver-style]
+            [jiffy.protocols.format.text-style :as text-style]
             [jiffy.temporal.chrono-field :as chrono-field]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.value-range :as value-range]
-            [jiffy.time-comparable :as time-comparable]
-            [jiffy.zone-id :as zone-id]
-            [jiffy.zone-offset :as zone-offset]))
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.value-range :as value-range]))
+
+(s/def ::chronology ::chronology/chronology)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Chronology.java#L316
 (s/def ::date-args ::j/wip)

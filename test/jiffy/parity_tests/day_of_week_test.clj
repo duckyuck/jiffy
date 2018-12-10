@@ -6,13 +6,13 @@
 (test-proto-fn jiffy.day-of-week jiffy.day-of-week/plus)
 (test-proto-fn jiffy.day-of-week jiffy.day-of-week/minus)
 
-(test-proto-fn jiffy.day-of-week jiffy.temporal.temporal-accessor/is-supported)
-(test-proto-fn jiffy.day-of-week jiffy.temporal.temporal-accessor/range)
-(test-proto-fn jiffy.day-of-week jiffy.temporal.temporal-accessor/get)
-(test-proto-fn jiffy.day-of-week jiffy.temporal.temporal-accessor/get-long)
-(test-proto-fn jiffy.day-of-week jiffy.temporal.temporal-accessor/query)
+(test-proto-fn jiffy.day-of-week jiffy.protocols.temporal.temporal-accessor/is-supported)
+(test-proto-fn jiffy.day-of-week jiffy.protocols.temporal.temporal-accessor/range)
+(test-proto-fn jiffy.day-of-week jiffy.protocols.temporal.temporal-accessor/get)
+(test-proto-fn jiffy.day-of-week jiffy.protocols.temporal.temporal-accessor/get-long)
+(test-proto-fn jiffy.day-of-week jiffy.protocols.temporal.temporal-accessor/query)
 
-(test-proto-fn jiffy.day-of-week jiffy.temporal.temporal-adjuster/adjust-into)
+(test-proto-fn jiffy.day-of-week jiffy.protocols.temporal.temporal-adjuster/adjust-into)
 
 (test-static-fn jiffy.day-of-week/of)
 ;; (test-static-fn! jiffy.day-of-week/from)

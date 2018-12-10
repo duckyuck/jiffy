@@ -2,17 +2,19 @@
   (:require [clojure.spec.alpha :as s]
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
             [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
             [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.temporal.value-range :as value-range]
-            [jiffy.time-comparable :as time-comparable]
-            [jiffy.zone-id :as zone-id]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.protocols.zone-offset :as zone-offset]
+            [jiffy.protocols.zone.zone-rules :as zone-rules]
             [jiffy.zone-offset-impl :refer [create #?@(:cljs [ZoneOffset])] :as impl]
-            [jiffy.zone.zone-rules-impl :as zone-rules]
+            [jiffy.zone.zone-rules-impl :as zone-rules-impl]
             [jiffy.temporal.chrono-field :as chrono-field]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [clojure.string :as str]
@@ -25,10 +27,6 @@
 
 (def MAX_SECONDS impl/MAX_SECONDS)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java
-(defprotocol IZoneOffset
-  (get-total-seconds [this]))
-
 (s/def ::zone-offset ::impl/zone-offset)
 
 (defmacro args [& x] `(s/tuple ::zone-offset ~@x))
@@ -39,7 +37,7 @@
 (s/fdef -get-total-seconds :args ::get-total-seconds-args :ret ::j/int)
 
 (extend-type ZoneOffset
-  IZoneOffset
+  zone-offset/IZoneOffset
   (get-total-seconds [this] (-get-total-seconds this)))
 
 ;; NB! This method is overloaded!
@@ -60,7 +58,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L504
 (s/def ::get-rules-args (args))
-(defn -get-rules [this] (zone-rules/of this))
+(defn -get-rules [this] (zone-rules-impl/of this))
 (s/fdef -get-rules :args ::get-rules-args :ret ::zone-rules/zone-rules)
 
 (extend-type ZoneOffset

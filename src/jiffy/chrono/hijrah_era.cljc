@@ -1,13 +1,13 @@
 (ns jiffy.chrono.hijrah-era
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.era :as era]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.text-style :as text-style]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.value-range :as value-range]))
+            [jiffy.protocols.chrono.era :as era]
+            [jiffy.protocols.format.text-style :as text-style]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.specs :as j]))
 
 (defrecord HijrahEra [])
 

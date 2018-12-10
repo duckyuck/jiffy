@@ -1,4 +1,4 @@
-(ns jiffy.temporal.temporal-accessor
+(ns jiffy.protocols.temporal.temporal-accessor
   (:refer-clojure :exclude [get range])
   (:require [clojure.spec.alpha :as s]))
 

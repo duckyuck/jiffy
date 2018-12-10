@@ -1,36 +1,15 @@
 (ns jiffy.format.date-time-parse-context
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chronology :as chronology]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.decimal-style :as decimal-style]
-            [jiffy.format.parsed :as parsed]
-            [jiffy.format.resolver-style :as resolver-style]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.zone-id :as zone-id]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeParseContext.java
-(defprotocol IDateTimeParseContext
-  (copy [this])
-  (get-locale [this])
-  (get-decimal-style [this])
-  (get-effective-chronology [this])
-  (is-case-sensitive [this])
-  (set-case-sensitive [this case-sensitive])
-  (sub-sequence-equals [this cs1 offset1 cs2 offset2 length])
-  (char-equals [this ch1 ch2])
-  (is-strict [this])
-  (set-strict [this strict])
-  (start-optional [this])
-  (end-optional [this successful])
-  (to-unresolved [this])
-  (to-resolved [this resolver-style resolver-fields])
-  (get-parsed [this field])
-  (set-parsed-field [this field value error-pos success-pos])
-  (set-parsed [this set-parsed--overloaded-param])
-  (add-chrono-changed-listener [this listener])
-  (set-parsed-leap-second [this]))
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.protocols.format.date-time-parse-context :as date-time-parse-context]
+            [jiffy.protocols.format.decimal-style :as decimal-style]
+            [jiffy.protocols.format.parsed :as parsed]
+            [jiffy.protocols.format.resolver-style :as resolver-style]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.specs :as j]))
 
 (defrecord DateTimeParseContext [])
 
@@ -138,7 +117,7 @@
 (s/fdef -set-parsed-leap-second :args ::set-parsed-leap-second-args :ret ::j/void)
 
 (extend-type DateTimeParseContext
-  IDateTimeParseContext
+  date-time-parse-context/IDateTimeParseContext
   (copy [this] (-copy this))
   (get-locale [this] (-get-locale this))
   (get-decimal-style [this] (-get-decimal-style this))

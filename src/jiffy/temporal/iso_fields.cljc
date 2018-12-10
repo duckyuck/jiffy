@@ -1,8 +1,9 @@
 (ns jiffy.temporal.iso-fields
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]))
+            [jiffy.protocols.temporal.iso-fields :as iso-fields]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.specs :as j]))
 
 (defrecord IsoFields [])
 

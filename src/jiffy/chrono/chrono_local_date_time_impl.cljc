@@ -1,24 +1,21 @@
 (ns jiffy.chrono.chrono-local-date-time-impl
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chrono-local-date :as chrono-local-date]
-            [jiffy.chrono.chrono-local-date-time :as chrono-local-date-time]
-            [jiffy.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
-            [jiffy.chrono.chronology :as chronology]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.local-time :as local-time]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.temporal-unit :as temporal-unit]
-            [jiffy.temporal.value-range :as value-range]
-            [jiffy.time-comparable :as time-comparable]
-            [jiffy.zone-id :as zone-id]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTimeImpl.java
-(defprotocol IChronoLocalDateTimeImpl
-  (plus-seconds [this seconds]))
+            [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
+            [jiffy.protocols.chrono.chrono-local-date-time-impl :as chrono-local-date-time-impl]
+            [jiffy.protocols.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.protocols.local-time :as local-time]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.specs :as j]))
 
 (defrecord ChronoLocalDateTimeImpl [])
 
@@ -35,7 +32,7 @@
 (s/fdef -plus-seconds :args ::plus-seconds-args :ret ::chrono-local-date-time-impl)
 
 (extend-type ChronoLocalDateTimeImpl
-  IChronoLocalDateTimeImpl
+  chrono-local-date-time-impl/IChronoLocalDateTimeImpl
   (plus-seconds [this seconds] (-plus-seconds this seconds)))
 
 ;; FIXME: no implementation found from inherited class interface java.lang.Comparable

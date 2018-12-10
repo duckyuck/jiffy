@@ -1,4 +1,4 @@
-(ns jiffy.temporal.temporal-field
+(ns jiffy.protocols.temporal.temporal-field
   (:refer-clojure :exclude [range resolve])
   (:require [clojure.spec.alpha :as s]))
 

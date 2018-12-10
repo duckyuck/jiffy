@@ -1,20 +1,15 @@
 (ns jiffy.chrono.japanese-era
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.era :as era]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.text-style :as text-style]
-            [jiffy.local-date :as local-date]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.value-range :as value-range]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/JapaneseEra.java
-(defprotocol IJapaneseEra
-  (get-private-era [this])
-  (get-abbreviation [this])
-  (get-name [this]))
+            [jiffy.protocols.chrono.era :as era]
+            [jiffy.protocols.chrono.japanese-era :as japanese-era]
+            [jiffy.protocols.format.text-style :as text-style]
+            [jiffy.protocols.local-date :as local-date]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.specs :as j]))
 
 (defrecord JapaneseEra [])
 
@@ -41,7 +36,7 @@
 (s/fdef -get-name :args ::get-name-args :ret string?)
 
 (extend-type JapaneseEra
-  IJapaneseEra
+  japanese-era/IJapaneseEra
   (get-private-era [this] (-get-private-era this))
   (get-abbreviation [this] (-get-abbreviation this))
   (get-name [this] (-get-name this)))

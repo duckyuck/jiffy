@@ -1,62 +1,71 @@
 (ns jiffy.parity-tests.test-specs
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
-            [jiffy.chrono.chrono-local-date-time-impl :as chrono-local-date-time-impl]
-            [jiffy.chrono.chrono-period-impl :as chrono-period-impl]
-            [jiffy.chrono.hijrah-date :as hijrah-date]
-            [jiffy.chrono.hijrah-era :as hijrah-era]
-            [jiffy.chrono.japanese-date :as japanese-date]
-            [jiffy.chrono.japanese-era :as japanese-era]
-            [jiffy.chrono.minguo-date :as minguo-date]
-            [jiffy.chrono.thai-buddhist-date :as thai-buddhist-date]
-            [jiffy.clock :as clock]
+            [jiffy.clock :as clock-impl]
             [jiffy.day-of-week :as day-of-week]
-            [jiffy.duration :as duration]
-            [jiffy.format.parsed :as parsed]
-            [jiffy.instant :as instant]
-            [jiffy.local-date :as local-date]
-            [jiffy.local-date-time :as local-date-time]
-            [jiffy.local-time :as local-time]
+            jiffy.duration
+            jiffy.instant
             [jiffy.month :as month]
-            [jiffy.month-day :as month-day]
-            [jiffy.offset-date-time :as offset-date-time]
-            [jiffy.offset-time :as offset-time]
-            [jiffy.period :as period]
+            jiffy.period
+            [jiffy.protocols.chrono.chrono-local-date-time-impl :as chrono-local-date-time-impl]
+            [jiffy.protocols.chrono.chrono-period-impl :as chrono-period-impl]
+            [jiffy.protocols.chrono.hijrah-date :as hijrah-date]
+            [jiffy.protocols.chrono.hijrah-era :as hijrah-era]
+            [jiffy.protocols.chrono.japanese-date :as japanese-date]
+            [jiffy.protocols.chrono.japanese-era :as japanese-era]
+            [jiffy.protocols.chrono.minguo-date :as minguo-date]
+            [jiffy.protocols.chrono.thai-buddhist-date :as thai-buddhist-date]
+            [jiffy.protocols.clock :as clock]
+            [jiffy.protocols.duration :as duration]
+            [jiffy.protocols.format.parsed :as parsed]
+            [jiffy.protocols.instant :as instant]
+            [jiffy.protocols.local-date :as local-date]
+            [jiffy.protocols.local-date-time :as local-date-time]
+            [jiffy.protocols.local-time :as local-time]
+            [jiffy.protocols.month-day :as month-day]
+            [jiffy.protocols.offset-date-time :as offset-date-time]
+            [jiffy.protocols.offset-time :as offset-time]
+            [jiffy.protocols.period :as period]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
+            [jiffy.protocols.year :as year]
+            [jiffy.protocols.year-month :as year-month]
+            [jiffy.protocols.zoned-date-time :as zoned-date-time]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.temporal.chrono-field :as chrono-field]
             [jiffy.temporal.chrono-unit :as chrono-unit]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-adjusters :as temporal-adjusters]
-            [jiffy.temporal.temporal-amount :as temporal-amount]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-field :as temporal-field]
+            [jiffy.temporal.temporal-adjusters :as temporal-adjusters-impl]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.temporal.temporal-unit :as temporal-unit]
-            [jiffy.year-impl :as year]
-            [jiffy.year-month :as year-month]
-            [jiffy.zoned-date-time :as zoned-date-time]
-            [jiffy.zone-id :as zone-id]
-            [jiffy.zone-offset :as zone-offset]))
+            jiffy.zone-offset))
+
+(s/def ::duration/duration :jiffy.duration/duration)
+(s/def ::instant/instant :jiffy.instant/instant)
+(s/def ::zone-offset/zone-offset :jiffy.zone-offset/zone-offset)
 
 (s/def ::clock/clock
   (s/with-gen #(satisfies? clock/IClock %)
-    (fn [] (gen/one-of [(s/gen ::clock/system-clock)]))))
+    (fn [] (gen/one-of [(s/gen ::clock-impl/system-clock)]))))
 
 (s/def ::temporal-field/temporal-field
   (s/with-gen #(satisfies? temporal-field/ITemporalField %)
     (fn [] (gen/one-of (map gen/return (chrono-field/values))))))
 
 (s/def ::chrono-unit/chrono-unit
-  (s/with-gen #(satisfies? chrono-unit/IChronoUnit %)
+  (s/with-gen chrono-unit/chrono-unit?
     (fn [] (gen/one-of (map gen/return (chrono-unit/values))))))
 
 (s/def ::month/month
-  (s/with-gen #(satisfies? month/IMonth %)
+  (s/with-gen month/month?
     (fn [] (gen/one-of (map gen/return (month/values))))))
 
 (s/def ::day-of-week/day-of-week
-  (s/with-gen #(satisfies? day-of-week/IDayOfWeek %)
+  (s/with-gen day-of-week/day-of-week?
     (fn [] (gen/one-of (map gen/return (day-of-week/values))))))
 
 (s/def ::temporal-unit/temporal-unit ::chrono-unit/chrono-unit)
@@ -114,10 +123,10 @@
                                     ;; ::year-month/year-month
                                     ;; ::zone-offset/zone-offset
                                     ]
-                                   temporal-adjusters/temporal-adjusters-specs))))))
+                                   temporal-adjusters-impl/temporal-adjusters-specs))))))
 
 (s/def ::temporal-accessor/temporal-accessor
-  (s/with-gen #(satisfies? temporal-accessor/ITemporalAccessor %)
+  (s/with-gen any? ;; #(satisfies? temporal-accessor/ITemporalAccessor %)
     (fn [] (gen/one-of (map s/gen [;; ::local-date-time/local-date-time
                                    ::instant/instant
                                    ;; ::day-of-week/day-of-week

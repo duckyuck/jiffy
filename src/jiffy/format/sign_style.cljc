@@ -1,11 +1,8 @@
 (ns jiffy.format.sign-style
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
+            [jiffy.protocols.format.sign-style :as sign-style]
             [jiffy.specs :as j]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/SignStyle.java
-(defprotocol ISignStyle
-  (parse [this positive strict fixed-width]))
 
 (defrecord SignStyle [])
 
@@ -22,7 +19,7 @@
 (s/fdef -parse :args ::parse-args :ret ::j/boolean)
 
 (extend-type SignStyle
-  ISignStyle
+  sign-style/ISignStyle
   (parse [this positive strict fixed-width] (-parse this positive strict fixed-width)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/SignStyle.java

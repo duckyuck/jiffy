@@ -1,40 +1,25 @@
 (ns jiffy.period
-  (:require [clojure.spec.alpha :as s]
+  (:require #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
+            [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [jiffy.asserts :as asserts]
-            [jiffy.chrono.chrono-local-date :as chrono-local-date]
-            [jiffy.chrono.chrono-period :as chrono-period :refer [#?@(:cljs [IChronoPeriod])]]
-            [jiffy.chrono.chronology :as chronology]
-            [jiffy.chrono.iso-chronology-impl :as iso-chronology]
-            #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
+            [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.chrono.iso-chronology-impl :as iso-chronology-impl]
+            [jiffy.protocols.chrono.iso-chronology :as iso-chronology]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.exception :refer [ex try* JavaArithmeticException DateTimeException DateTimeParseException UnsupportedTemporalTypeException]]
             [jiffy.local-date-impl :as local-date]
             [jiffy.math :as math]
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.protocols.chrono.chrono-period :as chrono-period]
+            [jiffy.protocols.period :as period]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
             [jiffy.specs :as j]
             [jiffy.temporal.chrono-unit :as chrono-unit]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-amount :as temporal-amount]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
-            [jiffy.temporal.temporal-queries :as temporal-queries]
-            [jiffy.temporal.temporal-unit :as temporal-unit])
-  #?(:clj (:import [jiffy.chrono.chrono_period IChronoPeriod])))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java
-(defprotocol IPeriod
-  (get-years [this])
-  (get-months [this])
-  (get-days [this])
-  (with-years [this years])
-  (with-months [this months])
-  (with-days [this days])
-  (plus-years [this years-to-add])
-  (plus-months [this months-to-add])
-  (plus-days [this days-to-add])
-  (minus-years [this years-to-subtract])
-  (minus-months [this months-to-subtract])
-  (minus-days [this days-to-subtract])
-  (to-total-months [this]))
+            [jiffy.temporal.temporal-queries :as temporal-queries]))
 
 (defrecord Period [years months days])
 
@@ -57,7 +42,7 @@
     amount
 
     (and (satisfies? chrono-period/IChronoPeriod amount)
-         (not= iso-chronology/INSTANCE (chrono-period/get-chronology amount)))
+         (not= iso-chronology-impl/INSTANCE (chrono-period/get-chronology amount)))
     (throw (ex DateTimeException (str "Period requires ISO chronology: " amount)))
 
     :default
@@ -184,7 +169,7 @@
 (s/fdef -to-total-months :args ::to-total-months-args :ret ::j/month)
 
 (extend-type Period
-  IPeriod
+  period/IPeriod
   (get-years [this] (-get-years this))
   (get-months [this] (-get-months this))
   (get-days [this] (-get-days this))
@@ -202,7 +187,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L473
 (s/def ::get-chronology-args (args))
 (defn -get-chronology [this]
-  iso-chronology/INSTANCE)
+  iso-chronology-impl/INSTANCE)
 (s/fdef -get-chronology :args ::get-chronology-args :ret ::iso-chronology/iso-chronology)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L485
@@ -254,7 +239,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L834
 (s/def ::normalized-args (args))
 (defn -normalized [this]
-  (let [total-months (to-total-months this)
+  (let [total-months (-to-total-months this)
         split-years (long (/ total-months 12))
         split-months (int (rem total-months 12))]
     (create (math/to-int-exact split-years) split-months (:days this))))
@@ -290,14 +275,14 @@
 (defn- validate-chrono [temporal]
   (asserts/require-non-nil temporal "temporal")
   (let [temporal-chrono (temporal-accessor/query temporal (temporal-queries/chronology))]
-    (when (and (not (nil? temporal-chrono)) (not= iso-chronology/INSTANCE temporal-chrono))
+    (when (and (not (nil? temporal-chrono)) (not= iso-chronology-impl/INSTANCE temporal-chrono))
       (throw (ex DateTimeException (str "Chronology mismatch, expected: ISO, actual: " (chronology/get-id temporal-chrono)))))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L894
 (s/def ::add-to-args (args ::temporal/temporal))
 (defn -add-to [this temporal]
   (validate-chrono temporal)
-  (let [total-months (to-total-months this)]
+  (let [total-months (-to-total-months this)]
     (cond-> temporal
       (and (= (:months this) 0)
            (not= (:years this) 0))
@@ -315,7 +300,7 @@
 (s/def ::subtract-from-args (args ::temporal/temporal))
 (defn -subtract-from [this temporal]
   (validate-chrono temporal)
-  (let [total-months (to-total-months this)]
+  (let [total-months (-to-total-months this)]
     (cond-> temporal
       (and (zero? (:months this))
            (not (zero? (:years this))))

@@ -1,24 +1,22 @@
 (ns jiffy.day-of-week
-  (:require [clojure.spec.alpha :as s]
-            #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
+  (:require #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
+            [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.enum #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]
+            [jiffy.enums #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException JavaIllegalArgumentException ex #?(:clj try*)]  #?@(:cljs [:refer-macros [try*]])]
             [jiffy.format.text-style :as text-style]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.value-range :as value-range]
             [jiffy.specs :as j]
             [jiffy.temporal.chrono-field :as chrono-field]
             [jiffy.temporal.chrono-unit :as chrono-unit]
-            [jiffy.temporal.temporal :as temporal]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
             [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
             [jiffy.temporal.temporal-queries :as temporal-queries]
-            [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.temporal.temporal-field :as temporal-field]
-            [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.temporal.value-range :as value-range]))
+            [jiffy.temporal.temporal-query :as temporal-query]))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/DayOfWeek.java
 (defprotocol IDayOfWeek
   (get-value [this])
   (get-display-name [this style locale])
@@ -26,6 +24,8 @@
   (minus [this days]))
 
 (defrecord DayOfWeek [ordinal enum-name])
+
+(def day-of-week? (partial instance? DayOfWeek))
 
 (s/def ::create-args (s/tuple ::j/long string?))
 (def create ->DayOfWeek)

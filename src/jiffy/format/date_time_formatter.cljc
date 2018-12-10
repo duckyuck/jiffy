@@ -1,38 +1,16 @@
 (ns jiffy.format.date-time-formatter
-  (:refer-clojure :exclude [format])
+  (:refer-clojure :exclude [format ])
   (:require [clojure.spec.alpha :as s]
-            [jiffy.chrono.chronology :as chronology]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.format.decimal-style :as decimal-style]
-            [jiffy.format.format-style :as format-style]
-            [jiffy.format.resolver-style :as resolver-style]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
+            [jiffy.protocols.format.decimal-style :as decimal-style]
+            [jiffy.protocols.format.format-style :as format-style]
+            [jiffy.protocols.format.resolver-style :as resolver-style]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
             [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.zone-id :as zone-id]))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeFormatter.java
-(defprotocol IDateTimeFormatter
-  (parse-best [this parse-best--unknown-param-name-1 parse-best--unknown-param-name-2])
-  (format [this formatter])
-  (get-locale [this])
-  (with-locale [this locale])
-  (localized-by [this locale])
-  (get-decimal-style [this])
-  (with-decimal-style [this decimal-style])
-  (get-chronology [this])
-  (with-chronology [this chrono])
-  (get-zone [this])
-  (with-zone [this zone])
-  (get-resolver-style [this])
-  (with-resolver-style [this resolver-style])
-  (get-resolver-fields [this])
-  (with-resolver-fields [this with-resolver-fields--overloaded-param])
-  (format-to [this temporal appendable])
-  (parse [this text] [this parse--overloaded-param-1 parse--overloaded-param-2])
-  (parse-unresolved [this text position])
-  (to-printer-parser [this optional])
-  (to-format [this] [this parse-query]))
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.specs :as j]))
 
 (defrecord DateTimeFormatter [])
 
@@ -154,7 +132,7 @@
 (s/fdef -to-format :args ::to-format-args :ret ::j/wip)
 
 (extend-type DateTimeFormatter
-  IDateTimeFormatter
+  date-time-formatter/IDateTimeFormatter
   (parse-best [this parse-best--unknown-param-name-1 parse-best--unknown-param-name-2] (-parse-best this parse-best--unknown-param-name-1 parse-best--unknown-param-name-2))
   (format [this formatter] (-format this formatter))
   (get-locale [this] (-get-locale this))
