@@ -3,7 +3,7 @@
             [jiffy.dev.wip :refer [wip]]
             [jiffy.format.text-style :as text-style]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal-accessor :as temporal-acccessor]
+            [jiffy.protocols.temporal.temporal-accessor :as temporal-acccessor]
             [jiffy.zone.zone-rules :as zone-rules]))
 
 (defmacro args [& x] `(s/tuple ::j/wip ~@x))
