@@ -15,24 +15,25 @@
 (defn cljs-env? [env]
   (boolean (:ns env)))
 
+(defn matches? [expected thrown]
+  (or (isa? expected (type thrown))
+      (and (keyword? expected)
+           (or (some-> thrown ex-data ::kind (isa? expected))
+               (= :default expected)))))
+
 (defn gen-catch [cljs? catch-exprs]
   (if-not (seq catch-exprs)
     []
     (let [caught-sym (gensym)]
       `(catch ~(if cljs? :default 'Throwable) ~caught-sym
-         (letfn [(~'matches? [t# thrown#]
-                  (or (isa? t# (type thrown#))
-                      (and (keyword? t#)
-                           (or (some-> thrown# ex-data ::kind (isa? t#))
-                               (= :default t#)))))]
-           (cond
-             ~@(->> (for [{:keys [what binding exprs]} catch-exprs]
-                      `((~'matches? ~(second what) ~caught-sym)
-                        (let [~binding ~caught-sym]
-                          ~@exprs)))
-                    (mapcat identity))
-             :else
-             (throw ~caught-sym)))))))
+         (cond
+           ~@(->> (for [{:keys [what binding exprs]} catch-exprs]
+                    `((matches? ~(second what) ~caught-sym)
+                      (let [~binding ~caught-sym]
+                        ~@exprs)))
+                  (mapcat identity))
+           :else
+           (throw ~caught-sym))))))
 
 (defmacro try* [& exprs]
   (when-not (s/valid? ::try-exprs exprs)
