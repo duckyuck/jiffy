@@ -1,7 +1,8 @@
 #kaocha/v1
 {:tests [{:id :all
           :test-paths ["test"]
-          :source-paths ["src"]}]
+          :source-paths ["src"]
+          :focus-meta [:focus]}]
  :reporter [;; kaocha.report.progress/progress
             kaocha.report/documentation
             ;; kaocha.report/dots
