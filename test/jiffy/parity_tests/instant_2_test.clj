@@ -1,0 +1,36 @@
+(ns jiffy.parity-tests.instant-2-test
+  (:require [jiffy.parity-tests.support-2 :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support]))
+
+(test-proto-fn jiffy.instant-2 jiffy.protocols.instant/get-epoch-second)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.instant/get-nano)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.instant/truncated-to)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.instant/plus-seconds)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.instant/plus-millis)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.instant/plus-nanos)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.instant/minus-seconds)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.instant/minus-millis)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.instant/minus-nanos)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.instant/to-epoch-milli)
+
+;; (test-proto-fn! jiffy.instant-2 jiffy.protocols.instant/at-offset)
+;; (test-proto-fn! jiffy.instant-2 jiffy.protocols.instant/at-zone)
+
+(test-proto-fn jiffy.instant-2 jiffy.protocols.instant/is-after)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.instant/is-before)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.time-comparable/compare-to)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.temporal.temporal/with)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.temporal.temporal/plus)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.temporal.temporal/minus)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.temporal.temporal/until)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.temporal.temporal-accessor/is-supported)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.temporal.temporal-accessor/range)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.temporal.temporal-accessor/get)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.temporal.temporal-accessor/get-long)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.temporal.temporal-accessor/query)
+(test-proto-fn jiffy.instant-2 jiffy.protocols.temporal.temporal-adjuster/adjust-into)
+
+(test-static-fn jiffy.instant-2/of-epoch-second)
+(test-static-fn jiffy.instant-2/of-epoch-milli)
+(test-static-fn jiffy.instant-2/from)
+
+;; (test-static-fn! jiffy.instant/now)

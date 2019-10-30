@@ -42,6 +42,7 @@
             jiffy.format.resolver-style
             jiffy.format.sign-style
             jiffy.format.text-style
+            jiffy.instant-impl
             [jiffy.instant :as instant]
             jiffy.local-date
             jiffy.local-date-time
@@ -161,19 +162,14 @@
 
 (comment
 
-  (def i1 (instant/now))
-  i1
+  (require '[jiffy.instant :as instant])
 
-  (def i2 (-> i1
-              (instant/plus-seconds 30)
-              (instant/plus-millis 2500)))
-  i2
+  (let [i1 (instant/now)
+        i2 (-> i1
+               (instant/-plus-seconds 30)
+               (instant/-plus-millis 2500))]
+    (duration/between i1 i2))
 
-  (def d1 (duration/between i1 i2))
-
-  d1
-
-  (duration/to-minutes d1)
 
   )
 

@@ -1,12 +1,15 @@
 (ns jiffy.parity-tests.test-specs
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
+            [com.gfredericks.test.chuck :as chuck]
+            [com.gfredericks.test.chuck.generators :as gen']
             [jiffy.clock :as clock-impl]
+            [jiffy.conversion :as conversion]
             [jiffy.day-of-week :as day-of-week]
-            jiffy.duration
-            jiffy.instant
+            [jiffy.duration :as duration-impl]
+            [jiffy.instant-2 :as instant-impl]
             [jiffy.month :as month]
-            jiffy.period
+            [jiffy.period :as period-impl]
             [jiffy.protocols.chrono.chrono-local-date-time-impl :as chrono-local-date-time-impl]
             [jiffy.protocols.chrono.chrono-period-impl :as chrono-period-impl]
             [jiffy.protocols.chrono.hijrah-date :as hijrah-date]
@@ -42,11 +45,18 @@
             [jiffy.temporal.temporal-adjusters :as temporal-adjusters-impl]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.temporal.temporal-query :as temporal-query]
-            jiffy.zone-offset))
+            [jiffy.zone-offset :as zone-offset-impl]
+            [jiffy.zoned-date-time :as zoned-date-time-impl]))
 
-(s/def ::duration/duration :jiffy.duration/duration)
-(s/def ::instant/instant :jiffy.instant/instant)
-(s/def ::zone-offset/zone-offset :jiffy.zone-offset/zone-offset)
+(def dummy :hi)
+
+(println "loading test-specs")
+
+(s/def ::duration/duration ::duration-impl/duration)
+(s/def ::period/period ::period-impl/period)
+(s/def ::instant/instant ::instant-impl/instant)
+(s/def ::zone-offset/zone-offset ::zone-offset-impl/zone-offset)
+(s/def ::zoned-date-time/zoned-date-time ::zoned-date-time-impl/zoned-date-time)
 
 (s/def ::clock/clock
   (s/with-gen #(satisfies? clock/IClock %)
@@ -72,9 +82,9 @@
 
 (s/def ::temporal-amount/temporal-amount
   (s/with-gen #(satisfies? temporal-amount/ITemporalAmount %)
-    (fn [] (gen/one-of (map s/gen [ ;; ::chrono-period-impl/chrono-period-impl
+    (fn [] (gen/one-of (map s/gen [;; ::chrono-period-impl/chrono-period-impl
                                    ::duration/duration
-                                   ;; ::period/period
+                                   ;; ::period-impl/period
                                    ])))))
 
 (s/def ::temporal/temporal
@@ -86,7 +96,7 @@
                                    ;; :jiffy.chrono.japanese-date/japanese-date
                                    ;; :jiffy.chrono.minguo-date/minguo-date
                                    ;; :jiffy.chrono.thai-buddhist-date/thai-buddhist-date
-                                   :jiffy.instant/instant
+                                   :jiffy.instant-2/instant
                                    ;; :jiffy.local-date/local-date
                                    ;; :jiffy.local-date-time/local-date-time
                                    ;; :jiffy.local-time/local-time
@@ -156,3 +166,45 @@
     (fn [] (gen/one-of (map s/gen [::zone-offset/zone-offset
                                    ;; ::zone-region/zone-region
                                    ])))))
+
+(comment
+
+  (satisfies? temporal/ITemporal
+                (first (gen/sample (s/gen :jiffy.instant-2/instant))))
+
+  (gen/sample (s/gen (:args (s/get-spec #'instant-impl/with))))
+
+  (gen/sample (s/gen (:args (s/get-spec #'instant-impl/of-epoch-milli))))
+
+  (gen/sample (s/gen :jiffy.instant-2/instant))
+
+  (gen/sample (s/gen ::temporal-amount/temporal-amount))
+
+  (gen/sample (s/gen :jiffy.protocols.temporal.temporal-unit/temporal-unit))
+
+
+  (first
+   (gen/sample
+    (s/gen (s/cat
+            :this
+            (s/spec :jiffy.instant-2/instant)
+            :amount-to-subtract
+            (s/spec
+             :jiffy.protocols.temporal.temporal-amount/temporal-amount)))))
+
+  (gen/sample (s/gen ::temporal-field/temporal-field))
+
+  (gen/sample (s/gen :jiffy.protocols.temporal.temporal-field/temporal-field))
+
+  (conversion/jiffy->java (first (gen/sample (s/gen :jiffy.zoned-date-time/zoned-date-time))))
+
+  (satisfies? temporal/ITemporal
+              (first (gen/sample (s/gen :jiffy.zoned-date-time/zoned-date-time))))
+
+
+
+  (gen/sample
+   (gen'/string-from-regex
+    (re-pattern
+     (str
+      "([-+]?)P(?:([-+]?[0-9]+)D)?(T(?:([-+]?[0-9]+)H)?(?:([-+]?[0-9]+)M)?(?:([-+]?[0-9]+)(?:[.,]([0-9]{0,9}))?S)?)?")))))

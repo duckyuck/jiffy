@@ -1,5 +1,5 @@
 (ns jiffy.zoned-date-time
-  (:require #?(:clj [jiffy.conversion :as converstion])
+  (:require #?(:clj [jiffy.conversion :as conversion])
             [clojure.spec.alpha :as s]
             [jiffy.asserts :as asserts]
             [jiffy.day-of-week :as day-of-week]
@@ -743,11 +743,13 @@
 (s/fdef parse :args ::parse-args :ret ::zoned-date-time)
 
 #?(:clj
-   (defmethod converstion/jiffy->java ZonedDateTime [{:keys [local-date zone offset]}]
-     (java.time.ZonedDateTime/ofLocal local-date zone offset)))
+   (defmethod conversion/jiffy->java ZonedDateTime [{:keys [local-date zone offset]}]
+     (java.time.ZonedDateTime/ofLocal (conversion/jiffy->java local-date)
+                                      (conversion/jiffy->java zone)
+                                      (conversion/jiffy->java offset))))
 
 #?(:clj
-   (defmethod converstion/same? ZonedDateTime
+   (defmethod conversion/same? ZonedDateTime
      [jiffy-object java-object]
      (= (map #(% jiffy-object) [:local-date :zone :offset])
         (map #(% java-object) [(memfn toLocalDateTime) (memfn getZone) (memfn getOffset)]))))

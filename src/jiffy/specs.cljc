@@ -44,6 +44,15 @@
   (s/with-gen #(instance? record-type %)
     (fn [] (gen/fmap #(apply constructor %) (s/gen param-spec)))))
 
+(defn constructor-spec2 [constructor-fn spec]
+  (s/with-gen spec
+    (fn [] (gen/fmap #(apply constructor-fn %) (s/gen (:args (s/get-spec constructor-fn)))))))
+
+(defn constructor-spec3 [constructor-fn]
+  (let [spec (s/get-spec constructor-fn)]
+    (s/with-gen (:ret spec)
+      (fn [] (gen/fmap #(apply constructor-fn %) (s/gen (:args spec)))))))
+
 (defn- zone-id? [s]
   (re-find #"^[a-zA-Z][a-zA-Z/0-9~\._+-]+$" s))
 
