@@ -1,4 +1,4 @@
-(ns jiffy.parity-tests.instant-2-test
+(ns ^:focus jiffy.parity-tests.instant-2-test
   (:require [jiffy.parity-tests.support-2 :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support]))
 
 (test-proto-fn jiffy.instant-2 jiffy.protocols.instant/get-epoch-second)

@@ -114,21 +114,35 @@
     (str (str/lower-case (str first-char))
          (apply str rest))))
 
+(defmacro store-results [jiffy-fn args jiffy-expr]
+  `(spit (str "regression-corpus/" (str/replace '~jiffy-fn #"/" "--"))
+         (str
+          (pr-str [~args (let [res# (trycatch ~jiffy-expr)]
+                           (if-let [ex# (ex-data res#)]
+                             {:jiffy.exception/kind (:jiffy.exception/kind ex#)
+                              :message (.getMessage res#)}
+                             res#))])
+          "\n")
+         :append true))
+
 (defmacro gen-prop [jiffy-fn java-fn spec & [{:keys [static?]}]]
   `(prop/for-all
     [args# (s/gen ~spec)]
-    (same? (invoke-jiffy ~jiffy-fn args#)
-           (invoke-java ~java-fn
-                        (map jiffy->java args#)
-                        {:static? ~static?}))))
+    (let [is-same?# (same? (invoke-jiffy ~jiffy-fn args#)
+                           (invoke-java ~java-fn
+                                        (map jiffy->java args#)
+                                        {:static? ~static?}))]
+      (when is-same?#
+        (store-results ~jiffy-fn args# (invoke-jiffy ~jiffy-fn args#)))
+      is-same?#)))
 
-(def default-num-tests 1000)
+(def default-num-tests 100)
 
 (defmacro test-proto-fn [impl-ns proto-fn & [num-tests]]
   `(do
      (require '~(symbol (namespace proto-fn)))
      (require '~(symbol impl-ns))
-     (defspec ~(gen-test-name proto-fn) ~(or num-tests default-num-tests)
+     (defspec ~(gen-test-name proto-fn) {:num-tests ~(or num-tests default-num-tests)}
        (gen-prop ~proto-fn
                  '~(symbol (jiffy-ns->java-class (str impl-ns))
                            (jiffy-fn->java-fn (name proto-fn)))
@@ -170,7 +184,7 @@
      (test-fn! ~proto-fn
                '~(symbol (jiffy-ns->java-class (str impl-ns))
                          (jiffy-fn->java-fn (name proto-fn)))
-               (gen/sample (s/gen (get-spec '~(symbol (str impl-ns) (name proto-fn)))) ~(or num-tests 1000))
+               (gen/sample (s/gen (get-spec '~(symbol (str impl-ns) (name proto-fn)))) ~(or num-tests default-num-tests))
                {:static? false})))
 
 (defmacro test-static-fn! [jiffy-fn & [num-tests]]
