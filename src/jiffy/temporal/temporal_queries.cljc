@@ -14,6 +14,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalQueries.java#L344
 ;; (defquery ZONE_ID "ZoneId" [temporal]
 ;;   (temporal-accessor/query temporal ZONE_ID))
+
 (def ZONE_ID
   (temporal-query/->TemporalQuery
    "ZoneId"
@@ -22,6 +23,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalQueries.java#L359
 ;; (defquery CHRONO "Chronology" [temporal]
 ;;   (temporal-accessor/query temporal CHRONO))
+
 (def CHRONO
   (temporal-query/->TemporalQuery
    "Chronology"
@@ -30,6 +32,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalQueries.java#L375
 ;; (defquery PRECISION "Precision" [temporal]
 ;;   (temporal-accessor/query temporal PRECISION))
+
 (def PRECISION
   (temporal-query/->TemporalQuery
    "Precision"
@@ -39,6 +42,7 @@
 ;; (defquery OFFSET "ZoneOffset" [temporal]
 ;;   (when (temporal-accessor/is-supported temporal chrono-field/OFFSET_SECONDS)
 ;;     (zone-offset/of-total-seconds (temporal-accessor/get temporal chrono-field/OFFSET_SECONDS))))
+
 (def OFFSET
   (temporal-query/->TemporalQuery
    "ZoneOffset"
@@ -55,6 +59,7 @@
 ;; (defquery ZONE "Zone" [temporal]
 ;;   (or (temporal-accessor/query temporal ZONE_ID)
 ;;       (temporal-accessor/query temporal OFFSET)))
+
 (def ZONE
   (temporal-query/->TemporalQuery
    "Zone"
@@ -67,6 +72,7 @@
 ;; (defquery LOCAL_DATE "LocalDate" [temporal]
 ;;   (when (temporal-accessor/is-supported temporal chrono-field/EPOCH_DAY)
 ;;     (local-date/of-epoch-day (temporal-accessor/get temporal chrono-field/EPOCH_DAY))))
+
 (def LOCAL_DATE
   (temporal-query/->TemporalQuery
    "LocalDate"
@@ -81,6 +87,7 @@
 ;; (defquery LOCAL_TIME "LocalTime" [temporal]
 ;;   (when (temporal-accessor/is-supported temporal chrono-field/NANO_OF_DAY)
 ;;     (local-time/of-nano-of-day (temporal-accessor/get temporal chrono-field/NANO_OF_DAY))))
+
 (def LOCAL_TIME
   (temporal-query/->TemporalQuery
    "LocalTime"
@@ -92,6 +99,15 @@
         (temporal-accessor/get
          temporal
          chrono-field/NANO_OF_DAY))))))
+
+(def name->query
+  {"Chronology" CHRONO
+   "Precision" PRECISION
+   "ZoneOffset" OFFSET
+   "Zone" ZONE
+   "LocalDate" LOCAL_DATE
+   "LocalTime" LOCAL_TIME
+   "ZoneId" ZONE_ID})
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalQueries.java#L167
 (defn zone-id [] ZONE_ID)
@@ -120,3 +136,10 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalQueries.java#L336
 (defn local-time [] LOCAL_TIME)
 (s/fdef local-time :ret ::temporal-query/temporal-query)
+
+(comment
+
+
+  (str (java.time.temporal.TemporalQueries/zone))
+  )
+

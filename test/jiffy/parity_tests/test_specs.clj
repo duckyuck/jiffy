@@ -1,8 +1,8 @@
 (ns jiffy.parity-tests.test-specs
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
-            [com.gfredericks.test.chuck :as chuck]
-            [com.gfredericks.test.chuck.generators :as gen']
+            ;; [com.gfredericks.test.chuck :as chuck]
+            ;; [com.gfredericks.test.chuck.generators :as gen']
             [jiffy.clock :as clock-impl]
             [jiffy.conversion :as conversion]
             [jiffy.day-of-week :as day-of-week]
@@ -47,10 +47,6 @@
             [jiffy.temporal.temporal-query :as temporal-query]
             [jiffy.zone-offset :as zone-offset-impl]
             [jiffy.zoned-date-time :as zoned-date-time-impl]))
-
-(def dummy :hi)
-
-(println "loading test-specs")
 
 (s/def ::duration/duration ::duration-impl/duration)
 (s/def ::period/period ::period-impl/period)
@@ -203,8 +199,9 @@
 
 
 
-  (gen/sample
-   (gen'/string-from-regex
-    (re-pattern
-     (str
-      "([-+]?)P(?:([-+]?[0-9]+)D)?(T(?:([-+]?[0-9]+)H)?(?:([-+]?[0-9]+)M)?(?:([-+]?[0-9]+)(?:[.,]([0-9]{0,9}))?S)?)?")))))
+  ;; (gen/sample
+  ;;  (gen'/string-from-regex
+  ;;   (re-pattern
+  ;;    (str
+  ;;     "([-+]?)P(?:([-+]?[0-9]+)D)?(T(?:([-+]?[0-9]+)H)?(?:([-+]?[0-9]+)M)?(?:([-+]?[0-9]+)(?:[.,]([0-9]{0,9}))?S)?)?"))))
+  )

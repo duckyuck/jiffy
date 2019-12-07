@@ -1,10 +1,8 @@
 (ns jiffy.parity-tests.math-test
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
-            [clojure.test :as t]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
-            [jiffy.math :as math]
             [jiffy.math :as sut]
             [jiffy.parity-tests.support :refer [same?]]
             [jiffy.specs :as j]))

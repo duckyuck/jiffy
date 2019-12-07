@@ -7,3 +7,6 @@ test-clj:
 
 test-cljs:
 	clojure -Atest-cljs
+
+clean:
+	rm -rf target cljs-test-runner-out

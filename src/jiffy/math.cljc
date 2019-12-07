@@ -8,6 +8,12 @@
 (def integer-min-value (mm/integer-min-value))
 (def integer-max-value (mm/integer-max-value))
 
+(comment
+
+  (= 9223372036854776000
+     9223372036854775296)
+  )
+
 (defmulti add-exact* (fn [x y] [(type x) (type y)]))
 (defn add-exact [x y] (add-exact* x y))
 
@@ -114,12 +120,33 @@
      [x y]
      (multiply-exact* x (long y))))
 
-(defn floor-div [x y]
-  (let [r (long (/ x y))]
-    (cond-> r
-      (and (neg? (bit-xor x y))
-           (not= (* r y) x))
-      dec)))
+#?(:clj
+   (defn floor-div [x y]
+     (let [r (long (/ x y))]
+       (cond-> r
+         (and (neg? (bit-xor x y))
+              (not= (* r y) x))
+         dec)))
+
+   :cljs
+   (defn floor-div [x y]
+     (let [r (long (/ x y))]
+       (cond-> r
+         (and (neg? (bit-xor x y))
+              (not= (* r y) x))
+         dec)))
+
+   ;; :cljs
+   ;; (defn floor-div [x y]
+   ;;   (let [r (Math/trunc (/ x y))]
+   ;;     (cond-> r
+   ;;       (neg? r)
+   ;;       dec)))
+   )
+
+;; #?(:cljs
+;;    (defn floor-div [x y]
+;;      (Math/floor (/ x y))))
 
 (defn floor-mod [x y]
   (- x (* (floor-div x y) y)))

@@ -9,7 +9,14 @@
             [jiffy.exception :refer [try*]]
             [jiffy.math :as math]
             [jiffy.parity-tests.test-specs]
-            [jiffy.specs :as j]))
+            [jiffy.specs :as j]
+            [jiffy.edn-clj :include-macros true]))
+
+(comment
+
+  :jiffy.edn-clj/keep
+
+  )
 
 (defn partition-between
   [pred? coll]

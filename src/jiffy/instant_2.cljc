@@ -1,7 +1,10 @@
 (ns jiffy.instant-2
   (:refer-clojure :exclude [range get])
   (:require #?(:clj [jiffy.conversion :as conversion])
-            [clojure.spec.alpha :as s]
+            #?(:clj [clojure.spec.alpha :as s])
+            #?(:cljs [cljs.spec.alpha :as s])
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.format.date-time-formatter :as date-time-formatter-impl]
             [jiffy.clock :as clock-impl]
@@ -24,7 +27,6 @@
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.specs :as j]
-            [jiffy.dev.defs :refer [def-record def-method def-constructor]]
             [jiffy.temporal.chrono-field :as chrono-field :refer [INSTANT_SECONDS MICRO_OF_SECOND MILLI_OF_SECOND NANO_OF_SECOND]]
             [jiffy.temporal.chrono-unit :as chrono-unit :refer [DAYS HALF_DAYS HOURS MICROS MILLIS MINUTES NANOS SECONDS]]
             [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
@@ -468,7 +470,7 @@
   ([clock ::clock/clock] (clock/instant clock)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L343
-(def-constructor of-epoch-milli ::instant
+#_(def-constructor of-epoch-milli ::instant
   [epoch-milli ::j/milli]
   (create (math/floor-div epoch-milli 1000)
           (int (* (math/floor-mod epoch-milli 1000)

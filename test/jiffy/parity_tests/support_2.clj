@@ -9,7 +9,14 @@
             [jiffy.exception :refer [try*]]
             [jiffy.math :as math]
             [jiffy.parity-tests.test-specs]
-            [jiffy.specs :as j]))
+            [jiffy.specs :as j]
+            [jiffy.edn-clj :include-macros true]))
+
+(comment
+
+  :jiffy.edn-clj/keep
+
+  )
 
 (defn partition-between
   [pred? coll]
@@ -115,13 +122,15 @@
          (apply str rest))))
 
 (defmacro store-results [jiffy-fn args jiffy-expr]
-  `(spit (str "regression-corpus/" (str/replace '~jiffy-fn #"/" "--"))
+  `(spit "regression-corpus.edn"
          (str
-          (pr-str [~args (let [res# (trycatch ~jiffy-expr)]
-                           (if-let [ex# (ex-data res#)]
-                             {:jiffy.exception/kind (:jiffy.exception/kind ex#)
-                              :message (.getMessage res#)}
-                             res#))])
+          (pr-str {:fn '~jiffy-fn
+                   :args ~args
+                   :result (let [res# (trycatch ~jiffy-expr)]
+                             (if-let [ex# (ex-data res#)]
+                               {:jiffy.exception/kind (:jiffy.exception/kind ex#)
+                                :message (.getMessage res#)}
+                               res#))})
           "\n")
          :append true))
 

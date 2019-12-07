@@ -2,7 +2,7 @@
   (:require [jiffy.specs :as j]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
-            [jiffy.dev.defs :refer [def-record def-method def-constructor]]))
+            [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
