@@ -12,9 +12,8 @@
  :aliases {:nrepl {:extra-deps {nrepl/nrepl {:mvn/version "0.4.5"}}
                    :extra-paths ["test"]}
            :dev {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]
-                 :extra-deps {com.bhauman/figwheel-main {:mvn/version "0.1.9"}
+                 :extra-deps {com.bhauman/figwheel-main {:mvn/version "0.2.18"}
                               com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}}
-
            :test-clj {:extra-paths ["test"]
                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.85.1342"}}
                       :main-opts ["-m" "kaocha.runner"]}
