@@ -17,7 +17,7 @@
                               com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}}
 
            :test-clj {:extra-paths ["test"]
-                      :extra-deps {lambdaisland/kaocha {:mvn/version "0.0-266"}}
+                      :extra-deps {lambdaisland/kaocha {:mvn/version "1.85.1342"}}
                       :main-opts ["-m" "kaocha.runner"]}
            :test-clj-cognitect {:extra-paths ["test"]
                                 :extra-deps {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
