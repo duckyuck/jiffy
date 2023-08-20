@@ -5,7 +5,7 @@
           :focus-meta [:focus]}]
  :reporter [;; kaocha.report.progress/progress
             kaocha.report/documentation
-            ;; kaocha.report/dots
+            kaocha.report/dots
             ]
  ;; :plugins [kaocha.plugin/profiling]
 }

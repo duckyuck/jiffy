@@ -6,6 +6,7 @@
         duckyuck/orchestra {:git/url "https://github.com/duckyuck/orchestra.git"
                             :deps/manifest :mvn
                             :sha "1efcd56195c7f4b983c6bd64a436c41ae59d0aeb"}
+        com.gfredericks/exact {:mvn/version "0.1.11"}
         org.clojure/test.check {:mvn/version "0.10.0-alpha3"}
         ;; com.gfredericks/test.chuck {:mvn/version "0.2.10"}
         }

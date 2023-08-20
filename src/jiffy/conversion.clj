@@ -25,3 +25,4 @@
 
 (defmethod same? clojure.lang.PersistentVector [& args] (apply same-coll? args))
 (defmethod same? clojure.lang.ArraySeq [& args] (apply same-coll? args))
+(defmethod same? (Class/forName "[Ljava.math.BigInteger;") [& args] (apply same-coll? args))

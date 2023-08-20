@@ -1,7 +1,7 @@
 (ns jiffy.duration-impl
   (:require [clojure.spec.alpha :as s]
-            [jiffy.big-decimal :as big-decimal]
-            [jiffy.big-integer :as big-integer]
+            [jiffy.math.big-decimal :as big-decimal]
+            [jiffy.math.big-integer :as big-integer]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.exception :refer [ex JavaArithmeticException]]
             [jiffy.local-time-constants :refer [MINUTES_PER_HOUR NANOS_PER_DAY NANOS_PER_MILLI NANOS_PER_SECOND SECONDS_PER_DAY SECONDS_PER_HOUR SECONDS_PER_MINUTE]]

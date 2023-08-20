@@ -1,5 +1,5 @@
 (ns jiffy.dev.main
-  (:require jiffy.big-decimal
+  (:require jiffy.math.big-decimal
             jiffy.chrono.abstract-chronology
             jiffy.chrono.chrono-local-date
             jiffy.chrono.chrono-local-date-impl
@@ -75,7 +75,7 @@
             jiffy.zone.zone-rules-provider))
 
 (comment
-  jiffy.big-decimal/keep-me
+  jiffy.math.big-decimal/keep-me
   jiffy.chrono.abstract-chronology/keep-me
   jiffy.chrono.chrono-local-date/keep-me
   jiffy.chrono.chrono-local-date-impl/keep-me

@@ -2,7 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.test.check.generators]
             [jiffy.asserts :refer [require-non-nil]]
-            [jiffy.big-decimal :as big-decimal]
+            [jiffy.math.big-decimal :as big-decimal]
             #?(:clj [jiffy.conversion :as conversion])
             [jiffy.dev.wip :refer [wip]]
             [jiffy.duration-impl :refer [create #?@(:cljs [Duration])] :as impl]
