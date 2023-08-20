@@ -8,13 +8,40 @@
 (def integer-min-value -2147483648)
 (def integer-max-value 2147483647)
 
-(defn add-exact [x y]
+(defn bit-length [n]
+  (if (zero? n)
+    1
+    (inc (int (/ (Math/log (Math/abs n))
+                 (Math/log 2))))))
+
+(defmulti add-exact* (fn [x y] [(type x) (type y)]))
+(defn add-exact [x y] (add-exact* x y))
+
+(defmethod add-exact* [java.lang.Integer java.lang.Integer]
+  [x y]
+  (let [r (try* (+ x y)
+                (catch :default e
+                  (throw (ex JavaArithmeticException "integer overflow" {:x x :y y} e))))]
+    (when (>= (bit-length r) 32)
+      (throw (ex JavaArithmeticException "integer overflow" {:x x :y y})))
+    r))
+
+(defmethod add-exact* [java.lang.Long java.lang.Long]
+  [x y]
   (let [r (try* (math/add-exact x y)
                 (catch :default e
                   (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
     (when (neg? (bit-and (bit-xor x r) (bit-xor y r)))
       (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
     r))
+
+;; (defn add-exact [x y]
+;;   (let [r (try* (math/add-exact x y)
+;;                 (catch :default e
+;;                   (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
+;;     (when (neg? (bit-and (bit-xor x r) (bit-xor y r)))
+;;       (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
+;;     r))
 
 (defn subtract-exact [x y]
   (let [r (try* (math/subtract-exact x y)
@@ -35,24 +62,6 @@
 
 (defn abs [x]
   (Math/abs x))
-
-(defn multiply-exact-long
-  {:doc "Returns the product of x and y, throws ArithmeticException on overflow.
-  See: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#multiplyExact-long-long-"
-   :inline-arities #{2}
-   :inline (fn [x y] `(Math/multiplyExact (long ~x) (long ~y)))
-   :added "1.11"}
-  ^long [^long x ^long y]
-  (Math/multiplyExact x y))
-
-(defn multiply-exact-int
-  {:doc "Returns the product of x and y, throws ArithmeticException on overflow.
-  See: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#multiplyExact-long-long-"
-   :inline-arities #{2}
-   :inline (fn [x y] `(Math/multiplyExact (int ~x) (int ~y)))
-   :added "1.11"}
-  [x y]
-  (Math/multiplyExact x y))
 
 (defmulti multiply-exact* (fn [x y] [(type x) (type y)]))
 (defn multiply-exact [x y] (multiply-exact* x y))

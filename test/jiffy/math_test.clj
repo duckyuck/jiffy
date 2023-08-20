@@ -37,7 +37,7 @@
                              (gen/fmap wrap))]
                 (let [[x y] (unwrap values)]
                   (compare-math values
-                                (sut/add-exact x y)
+                                (sut/add-exact (long x) (long y))
                                 (math/add-exact x y)))))
 
 (defspec subtract-exact-test 10000
@@ -47,7 +47,7 @@
                 (let [[x y] (unwrap values)]
                   (compare-math values
                                 (sut/subtract-exact x y)
-                                (math/subtract-exact (long x) (long y))))))
+                                (math/subtract-exact x y)))))
 
 (defspec multiply-exact-test 1000
   (prop/for-all [values (->> (s/tuple ::j/long

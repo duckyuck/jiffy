@@ -390,7 +390,7 @@
            [y m w d] (map #(-> (or (math/parse-int %) 0) (* factor) math/to-int-exact) nums)]
        (when (apply = nil nums)
          (throw (ex DateTimeParseException "Text cannot be parsed to a Period" {:parsed-data text :error-index 0})))
-       (create y m (math/add-exact d (int (math/multiply-exact w (int 7))))))
+       (create y m (math/add-exact (int d) (int (math/multiply-exact w (int 7))))))
      (catch JavaArithmeticException e
        (throw e))
      (catch :default e
