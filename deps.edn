@@ -6,6 +6,7 @@
         duckyuck/orchestra {:git/url "https://github.com/duckyuck/orchestra.git"
                             :sha "b43fe75d49bec16279778814f588fb239dad91ad"}
         com.gfredericks/exact {:mvn/version "0.1.11"}
+        funcool/decimal {:mvn/version "1.0.2"}
         org.clojure/test.check {:mvn/version "0.10.0-alpha3"}
         com.clojure-goes-fast/clj-java-decompiler {:mvn/version "0.3.4"}
         ;; com.gfredericks/test.chuck {:mvn/version "0.2.10"}
