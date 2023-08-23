@@ -9,8 +9,7 @@
 ;;
 ;; Spec'd record with generator
 
-(def-record MyRecord ::my-record [a number? b keyword?]
-  {:pre (> a 0)})
+(def-record MyRecord ::my-record [a number? b keyword?])
 
 #_(MyRecord. 1 :foo)
 
@@ -39,7 +38,7 @@
    x string?
    y boolean?]
   {:this this
-   :x (str "we got: " x)
+   :x (str "we got: '" x "'")
    :y y})
 
 #_(for [args (-> #'my-method s/get-spec :args s/gen gen/sample)]

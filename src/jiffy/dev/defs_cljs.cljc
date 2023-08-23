@@ -1,9 +1,11 @@
 (ns jiffy.dev.defs-cljs
-  (:require [cljs.reader :as reader]
+  (:require ;; [cljs.reader :as reader]
             [cljs.spec.alpha :as s]
             [cljs.spec.gen.alpha :as gen]
             [clojure.string :as str]
-            [orchestra.core :refer [defn-spec]]))
+            #?(:cljs [orchestra.core :refer-macros [defn-spec]])
+            #?(:clj [orchestra.core :refer [defn-spec]])
+            ))
 
 (defmacro def-record [record spec-name fields+specs & args]
   (let [fields (partition 2 fields+specs)
@@ -12,6 +14,18 @@
         constructor-args (vec (repeatedly (count fields) gensym))]
     `(do
        (defrecord ~record ~(vec field-names))
+       ;; (letfn [(constructor# ~constructor-args
+       ;;           (new ~record ~@constructor-args))]
+       ;;   (s/def ~spec-name
+       ;;     (s/with-gen #(instance? ~record %)
+       ;;       (fn [] (->> (s/tuple ~@fields-spec)
+       ;;                   s/gen
+       ;;                   (gen/such-that (fn [~(vec field-names)]
+       ;;                                    (if (seq ~args)
+       ;;                                      (do
+       ;;                                        ~@args)
+       ;;                                      true)))
+       ;;                   (gen/fmap #(apply constructor# %)))))))
        (letfn [(constructor# ~constructor-args
                  (new ~record ~@constructor-args))]
          (s/def ~spec-name
@@ -34,13 +48,8 @@
 
 (comment
 
-  (def-record MyRecord ::my-record [a number? b keyword?]
-    (> a 0))
+  (gen/sample (s/gen integer?))
 
-  (MyRecord. 1 :foo)
-
-  ;; (gen/sample (s/gen ::my-record))
+  (def-record MyRecord ::my-record [a number? b keyword?])
 
   )
-
-

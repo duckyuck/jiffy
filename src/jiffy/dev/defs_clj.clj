@@ -58,3 +58,11 @@
 
 (defmacro def-constructor [& args]
   `(defn-spec ~@args))
+
+(comment
+
+  (gen/sample (s/gen integer?))
+
+  (def-record MyRecord ::my-record [a number? b keyword?])
+
+  )
