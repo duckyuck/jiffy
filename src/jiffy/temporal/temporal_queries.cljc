@@ -100,14 +100,16 @@
          temporal
          chrono-field/NANO_OF_DAY))))))
 
-(def name->query
-  {"Chronology" CHRONO
-   "Precision" PRECISION
-   "ZoneOffset" OFFSET
-   "Zone" ZONE
-   "LocalDate" LOCAL_DATE
-   "LocalTime" LOCAL_TIME
-   "ZoneId" ZONE_ID})
+(defn name->query [name]
+  (or (get {"Chronology" CHRONO
+            "Precision" PRECISION
+            "ZoneOffset" OFFSET
+            "Zone" ZONE
+            "LocalDate" LOCAL_DATE
+            "LocalTime" LOCAL_TIME
+            "ZoneId" ZONE_ID}
+           name)
+      (throw (ex-info (str "Unknown TemporalQuery with name: '" name "'") {:name name}))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalQueries.java#L167
 (defn zone-id [] ZONE_ID)
