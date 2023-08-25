@@ -9,3 +9,7 @@
            `(do
               (def ~sym (~constructor-fn ~(next-ordinal) ~(str sym) ~@args))
               (swap! ~'enums assoc ~(str sym) ~sym))))))
+
+;; TODO - implement `value-of`, mimicing Java's Enum/valueOf, throwing exception
+;; if given unknown id to resolve. Useful for enums that have an EDN representation that we
+;; do not have control over. See e.g. `jiffy.edn` and `jiffy.temporal.chrono-field/valueOf`
