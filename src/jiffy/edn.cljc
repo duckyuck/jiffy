@@ -1,7 +1,7 @@
 (ns jiffy.edn
   (:require [clojure.edn :as edn]
             #?(:cljs [cljs.reader :as reader])
-            ;; [jiffy.instant-2 #?@(:cljs [:refer [Instant]])]
+            [jiffy.instant-2 #?@(:cljs [:refer [Instant]])]
             [jiffy.instant-impl #?@(:cljs [:refer [Instant]])]
             [jiffy.duration-impl #?@(:cljs [:refer [Duration]])]
             [jiffy.temporal.temporal-queries]
@@ -25,9 +25,9 @@
 (defn ->map [x] (into {} x))
 
 (def tags
-  `{;; :instant-2 {:record Instant
-    ;;             :read-fn 'jiffy.instant-2/map->Instant
-    ;;             :write-fn '->map}
+  `{:instant-2 {:record Instant
+                :read-fn 'jiffy.instant-2/map->Instant
+                :write-fn '->map}
     :instant {:record Instant
               :read-fn 'jiffy.instant-impl/map->Instant
               :write-fn '->map}

@@ -1,11 +1,11 @@
 (ns jiffy.conversion-2
   (:require [jiffy.exception :as exception]
-            ;; [jiffy.instant-2]
-            [jiffy.instant-impl])
+            ;; [jiffy.instant-impl]
+            [jiffy.instant-2])
   (:import jiffy.day_of_week.DayOfWeek
            jiffy.duration_impl.Duration
-           ;; jiffy.instant_2.Instant
-           jiffy.instant_impl.Instant
+           jiffy.instant_2.Instant
+           ;; jiffy.instant_impl.Instant
            jiffy.local_time_impl.LocalTime
            jiffy.month.Month
            jiffy.period.Period

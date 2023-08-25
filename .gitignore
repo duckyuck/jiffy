@@ -2,3 +2,4 @@
 /.nrepl-port
 target/
 cljs-test-runner-out/
+/regression-corpus.edn

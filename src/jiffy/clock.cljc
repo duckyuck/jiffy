@@ -1,11 +1,10 @@
 (ns jiffy.clock
-  (:require #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
-            [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.clock :as clock]
             [jiffy.protocols.duration :as duration]
             [jiffy.protocols.instant :as instant]
-            [jiffy.instant-impl :as instant-impl]
+            [jiffy.instant-2-impl :as instant-impl]
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.zone-offset :as zone-offset]
             [jiffy.specs :as j])

@@ -1,13 +1,13 @@
 (ns jiffy.instant-2
   (:refer-clojure :exclude [range get])
-  (:require #?(:clj [jiffy.conversion :as conversion])
-            #?(:clj [clojure.spec.alpha :as s])
+  (:require #?(:clj [clojure.spec.alpha :as s])
             #?(:cljs [cljs.spec.alpha :as s])
             #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.format.date-time-formatter :as date-time-formatter-impl]
             [jiffy.clock :as clock-impl]
+            [jiffy.instant-2-impl :refer [#?@(:cljs [Instant])] :as impl]
             [jiffy.local-time-impl :refer [NANOS_PER_DAY NANOS_PER_SECOND SECONDS_PER_DAY SECONDS_PER_HOUR SECONDS_PER_MINUTE]]
             [jiffy.math :as math]
             [jiffy.offset-date-time :as offset-date-time]
@@ -32,30 +32,15 @@
             [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.zoned-date-time :as zoned-date-time-impl]))
+            [jiffy.zoned-date-time :as zoned-date-time-impl]
+            [jiffy.instant-2-impl :as impl])
+  #?(:clj (:import [jiffy.instant_2_impl Instant])))
 
-(def-record Instant ::instant [seconds ::j/second nanos ::j/nano])
+(def EPOCH impl/EPOCH)
+(def MAX_SECOND impl/MAX_SECOND)
+(def MIN_SECOND impl/MIN_SECOND)
 
-(def EPOCH (->Instant 0 0))
-(def MAX_SECOND 31556889864403199)
-(def MIN_SECOND -31557014167219200)
-
-(def-constructor create ::instant
-  [seconds ::j/second
-   nano-of-second ::j/nano]
-  (cond
-    (zero? (bit-or seconds nano-of-second))
-    EPOCH
-
-    (or (< seconds MIN_SECOND) (> seconds MAX_SECOND))
-    (throw (ex DateTimeException
-               "Instant exceeds minimum or maximum instant"
-               {:max-second MAX_SECOND
-                :min-second MIN_SECOND
-                :seconds seconds}))
-
-    :else
-    (->Instant seconds nano-of-second)))
+(def create impl/create)
 
 (declare from
          to-epoch-milli
@@ -65,8 +50,8 @@
          plus-nanos)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L747
-(def-method truncated-to ::instant
-  [this ::instant
+(def-method truncated-to ::impl/instant
+  [this ::impl/instant
    unit ::temporal-unit/temporal-unit]
   (let [unit-dur (temporal-unit/get-duration unit)
         dur (delay (duration/to-nanos unit-dur))]
@@ -90,13 +75,13 @@
         (plus-nanos this (- result nod))))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L343
-(def-constructor of-epoch-milli ::instant
+(def-constructor of-epoch-milli ::impl/instant
   [epoch-milli ::j/milli]
   (create (math/floor-div epoch-milli 1000)
           (int (* (math/floor-mod epoch-milli 1000)
                   1000000))))
 
-(def-constructor of-epoch-second ::instant
+(def-constructor of-epoch-second ::impl/instant
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L303
   ([epoch-second ::j/second]
    (create epoch-second 0))
@@ -117,26 +102,26 @@
      (+ (:nanos this) (mod nanos-to-add NANOS_PER_SECOND)))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L877
-(def-method plus-seconds ::instant
-  [this ::instant
+(def-method plus-seconds ::impl/instant
+  [this ::impl/instant
    seconds-to-add ::j/second]
   (--plus this seconds-to-add 0))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L891
-(def-method plus-millis ::instant
-  [this ::instant
+(def-method plus-millis ::impl/instant
+  [this ::impl/instant
    millis-to-add ::j/milli]
   (--plus this (math/floor-div millis-to-add 1000) (* (mod millis-to-add 1000) 1000000)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L905
-(def-method plus-nanos ::instant
-  [this ::instant
+(def-method plus-nanos ::impl/instant
+  [this ::impl/instant
    nanos-to-add ::j/nano]
   (--plus this 0 nanos-to-add))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L992
-(def-method minus-seconds ::instant
-  [this ::instant
+(def-method minus-seconds ::impl/instant
+  [this ::impl/instant
    seconds-to-subtract ::j/second]
   (if (= seconds-to-subtract math/long-min-value)
     ;; TODO: wtf? plus'ing beyond max-value?
@@ -144,8 +129,8 @@
     (plus-seconds this (- seconds-to-subtract))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1009
-(def-method minus-millis ::instant
-  [this ::instant
+(def-method minus-millis ::impl/instant
+  [this ::impl/instant
    millis-to-subtract ::j/milli]
   (if (= millis-to-subtract math/long-min-value)
     ;; TODO: wtf? plus'ing beyond max-value?
@@ -153,8 +138,8 @@
     (plus-millis this (- millis-to-subtract))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1026
-(def-method minus-nanos ::instant
-  [this ::instant
+(def-method minus-nanos ::impl/instant
+  [this ::impl/instant
    nanos-to-subtract ::j/nano]
   (if (= nanos-to-subtract math/long-min-value)
     (-> this (plus-nanos math/long-max-value) (plus-nanos 1))
@@ -162,7 +147,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1149
 (def-method to-epoch-milli ::j/long
-  [this ::instant]
+  [this ::impl/instant]
   (if (and (neg? (:seconds this)) (pos? (:nanos this)))
     (let [millis (math/multiply-exact (inc (:seconds this)) 1000)
           adjustment (- (long (/ (:nanos this) 1000000)) 1000)]
@@ -172,36 +157,36 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1193
 (def-method at-offset ::offset-date-time/offset-date-time
-  [this ::instant
+  [this ::impl/instant
    offset ::zone-offset/zone-offset]
   (offset-date-time/of-instant this offset))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1211
 (def-method at-zone ::zoned-date-time/zoned-date-time
-  [this ::instant
+  [this ::impl/instant
    zone ::zone-id/zone-id]
   (zoned-date-time-impl/of-instant this zone))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1270
 (def-method is-after ::j/boolean
-  [this ::instant
-   other-instant ::instant]
+  [this ::impl/instant
+   other-instant ::impl/instant]
   (pos? (time-comparable/compare-to this other-instant)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1283
 (def-method is-before ::j/boolean
-  [this ::instant
-   other-instant ::instant]
+  [this ::impl/instant
+   other-instant ::impl/instant]
   (neg? (time-comparable/compare-to this other-instant)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L617
 (def-method get-epoch-second ::j/long
-  [this ::instant]
+  [this ::impl/instant]
   (:seconds this))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L617
 (def-method get-nano ::j/long
-  [this ::instant]
+  [this ::impl/instant]
   (:nanos this))
 
 (extend-type Instant
@@ -223,8 +208,8 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1253
 (def-method compare-to ::j/int
-  [this ::instant
-   other-instant ::instant]
+  [this ::impl/instant
+   other-instant ::impl/instant]
   (let [cmp (compare (:seconds this) (:seconds other-instant))]
     (if-not (zero? cmp)
       cmp
@@ -236,12 +221,12 @@
 
 (def-method with ::temporal/temporal
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L654
-  ([this ::instant
+  ([this ::impl/instant
     adjuster ::temporal-adjuster/temporal-adjuster]
    (temporal-adjuster/adjust-into adjuster this))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L703
-  ([this ::instant
+  ([this ::impl/instant
     field ::temporal-field/temporal-field
     new-value ::j/long]
    (if-not (satisfies? chrono-field/IChronoField field)
@@ -275,12 +260,12 @@
 
 (def-method plus ::temporal/temporal
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L786
-  ([this ::instant
+  ([this ::impl/instant
     amount-to-add ::temporal-amount/temporal-amount]
    (temporal-amount/add-to amount-to-add this))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L849
-  ([this ::instant
+  ([this ::impl/instant
     amount-to-add ::j/long
     unit ::temporal-unit/temporal-unit]
    (if (chrono-unit/chrono-unit? unit)
@@ -296,14 +281,14 @@
        (throw (ex UnsupportedTemporalTypeException (str "Unsupported unit: " unit))))
      (temporal-unit/add-to unit this amount-to-add))))
 
-(def-method minus ::instant
+(def-method minus ::impl/instant
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L953
-  ([this ::instant
+  ([this ::impl/instant
     amount-to-subtract ::temporal-amount/temporal-amount]
    (temporal-amount/subtract-from amount-to-subtract this))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L977
-  ([this ::instant
+  ([this ::impl/instant
     amount-to-subtract ::j/long
     unit ::temporal-unit/temporal-unit]
    (if (= amount-to-subtract math/long-min-value)
@@ -335,7 +320,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1142
 (def-method until ::j/long
-  [this ::instant
+  [this ::impl/instant
    end-exclusive ::temporal/temporal
    unit ::temporal-unit/temporal-unit]
   (let [end (from end-exclusive)]
@@ -380,7 +365,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L457
 ;; TODO: clean up dispatch via multimethods
 (def-method is-supported ::j/boolean
-  [this ::instant
+  [this ::impl/instant
    field-or-unit ::temporal-unit/temporal-unit]
   (cond
     (satisfies? temporal-field/ITemporalField field-or-unit)
@@ -394,13 +379,13 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L526
 (def-method range ::value-range/value-range
-  [this ::instant
+  [this ::impl/instant
    field ::temporal-field/temporal-field]
   (temporal-accessor-defaults/-range this field))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L558
 (def-method get ::j/int
-  [this ::instant
+  [this ::impl/instant
    field ::temporal-field/temporal-field]
   (if (satisfies? chrono-field/IChronoField field)
     (long
@@ -416,7 +401,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L594
 (def-method get-long ::j/long
-  [this ::instant
+  [this ::impl/instant
    field ::temporal-field/temporal-field]
   (if (satisfies? chrono-field/IChronoField field)
     (long
@@ -430,7 +415,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1054
 (def-method query ::j/any
-  [this ::instant
+  [this ::impl/instant
    q ::temporal-query/temporal-query]
   (if (= q (temporal-queries/precision))
     NANOS
@@ -452,7 +437,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1093
 (def-method adjust-into ::temporal/temporal
-  [this ::instant
+  [this ::impl/instant
    temporal ::temporal/temporal]
   (-> temporal
       (temporal/with INSTANT_SECONDS (:seconds this))
@@ -462,25 +447,18 @@
   temporal-adjuster/ITemporalAdjuster
   (adjust-into [this temporal] (adjust-into this temporal)))
 
-(def-constructor now ::instant
+(def-constructor now ::impl/instant
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L272
   ([] (clock/instant (clock-impl/system-utc)))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L287
   ([clock ::clock/clock] (clock/instant clock)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L343
-#_(def-constructor of-epoch-milli ::instant
-  [epoch-milli ::j/milli]
-  (create (math/floor-div epoch-milli 1000)
-          (int (* (math/floor-mod epoch-milli 1000)
-                  1000000))))
-
 (def MIN (of-epoch-second MIN_SECOND 0))
 (def MAX (of-epoch-second MAX_SECOND 999999999))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L367
-(def-constructor from ::instant
+(def-constructor from ::impl/instant
   [temporal ::temporal-accessor/temporal-accessor]
   (if (satisfies? instant/IInstant temporal)
     temporal
@@ -497,16 +475,6 @@
                   e))))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L394
-(def-constructor parse ::instant
+(def-constructor parse ::impl/instant
   [text ::j/char-sequence]
   (date-time-formatter/parse date-time-formatter-impl/ISO_INSTANT text from))
-
-#?(:clj
-   (defmethod conversion/jiffy->java Instant [{:keys [seconds nanos]}]
-     (.plusNanos (java.time.Instant/ofEpochSecond seconds) nanos)))
-
-#?(:clj
-   (defmethod conversion/same? Instant
-     [jiffy-object java-object]
-     (= (map #(% jiffy-object) [:seconds :nanos])
-        (map #(% java-object) [(memfn getEpochSecond) (memfn getNano)]))))

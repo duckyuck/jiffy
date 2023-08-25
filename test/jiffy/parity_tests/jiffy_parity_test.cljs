@@ -43,9 +43,9 @@
             jiffy.format.sign-style
             jiffy.format.text-style
             [jiffy.helper.macros :refer-macros [load-regression-corpus-str]]
-            ;; [jiffy.instant-2 :refer [Instant]]
-            [jiffy.instant :refer [Instant]]
+            [jiffy.instant-2 :refer [Instant]]
             jiffy.instant-impl
+            [jiffy.instant :refer [Instant]]
             jiffy.local-date-impl
             jiffy.local-date-time
             jiffy.local-date-time-impl

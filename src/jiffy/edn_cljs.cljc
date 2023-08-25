@@ -33,15 +33,15 @@
 ;;            (cljs.reader/register-tag-parser! (cljs.core/symbol "jiffy" "value-range") jiffy.temporal.value-range/map->ValueRange)
 ;;            ))
 
-(comment
+;; (comment
 
-  (gen-converters edn/tags)
+;;   (gen-converters edn/tags)
 
-  ;; (reader/read-string "#jiffy/instant-2{:seconds 0, :nanos 0}")
-  ;; (reader/read-string "#jiffy/duration{:seconds 1071594177785110233, :nanos 31100157}")
-  ;; (reader/read-string "#jiffy/value-range{:min-smallest 0, :min-largest 0, :max-smallest 999999999, :max-largest 999999999}")
+;;   ;; (reader/read-string "#jiffy/instant-2{:seconds 0, :nanos 0}")
+;;   ;; (reader/read-string "#jiffy/duration{:seconds 1071594177785110233, :nanos 31100157}")
+;;   ;; (reader/read-string "#jiffy/value-range{:min-smallest 0, :min-largest 0, :max-smallest 999999999, :max-largest 999999999}")
 
-  ;; (-> #jiffy/instant-2{:seconds 0, :nanos 0}
-  ;;     (jiffy.instant-2/plus-seconds 10))
+;;   ;; (-> #jiffy/instant-2{:seconds 0, :nanos 0}
+;;   ;;     (jiffy.instant-2/plus-seconds 10))
 
-  )
+;;   )
