@@ -1,6 +1,7 @@
 (ns jiffy.edn-test
   (:require [clojure.test :refer [deftest is testing]]
             [jiffy.edn-clj]
+            [jiffy.instant-2-impl :as instant-2-impl]
             [jiffy.instant-impl :as instant-impl]
             [jiffy.duration-impl :as duration-impl]
             [jiffy.temporal.temporal-query :as temporal-query #?@(:clj [:refer [defquery]] #?@(:cljs [:refer-macros [defquery]]))]
@@ -12,8 +13,11 @@
 
 (deftest print-edn-test
 
-  (is (= (pr-str (instant-impl/create 1692982727 544376000))
-         "#jiffy/instant{:seconds 1692982727, :nanos 544376000}"))
+  ;; (is (= (pr-str (instant-impl/create 1692982727 544376000))
+  ;;        "#jiffy/instant{:seconds 1692982727, :nanos 544376000}"))
+
+  (is (= (pr-str (instant-2-impl/create 1692982727 544376000))
+         "#jiffy/instant-2{:seconds 1692982727, :nanos 544376000}"))
 
   (is (= (pr-str (duration-impl/create 1692982727 544376000))
          "#jiffy/duration{:seconds 1692982727, :nanos 544376000}"))
@@ -135,8 +139,11 @@
 
 (deftest read-literal-test
 
-  (is (= #jiffy/instant{:seconds 1692982727, :nanos 544376000}
-         (instant-impl/create 1692982727 544376000)))
+  ;; (is (= #jiffy/instant{:seconds 1692982727, :nanos 544376000}
+  ;;        (instant-impl/create 1692982727 544376000)))
+
+  (is (= #jiffy/instant-2{:seconds 1692982727, :nanos 544376000}
+         (instant-2-impl/create 1692982727 544376000)))
 
   (is (= #jiffy/duration{:seconds 1692982727, :nanos 544376000}
          (duration-impl/create 1692982727 544376000)))

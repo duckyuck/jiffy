@@ -7,7 +7,7 @@
             [jiffy.conversion :as conversion]
             [jiffy.day-of-week :as day-of-week]
             [jiffy.duration :as duration-impl]
-            [jiffy.instant-2 :as instant-impl]
+            [jiffy.instant-2-impl :as instant-impl]
             ;; [jiffy.instant :as instant-impl]
             [jiffy.month :as month]
             [jiffy.period :as period-impl]
@@ -93,7 +93,7 @@
                                    ;; :jiffy.chrono.japanese-date/japanese-date
                                    ;; :jiffy.chrono.minguo-date/minguo-date
                                    ;; :jiffy.chrono.thai-buddhist-date/thai-buddhist-date
-                                   :jiffy.instant-2/instant
+                                   :jiffy.instant-2-impl/instant
                                    ;; :jiffy.instant/instant
                                    ;; :jiffy.local-date/local-date
                                    ;; :jiffy.local-date-time/local-date-time

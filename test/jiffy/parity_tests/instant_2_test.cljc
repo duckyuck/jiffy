@@ -35,4 +35,6 @@
 (test-static-fn jiffy.instant-2/of-epoch-milli)
 (test-static-fn jiffy.instant-2/from)
 
-;; (test-static-fn! jiffy.instant/now)
+;; TODO: (jiffy.instant/now) gets its value from the system's current time.
+;; We need to find a way to override the JDK function that provides this.
+#_(test-static-fn! jiffy.instant/now)
