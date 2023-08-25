@@ -1,8 +1,8 @@
 (ns jiffy.edn
   (:require [clojure.edn :as edn]
             #?(:cljs [cljs.reader :as reader])
-            [jiffy.instant-2 #?@(:cljs [:refer [Instant]])]
-            [jiffy.instant-impl #?@(:cljs [:refer [Instant]])]
+            [jiffy.instant-2-impl #?@(:cljs [:refer [Instant]])]
+            ;; [jiffy.instant-impl #?@(:cljs [:refer [Instant]])]
             [jiffy.duration-impl #?@(:cljs [:refer [Duration]])]
             [jiffy.temporal.temporal-queries]
             [jiffy.temporal.value-range #?@(:cljs [:refer [ValueRange]])]
@@ -10,8 +10,8 @@
             [jiffy.temporal.chrono-field #?@(:cljs [:refer [ChronoField]])]
             [jiffy.temporal.chrono-unit #?@(:cljs [:refer [ChronoUnit]])])
   #?(:clj (:import [java.io Writer]
-                   ;; [jiffy.instant_2 Instant]
-                   [jiffy.instant_impl Instant]
+                   [jiffy.instant_2_impl Instant]
+                   ;; [jiffy.instant_impl Instant]
                    [jiffy.duration_impl Duration]
                    [jiffy.temporal.value_range ValueRange]
                    [jiffy.temporal.temporal_query TemporalQuery]
@@ -26,11 +26,11 @@
 
 (def tags
   `{:instant-2 {:record Instant
-                :read-fn 'jiffy.instant-2/map->Instant
+                :read-fn 'jiffy.instant-2-impl/map->Instant
                 :write-fn '->map}
-    :instant {:record Instant
-              :read-fn 'jiffy.instant-impl/map->Instant
-              :write-fn '->map}
+    ;; :instant {:record Instant
+    ;;           :read-fn 'jiffy.instant-impl/map->Instant
+    ;;           :write-fn '->map}
     :duration {:record Duration
                :read-fn 'jiffy.duration-impl/map->Duration
                :write-fn '->map}

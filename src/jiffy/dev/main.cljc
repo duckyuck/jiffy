@@ -43,7 +43,8 @@
             jiffy.format.sign-style
             jiffy.format.text-style
             jiffy.instant-impl
-            [jiffy.instant :as instant]
+            [jiffy.instant-2 :as instant]
+            [jiffy.protocols.instant :as Instant]
             jiffy.local-date
             jiffy.local-date-time
             jiffy.local-time
@@ -72,7 +73,8 @@
             jiffy.zone.zone-offset-transition
             jiffy.zone.zone-offset-transition-rule
             jiffy.zone.zone-rules
-            jiffy.zone.zone-rules-provider))
+            jiffy.zone.zone-rules-provider
+            [jiffy.edn-cljs :include-macros true]))
 
 (comment
   jiffy.math.big-decimal/keep-me
@@ -104,6 +106,7 @@
   jiffy.clock/keep-me
   jiffy.day-of-week/keep-me
   jiffy.dev.wip/keep-me
+  jiffy.edn-cljs/keep-me
   jiffy.duration/keep-me
   jiffy.exception/keep-me
   jiffy.format.date-time-formatter
@@ -161,9 +164,6 @@
 (defn ^:after-load dummy [] ::ok)
 
 (comment
-
-  (require '[jiffy.instant :as instant])
-  (require '[jiffy.protocols.instant :as Instant])
 
   (let [i1 (instant/now)
         i2 (-> i1
