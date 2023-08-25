@@ -57,7 +57,7 @@
 
 (s/def ::clock/clock
   (s/with-gen #(satisfies? clock/IClock %)
-    (fn [] (gen/one-of [(s/gen ::clock-impl/system-clock)]))))
+    (fn [] (gen/one-of [(s/gen ::clock-impl/fixed-clock)]))))
 
 (s/def ::temporal-field/temporal-field
   (s/with-gen #(satisfies? temporal-field/ITemporalField %)

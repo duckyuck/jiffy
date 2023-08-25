@@ -8,8 +8,7 @@
             [jiffy.instant-impl :as instant-impl]
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.zone-offset :as zone-offset]
-            [jiffy.specs :as j]
-            [jiffy.conversion :as conversion])
+            [jiffy.specs :as j])
   #?(:clj (:import [jiffy.zone_offset_impl ZoneOffset])))
 
 (s/def ::clock ::clock/clock)
