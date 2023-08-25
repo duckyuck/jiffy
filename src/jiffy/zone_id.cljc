@@ -12,10 +12,6 @@
 
 (s/def ::zone-id ::zone-id/zone-id)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L271
-(defn system-default [] (wip ::system-default))
-(s/fdef system-default :ret ::zone-id)
-
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L287
 (defn get-available-zone-ids [] (wip ::get-available-zone-ids))
 (s/fdef get-available-zone-ids :ret ::j/wip)
@@ -52,14 +48,14 @@
        (assert/require-non-nil zone-id "zone-id")
        (cond
          (or (<= (count zone-id) 1)
-             (.startsWith zone-id "+")
-             (.startsWith zone-id "-"))
+              (.startsWith zone-id "+")
+              (.startsWith zone-id "-"))
          (zone-offset/of zone-id)
 
          (or (.startsWith zone-id "UTC") (.startsWith zone-id "GMT"))
          (of-with-prefix zone-id 3 arg)
 
-         (.startsWith "UT")
+         (.startsWith zone-id "UT")
          (of-with-prefix zone-id 2 arg)
 
          :default
@@ -107,3 +103,8 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L224
 (def SHORT_IDS ::SHORT_IDS--not-implemented)
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L271
+(defn system-default []
+  #?(:clj (.toZoneId (java.util.TimeZone/getDefault))))
+(s/fdef system-default :ret ::zone-id)
