@@ -3,10 +3,10 @@
 test: test-clj test-cljs
 
 test-clj:
-	clojure -Atest-clj
+	clojure -Mtest-clj
 
 test-cljs:
-	clojure -Atest-cljs
+	clojure -Mtest-cljs
 
 clean:
-	rm -rf target cljs-test-runner-out
+	rm -rf target/* cljs-test-runner-out
