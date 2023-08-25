@@ -1,4 +1,4 @@
-(ns jiffy.dev.main
+(ns ^:figwheel-hooks jiffy.dev.main
   (:require jiffy.math.big-decimal
             jiffy.chrono.abstract-chronology
             jiffy.chrono.chrono-local-date
@@ -158,16 +158,17 @@
 
 #?(:cljs (enable-console-print!))
 
-(defn dummy [] ::ok)
+(defn ^:after-load dummy [] ::ok)
 
 (comment
 
   (require '[jiffy.instant :as instant])
+  (require '[jiffy.protocols.instant :as Instant])
 
   (let [i1 (instant/now)
         i2 (-> i1
-               (instant/-plus-seconds 30)
-               (instant/-plus-millis 2500))]
+               (Instant/plus-seconds 30)
+               (Instant/plus-millis 2500))]
     (duration/between i1 i2))
 
 
