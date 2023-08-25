@@ -5,12 +5,12 @@
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
             [clojure.test :refer [deftest is]]
-            [jiffy.conversion :refer [jiffy->java] :as conversion]
+            [jiffy.conversion :as conversion]
+            [jiffy.edn-clj :include-macros true]
             [jiffy.exception :refer [try*]]
             [jiffy.math :as math]
             [jiffy.parity-tests.test-specs]
-            [jiffy.specs :as j]
-            [jiffy.edn-clj :include-macros true]))
+            [jiffy.specs :as j]))
 
 (comment
 
@@ -124,7 +124,7 @@
     [args# (s/gen ~spec)]
     (same? (invoke-jiffy ~jiffy-fn args#)
            (invoke-java ~java-fn
-                        (map jiffy->java args#)
+                        (map conversion/jiffy->java args#)
                         {:static? ~static?}))))
 
 (def default-num-tests 1000)
@@ -155,7 +155,7 @@
      (let [results#
            (for [args# ~args-samples]
              (let [jiffy-result# (trycatch (invoke-jiffy ~jiffy-fn args#))
-                   java-args# (mapv jiffy->java args#)
+                   java-args# (mapv conversion/jiffy->java args#)
                    result# {:failed/jiffy-args args#
                             :failed/jiffy-result jiffy-result#
                             :failed/java-args java-args#}

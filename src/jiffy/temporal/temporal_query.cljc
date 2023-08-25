@@ -1,6 +1,5 @@
 (ns jiffy.temporal.temporal-query
-  (:require [clojure.spec.alpha :as s]
-            #?(:clj [jiffy.conversion :as conversion])))
+  (:require [clojure.spec.alpha :as s]))
 
 (defprotocol ITemporalQuery
   (query-from [this temporal]))
@@ -14,19 +13,3 @@
 
 (defmacro defquery [sym name & query-from]
   `(def ~sym (->TemporalQuery ~name (fn ~@query-from))))
-
-#?(:clj
-   (defmethod conversion/jiffy->java TemporalQuery [{:keys [name]}]
-     (case name
-       "ZoneId" (java.time.temporal.TemporalQueries/zoneId)
-       "Chronology" (java.time.temporal.TemporalQueries/chronology)
-       "Precision" (java.time.temporal.TemporalQueries/precision)
-       "ZoneOffset" (java.time.temporal.TemporalQueries/offset)
-       "Zone" (java.time.temporal.TemporalQueries/zone)
-       "LocalDate" (java.time.temporal.TemporalQueries/localDate)
-       "LocalTime" (java.time.temporal.TemporalQueries/localTime))))
-
-#?(:clj
-   (defmethod conversion/same? TemporalQuery
-     [jiffy-object java-object]
-     (= (:name jiffy-object) (.toString java-object))))

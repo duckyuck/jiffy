@@ -1,6 +1,5 @@
 (ns jiffy.temporal.chrono-unit
-  (:require #?(:clj [jiffy.conversion :as conversion])
-            [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as s]
             [jiffy.duration-impl :as duration-impl]
             [jiffy.enums #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]
             [jiffy.math :as math]
@@ -105,18 +104,3 @@
 (s/def ::value-of-args (s/tuple string?))
 (defn value-of [enum-name] (@enums enum-name))
 (s/fdef value-of :args ::value-of-args :ret ::chrono-unit)
-
-#?(:clj
-   (defmethod conversion/jiffy->java ChronoUnit [chrono-unit]
-     (java.time.temporal.ChronoUnit/valueOf (:enum-name chrono-unit))))
-
-#?(:clj
-   (defmethod conversion/same? ChronoUnit [jiffy-object java-object]
-     ;; TODO compare all values of enum
-     (= (map #(% jiffy-object) [:ordinal
-                                ;; :enum-name
-                                :name
-                                ;; :duration
-                                ])
-        (map #(% java-object) [(memfn ordinal)
-                               (memfn toString)]))))

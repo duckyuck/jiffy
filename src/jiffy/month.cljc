@@ -1,6 +1,5 @@
 (ns jiffy.month
-  (:require #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
-            [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as s]
             [jiffy.chrono.chronology :as chronology]
             [jiffy.chrono.iso-chronology-impl :as iso-chronology]
             [jiffy.dev.wip :refer [wip]]
@@ -255,15 +254,3 @@
   ;;                 {:temporal temporal})))))
   )
 (s/fdef from :args ::from-args :ret ::month)
-
-#?(:clj
-   (defmethod jiffy->java Month [month]
-     (java.time.Month/valueOf (:enum-name month))))
-
-#?(:clj
-   (defmethod same? Month
-     [jiffy-object java-object]
-     (= (map #(% jiffy-object) [:ordinal
-                                :enum-name])
-        (map #(% java-object) [(memfn ordinal)
-                               (memfn name)]))))

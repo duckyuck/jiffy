@@ -67,10 +67,6 @@
 (def system-utc (constantly UTC))
 (s/fdef system-utc :ret ::clock)
 
-#?(:clj
-   (defmethod jiffy->java SystemClock [{:keys [zone]}]
-     (java.time.Clock/system (jiffy->java zone))))
-
 
 ;; Clock.FixedClock
 
@@ -110,16 +106,6 @@
   (with-zone [this zone] (-with-zone-fixed-clock this zone))
   (millis [this] (-millis-fixed-clock this))
   (instant [this] (-instant-fixed-clock this)))
-
-#?(:clj
-   (defmethod jiffy->java FixedClock [{:keys [instant zone]}]
-     (java.time.Clock/fixed (jiffy->java instant) (jiffy->java zone))))
-
-#?(:clj
-   (defmethod same? FixedClock
-     [jiffy-object java-object]
-     (and (same? (:instant jiffy-object) (.instant java-object))
-          (same? (:zone jiffy-object) (.getZone java-object)))))
 
 
 ;; (abstract) Clock
@@ -163,4 +149,3 @@
 (s/def ::offset-args (s/tuple ::clock ::duration/duration))
 (defn offset [base-clock offset-duration] (wip ::offset))
 (s/fdef offset :args ::offset-args :ret ::clock)
-

@@ -1,7 +1,6 @@
 (ns jiffy.local-time
   (:refer-clojure :exclude [format])
-  (:require #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
-            [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as s]
             [jiffy.asserts :refer [require-non-nil]]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.exception :refer [ex JavaNullPointerException UnsupportedTemporalTypeException]]
@@ -502,19 +501,3 @@
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L461
   ([text formatter] (wip ::parse)))
 (s/fdef parse :args ::parse-args :ret ::local-time)
-
-#?(:clj
-   (defmethod jiffy->java LocalTime [this]
-     (java.time.LocalTime/of (:hour this)
-                             (:minute this)
-                             (:second this)
-                             (:nano this))))
-
-#?(:clj
-   (defmethod same? LocalTime
-     [jiffy-object java-object]
-     (= (mapv #(% jiffy-object) [:hour :minute :second :nano])
-        [(.getHour java-object)
-         (.getMinute java-object)
-         (.getSecond java-object)
-         (.getNano java-object)])))

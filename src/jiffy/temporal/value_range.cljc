@@ -1,6 +1,5 @@
 (ns jiffy.temporal.value-range
   (:require [clojure.spec.alpha :as s]
-            #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
             [jiffy.specs :as j]
             [jiffy.exception :refer [DateTimeException JavaIllegalArgumentException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.protocols.temporal.value-range :as value-range]
@@ -147,19 +146,3 @@
 (s/def ::of-args ::create-args)
 (defn of [& args] (apply create args))
 (s/fdef of :args ::of-args :ret ::value-range)
-
-#?(:clj
-   (defmethod jiffy->java ValueRange [{:keys [min-smallest min-largest max-smallest max-largest]}]
-     (java.time.temporal.ValueRange/of min-smallest min-largest max-smallest max-largest)))
-
-#?(:clj
-   (defmethod same? ValueRange
-     [jiffy-object java-object]
-     (= (map #(% jiffy-object) [:min-smallest
-                                :min-largest
-                                :max-smallest
-                                :max-largest])
-        (map #(% java-object) [(memfn getMinimum)
-                               (memfn getLargestMinimum)
-                               (memfn getSmallestMaximum)
-                               (memfn getMaximum)]))))

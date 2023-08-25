@@ -1,6 +1,5 @@
 (ns jiffy.temporal.chrono-field
-  (:require #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
-            [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.enums #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]
             [jiffy.math :as math]
@@ -153,25 +152,3 @@
 (s/def ::value-of-args (s/tuple string?))
 (defn valueOf [enum-name] (@enums enum-name))
 (s/fdef valueOf :args ::value-of-args :ret ::chrono-field)
-
-#?(:clj
-   (defmethod jiffy->java ChronoField [chrono-field]
-     (java.time.temporal.ChronoField/valueOf (:enum-name chrono-field))))
-
-#?(:clj
-   (defmethod same? ChronoField
-     [jiffy-object java-object]
-     (= (map #(% jiffy-object) [:ordinal
-                                :enum-name
-                                :name
-                                :base-unit
-                                :range-unit
-                                :range
-                                :display-name-key])
-        (map #(% java-object) [(memfn ordinal)
-                               (memfn name)
-                               (memfn getName)
-                               (memfn getBaseUnit)
-                               (memfn getRangeUnit)
-                               (memfn getRange)
-                               (memfn getDisplayNameKey)]))))

@@ -5,7 +5,6 @@
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
             [clojure.walk :as walk]
-            [jiffy.conversion :as conversion]
             [jiffy.math :as sut]
             [jiffy.math.support :refer [compare-math wrap unwrap]]
             [jiffy.specs :as j]))

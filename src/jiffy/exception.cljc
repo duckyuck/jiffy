@@ -1,7 +1,6 @@
 (ns jiffy.exception
   (:require [clojure.spec.alpha :as s]
-            [jiffy.dev.wip :refer [wip]]
-            #?(:clj [jiffy.conversion :refer [same?]])))
+            [jiffy.dev.wip :refer [wip]]))
 
 (s/def ::catch-expr
   (s/cat :catch #(= 'catch %)
@@ -107,24 +106,3 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/format/DateTimeParseException.java#L134
 (defn getErrorIndex [this] (wip ::getErrorIndex))
-
-#?(:clj
-   (let [kind->class {JavaException java.lang.Exception
-                      JavaRuntimeException java.lang.RuntimeException
-                      JavaNullPointerException java.lang.NullPointerException
-                      DateTimeException java.time.DateTimeException
-                      UnsupportedTemporalTypeException java.time.temporal.UnsupportedTemporalTypeException
-                      ZoneRulesException java.time.zone.ZoneRulesException
-                      DateTimeParseException java.time.format.DateTimeParseException
-                      JavaArithmeticException java.lang.ArithmeticException
-                      JavaClassCastException java.lang.ClassCastException
-                      JavaIllegalArgumentException java.lang.IllegalArgumentException
-                      JavaIllegalStateException java.lang.IllegalStateException
-                      JavaParseException java.text.ParseException
-                      JavaIndexOutOfBoundsException java.lang.IndexOutOfBoundsException
-                      JavaThrowable java.lang.Throwable}]
-     ;; TODO: include exception message in check. needs polishing of exception error messages
-     (defmethod same? clojure.lang.ExceptionInfo
-       [ex java-object]
-       (= (kind->class (::kind (ex-data ex)))
-          (type java-object)))))

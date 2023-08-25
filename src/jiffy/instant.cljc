@@ -1,6 +1,5 @@
 (ns jiffy.instant
-  (:require #?(:clj [jiffy.conversion :as conversion])
-            [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as s]
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.format.date-time-formatter :as date-time-formatter-impl]
             [jiffy.clock :as clock-impl]
@@ -465,13 +464,3 @@
 
 (def MIN (of-epoch-second MIN_SECOND 0))
 (def MAX (of-epoch-second MAX_SECOND 999999999))
-
-#?(:clj
-   (defmethod conversion/jiffy->java Instant [{:keys [seconds nanos]}]
-     (.plusNanos (java.time.Instant/ofEpochSecond seconds) nanos)))
-
-#?(:clj
-   (defmethod conversion/same? Instant
-     [jiffy-object java-object]
-     (= (map #(% jiffy-object) [:seconds :nanos])
-        (map #(% java-object) [(memfn getEpochSecond) (memfn getNano)]))))

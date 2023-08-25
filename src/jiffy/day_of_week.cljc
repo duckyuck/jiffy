@@ -1,6 +1,5 @@
 (ns jiffy.day-of-week
-  (:require #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
-            [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.enums #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException JavaIllegalArgumentException ex #?(:clj try*)]  #?@(:cljs [:refer-macros [try*]])]
@@ -165,15 +164,3 @@
 (s/def ::from-args (s/tuple ::temporal-accessor/temporal-accessor))
 (defn from [temporal] (wip ::from))
 (s/fdef from :args ::from-args :ret ::day-of-week)
-
-#?(:clj
-   (defmethod jiffy->java DayOfWeek [day-of-week]
-     (java.time.DayOfWeek/valueOf (:enum-name day-of-week))))
-
-#?(:clj
-   (defmethod same? DayOfWeek
-     [jiffy-object java-object]
-     (= (map #(% jiffy-object) [:ordinal
-                                :enum-name])
-        (map #(% java-object) [(memfn ordinal)
-                               (memfn name)]))))

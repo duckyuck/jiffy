@@ -2,7 +2,6 @@
   (:require [clojure.spec.alpha :as s]
             [jiffy.exception :refer [DateTimeException ex]]
             [jiffy.math :as math]
-            #?(:clj [jiffy.conversion :as conversion])
             [jiffy.local-time-impl :as local-time]
             [jiffy.specs :as j]))
 
@@ -100,14 +99,3 @@
     (if (= offset-id-prefix \-)
       (of-hours-minutes-seconds (- hours) (- minutes) (- seconds))
       (of-hours-minutes-seconds hours minutes seconds))))
-
-#?(:clj
-   (defmethod conversion/jiffy->java ZoneOffset [jiffy-object]
-     (java.time.ZoneOffset/ofTotalSeconds (:total-seconds jiffy-object))))
-
-#?(:clj
-   (defmethod conversion/same? ZoneOffset
-     [jiffy-object java-object]
-     (= (map #(% jiffy-object) [:id :total-seconds])
-        [(.getId java-object)
-         (.getTotalSeconds java-object)])))

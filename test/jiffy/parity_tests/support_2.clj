@@ -5,12 +5,12 @@
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
             [clojure.test :refer [deftest is]]
-            [jiffy.conversion-2 :refer [jiffy->java] :as conversion]
+            [jiffy.conversion :refer [jiffy->java] :as conversion]
+            [jiffy.edn-clj :include-macros true]
             [jiffy.exception :refer [try*]]
             [jiffy.math :as math]
             [jiffy.parity-tests.test-specs]
-            [jiffy.specs :as j]
-            [jiffy.edn-clj :include-macros true]))
+            [jiffy.specs :as j]))
 
 (comment
 

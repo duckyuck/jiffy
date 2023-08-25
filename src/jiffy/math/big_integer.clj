@@ -1,7 +1,6 @@
 (ns jiffy.math.big-integer
   (:require [clojure.math :as math]
             [com.gfredericks.exact :as e]
-            [jiffy.conversion :as conversion]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.exception :refer [ex JavaArithmeticException try*]]))
 

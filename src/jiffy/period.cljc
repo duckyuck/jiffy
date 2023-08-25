@@ -1,6 +1,5 @@
 (ns jiffy.period
-  (:require #?(:clj [jiffy.conversion :refer [jiffy->java same?]])
-            [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [jiffy.asserts :as asserts]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
@@ -403,16 +402,3 @@
 (defn between [start-date-inclusive end-date-exclusive]
   (chrono-local-date/until start-date-inclusive end-date-exclusive))
 (s/fdef between :args ::between-args :ret ::period)
-
-#?(:clj
-   (defmethod jiffy->java Period [{:keys [years months days]}]
-     (java.time.Period/of years months days)))
-
-#?(:clj
-   (defmethod same? Period
-     [jiffy-object java-object]
-     (and (= (type java-object) java.time.Period)
-          (= (map #(% jiffy-object) [:years :months :days])
-             (map #(% java-object) [(memfn getYears)
-                                    (memfn getMonths)
-                                    (memfn getDays)])))))

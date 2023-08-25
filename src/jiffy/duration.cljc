@@ -3,7 +3,6 @@
             [clojure.test.check.generators]
             [jiffy.asserts :refer [require-non-nil]]
             [jiffy.math.big-decimal :as big-decimal]
-            #?(:clj [jiffy.conversion :as conversion])
             [jiffy.dev.wip :refer [wip]]
             [jiffy.duration-impl :refer [create #?@(:cljs [Duration])] :as impl]
             [jiffy.exception :refer [DateTimeParseException JavaArithmeticException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
@@ -650,13 +649,3 @@
                          (catch :default e [secs 0]))]
        (of-seconds secs nanos)))))
 (s/fdef between :args ::between-args :ret ::duration)
-
-#?(:clj
-   (defmethod conversion/jiffy->java Duration [{:keys [seconds nanos]}]
-     (.withNanos (java.time.Duration/ofSeconds seconds) nanos)))
-
-#?(:clj
-   (defmethod conversion/same? Duration
-     [jiffy-object java-object]
-     (= (map #(% jiffy-object) [:seconds :nanos])
-        (map #(% java-object) [(memfn getSeconds) (memfn getNano)]))))
