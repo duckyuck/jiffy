@@ -1,7 +1,7 @@
 (ns jiffy.dev.sandbox
-  (:require [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]
-            [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]]
+  (:require [cljs.spec.alpha :as s]
+            [cljs.spec.gen.alpha :as gen]
+            [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]]
             [jiffy.specs :as j]))
 
 
@@ -26,7 +26,7 @@
   (->MyRecord a b))
 
 #_(for [args (-> #'my-constructor s/get-spec :args s/gen gen/sample)]
-  (apply my-constructor args))
+    (apply my-constructor args))
 
 
 ;;;;;;;;;;;;;;;;;;
@@ -42,4 +42,6 @@
    :y y})
 
 #_(for [args (-> #'my-method s/get-spec :args s/gen gen/sample)]
-  (apply my-method args))
+    (apply my-method args))
+
+
