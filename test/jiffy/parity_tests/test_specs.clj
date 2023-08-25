@@ -7,7 +7,8 @@
             [jiffy.conversion :as conversion]
             [jiffy.day-of-week :as day-of-week]
             [jiffy.duration :as duration-impl]
-            [jiffy.instant-2 :as instant-impl]
+            ;; [jiffy.instant-2 :as instant-impl]
+            [jiffy.instant :as instant-impl]
             [jiffy.month :as month]
             [jiffy.period :as period-impl]
             [jiffy.protocols.chrono.chrono-local-date-time-impl :as chrono-local-date-time-impl]
@@ -45,8 +46,8 @@
             [jiffy.temporal.temporal-adjusters :as temporal-adjusters-impl]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.zone-offset :as zone-offset-impl]
-            [jiffy.zoned-date-time :as zoned-date-time-impl]))
+            [jiffy.zoned-date-time :as zoned-date-time-impl]
+            [jiffy.zone-offset :as zone-offset-impl]))
 
 (s/def ::duration/duration ::duration-impl/duration)
 (s/def ::period/period ::period-impl/period)
@@ -92,7 +93,8 @@
                                    ;; :jiffy.chrono.japanese-date/japanese-date
                                    ;; :jiffy.chrono.minguo-date/minguo-date
                                    ;; :jiffy.chrono.thai-buddhist-date/thai-buddhist-date
-                                   :jiffy.instant-2/instant
+                                   ;; :jiffy.instant-2/instant
+                                   :jiffy.instant/instant
                                    ;; :jiffy.local-date/local-date
                                    ;; :jiffy.local-date-time/local-date-time
                                    ;; :jiffy.local-time/local-time
@@ -165,14 +167,15 @@
 
 (comment
 
-  (satisfies? temporal/ITemporal
-                (first (gen/sample (s/gen :jiffy.instant-2/instant))))
+  ;; (satisfies? temporal/ITemporal
+  ;;               (first (gen/sample (s/gen :jiffy.instant-2/instant))))
 
   (gen/sample (s/gen (:args (s/get-spec #'instant-impl/with))))
 
   (gen/sample (s/gen (:args (s/get-spec #'instant-impl/of-epoch-milli))))
 
-  (gen/sample (s/gen :jiffy.instant-2/instant))
+  ;; (gen/sample (s/gen :jiffy.instant-2/instant))
+  (gen/sample (s/gen :jiffy.instant/instant))
 
   (gen/sample (s/gen ::temporal-amount/temporal-amount))
 
@@ -183,7 +186,8 @@
    (gen/sample
     (s/gen (s/cat
             :this
-            (s/spec :jiffy.instant-2/instant)
+            ;; (s/spec :jiffy.instant-2/instant)
+            (s/spec :jiffy.instant/instant)
             :amount-to-subtract
             (s/spec
              :jiffy.protocols.temporal.temporal-amount/temporal-amount)))))

@@ -1,18 +1,20 @@
 (ns jiffy.conversion-2
   (:require [jiffy.exception :as exception]
-            [jiffy.instant-2])
+            ;; [jiffy.instant-2]
+            [jiffy.instant-impl])
   (:import jiffy.day_of_week.DayOfWeek
            jiffy.duration_impl.Duration
-           jiffy.instant_2.Instant
+           ;; jiffy.instant_2.Instant
+           jiffy.instant_impl.Instant
+           jiffy.local_time_impl.LocalTime
+           jiffy.month.Month
+           jiffy.period.Period
            jiffy.temporal.chrono_field.ChronoField
            jiffy.temporal.chrono_unit.ChronoUnit
            jiffy.temporal.temporal_query.TemporalQuery
            jiffy.temporal.value_range.ValueRange
-           jiffy.zone_offset_impl.ZoneOffset
-           jiffy.month.Month
-           jiffy.period.Period
-           jiffy.local_time_impl.LocalTime
-           jiffy.zoned_date_time_impl.ZonedDateTime))
+           jiffy.zoned_date_time_impl.ZonedDateTime
+           jiffy.zone_offset_impl.ZoneOffset))
 
 (defmulti jiffy->java type)
 
