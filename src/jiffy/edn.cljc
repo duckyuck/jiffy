@@ -29,8 +29,8 @@
     ;;             :read-fn 'jiffy.instant-2/map->Instant
     ;;             :write-fn '->map}
     :instant {:record Instant
-                :read-fn 'jiffy.instant/map->Instant
-                :write-fn '->map}
+              :read-fn 'jiffy.instant-impl/map->Instant
+              :write-fn '->map}
     :duration {:record Duration
                :read-fn 'jiffy.duration-impl/map->Duration
                :write-fn '->map}
@@ -42,7 +42,4 @@
             :write-fn :enum-name}
     :unit {:record ChronoUnit
            :read-fn 'jiffy.temporal.chrono-unit/value-of
-           :write-fn :enum-name}
-    :value-range {:record ValueRange
-                  :read-fn 'jiffy.temporal.value-range/map->ValueRange
-                  :write-fn '->map}})
+           :write-fn :enum-name}})
