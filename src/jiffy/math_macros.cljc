@@ -1,13 +1,13 @@
 (ns jiffy.math-macros)
 
-(defmacro long-max-value []
-  (Long/MAX_VALUE))
+;; (defmacro long-max-value []
+;;   `~java.lang.Long/MAX_VALUE)
 
-(defmacro long-min-value []
-  (Long/MIN_VALUE))
+;; (defmacro long-min-value []
+;;   `~java.lang.Long/MIN_VALUE)
 
-(defmacro integer-max-value []
-  (Integer/MAX_VALUE))
+;; (defmacro integer-max-value []
+;;   `~java.lang.Integer/MAX_VALUE)
 
-(defmacro integer-min-value []
-  (Integer/MIN_VALUE))
+;; (defmacro integer-min-value []
+;;   `~java.lang.Integer/MIN_VALUE)

@@ -1,7 +1,7 @@
 (ns jiffy.math-cljs
   (:refer-clojure :exclude [abs parse-long])
   (:require [clojure.math :as math]
-            [jiffy.exception :refer [ex JavaArithmeticException try*]]))
+            [jiffy.exception :refer [ex JavaArithmeticException] :refer-macros [try*]]))
 
 ;; public
 ;; (def long-max-value (mm/long-max-value))
@@ -15,7 +15,8 @@
 (def integer-max-value 2147483647)
 
 (defn add-exact [x y]
-  (let [r (try* (math/add-exact x y)
+  (let [r (try* (clojure.core/+ x y)
+                ;; (math/add-exact x y)
                 (catch :default e
                   (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
     (when (neg? (bit-and (bit-xor x r) (bit-xor y r)))
@@ -75,10 +76,8 @@
 
 (defn parse-int [s]
   (when (string? s)
-    #?(:clj (Integer/parseInt s 10)
-       :cljs (js/parseInt s 10))))
+    (js/parseInt s 10)))
 
 (defn parse-long [s]
   (when (string? s)
-    #?(:clj (Long/parseLong s 10)
-       :cljs (js/parseLong s 10))))
+    (js/parseLong s 10)))
