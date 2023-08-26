@@ -1,6 +1,8 @@
 (ns jiffy.parity-tests.support-2-cljs
-  (:require [jiffy.edn-cljs]
-            [jiffy.exception :refer [ex] :refer-macros [try*]]
+  (:require [cljs.test :refer [deftest is testing]]
+            [clojure.string :as str]
+            [jiffy.edn-cljs]
+            [jiffy.exception :refer [ex try*]]
             [jiffy.parity-tests.corpus :as corpus]))
 
 (defn try-call [f args]
@@ -35,15 +37,31 @@
       (for [failure (take 3 failures)]
         {:expr `(~'jiffy.parity-tests.support-2-cljs/same?
                  (~'jiffy.parity-tests.support-2-cljs/try-call ~(:fn failure) [~@(:args failure)])
-                 ~(:result failure))
+                 ~(:expected failure))
          :failure failure}))))
 
 (defn test-proto-fn! [_ & args] (apply test-fn! args))
 
 (defn test-static-fn! [& args] (apply test-fn! args))
 
-(def test-proto-fn test-proto-fn!)
+(defmacro test-proto-fn [_ proto-fn]
+  `(do
+     (let [v# (var ~proto-fn)]
+       (deftest ~(gensym)
+         (let [res# (test-fn! v#)]
+           (if (:failure (first res#))
+             (throw (ex-info "Test failed" res#))
+             (if-not (pos? (first res#))
+               (throw (ex-info "No tests run" {:fn v#}))
+               (is (pos? (first res#))))))))))
 
-(def test-static-fn test-static-fn!)
-
-
+(defmacro test-static-fn [fn]
+  `(do
+     (let [v# (var ~fn)]
+       (deftest ~(gensym)
+         (let [res# (test-fn! v#)]
+           (if (:failure (first res#))
+             (throw (ex-info "Test failed" res#))
+             (if-not (pos? (first res#))
+               (throw (ex-info "No tests run" {:fn v#}))
+               (is (pos? (first res#))))))))))

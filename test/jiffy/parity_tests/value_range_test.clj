@@ -1,5 +1,5 @@
 (ns jiffy.parity-tests.value-range-test
-  (:require [jiffy.parity-tests.support :refer [test-proto-fn test-static-fn]]))
+  (:require [jiffy.parity-tests.support :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!]]))
 
 (test-proto-fn jiffy.temporal.value-range jiffy.protocols.temporal.value-range/is-fixed)
 (test-proto-fn jiffy.temporal.value-range jiffy.protocols.temporal.value-range/get-minimum)

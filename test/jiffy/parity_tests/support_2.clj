@@ -151,7 +151,7 @@
               (store-results ~jiffy-fn args# (invoke-jiffy ~jiffy-fn args#)))
             is-same?#)))))
 
-(def default-num-tests 100)
+(def default-num-tests 1000)
 
 (defmacro test-proto-fn [impl-ns proto-fn & [num-tests]]
   `(do

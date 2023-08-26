@@ -1,9 +1,9 @@
 (ns jiffy.parity-tests.corpus
   (:require [clojure.string :as str]
             [jiffy.edn-cljs]
-            [jiffy.helper.macros :refer-macros [load-edn-file] :include-macros true]))
+            [jiffy.helper.macros :refer [load-edn-file] :refer-macros [load-edn-file] :include-macros true]))
 
-(def corpus (load-edn-file "regression-corpus.edn"))
+(def corpus #?(:cljs (load-edn-file "regression-corpus.edn")))
 
 ;; TODO: replace this with something that allows testing with advanced compilation
 (defn fn->symbol [f]
@@ -19,7 +19,9 @@
               (last parts)))))
 
 (defn corpus-for-fn [f]
-  (let [fn-sym (fn->symbol f)]
+  (let [fn-sym (if (var? f)
+                 (symbol f)
+                 (fn->symbol f))]
     (filter #(= (:fn %) fn-sym) corpus)))
 
 (comment

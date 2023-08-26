@@ -1,6 +1,12 @@
 (ns jiffy.parity-tests.instant-2-test
   #?(:clj (:require [jiffy.parity-tests.support-2 :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support])
-     :cljs (:require [jiffy.parity-tests.support-2-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support]))
+     :cljs (:require [jiffy.parity-tests.support-2-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true]
+                     [jiffy.protocols.instant]
+                     [jiffy.protocols.temporal.temporal-adjuster]
+                     [jiffy.protocols.temporal.temporal]
+                     [jiffy.protocols.time-comparable]
+                     [jiffy.instant-2]
+                     [cljs.test :refer [deftest is testing]]))
   )
 
 (test-proto-fn jiffy.instant-2 jiffy.protocols.instant/get-epoch-second)
