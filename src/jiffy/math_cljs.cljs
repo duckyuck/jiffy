@@ -40,19 +40,16 @@
 (defn abs [x]
   (Math/abs x))
 
-;; (defn multiply-exact [x y]
-;;   (* x y))
-
 (defn bit-length [n]
   (if (zero? n)
     1
-    (inc (Math/floor (/ (Math/log (Math/abs n)) (Math/log 2))))))
+    (-> (Math/log (Math/abs n))
+        (/ (Math/log 2))
+        Math/floor
+        inc)))
 
 (defn multiply-exact [x y]
-  (try*
-   (math/multiply-exact x y)
-   (catch :default e
-     (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e)))))
+  (* x y))
 
 (defn floor-div [x y]
   (math/floor-div x y))

@@ -82,54 +82,18 @@
        (int r))))
 
 (defmethod multiply-exact* [java.lang.Long java.lang.Long]
-   [x y]
-   (let [r (try* (* x y)
-                 (catch :default e
-                   (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))
-         ax (abs x)
-         ay (abs y)]
-     ;; TODO: find out if this is nessecary on cljs.
-     ;; This case seems to be handled by Clojure itself (see try* above)
-     (when (and (not (zero? (unsigned-bit-shift-right (bit-or ax ay) 31)))
-                (or (and (not (zero? y))
-                         (not (= x (/ r y))))
-                    (and (= x long-max-value)
-                         (= y -1))))
-       (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
-     r))
+  [x y]
+  (*' x y))
 
 (defmethod multiply-exact* [java.lang.Long java.lang.Integer]
    [x y]
    (multiply-exact* x (long y)))
 
-;; (defn multiply-exact [x y]
-;;   (let [r (try* (math/multiply-exact x y)
-;;                 (catch :default e
-;;                   (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))
-;;         ax (abs x)
-;;         ay (abs y)]
-;;     (when (and (not (zero? (unsigned-bit-shift-right (bit-or ax ay) 31)))
-;;                (or (and (not (zero? y))
-;;                         (not (= x (/ r y))))
-;;                    (and (= x long-max-value)
-;;                         (= y -1))))
-;;       (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
-;;     r))
-
 (defn floor-div [x y]
-  (math/floor-div x y)
-  ;; (let [r (long (/ x y))]
-  ;;   (cond-> r
-  ;;     (and (neg? (bit-xor x y))
-  ;;          (not= (* r y) x))
-  ;;     dec))
-  )
-
+  (math/floor-div x y))
 
 (defn floor-mod [x y]
-  (math/floor-mod x y)
-  ;; (- x (*' y (math/floor-div x y)))
-  )
+  (math/floor-mod x y))
 
 (defn parse-int [s]
   (when (string? s)
