@@ -1,6 +1,7 @@
 (ns jiffy.period
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
+            [clojure.test.check.generators]
             [jiffy.asserts :as asserts]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
             [jiffy.chrono.iso-chronology-impl :as iso-chronology-impl]
