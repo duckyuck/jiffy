@@ -52,7 +52,7 @@
 (defn ex
   ([kind message] (ex kind message {} nil))
   ([kind message data] (ex kind message data nil))
-  ([kind message data cause] (ex-info message
+  ([kind message data cause] (ex-info (str message ": " (pr-str data))
                                       (assoc data ::kind kind)
                                       cause)))
 
