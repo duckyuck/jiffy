@@ -1,5 +1,6 @@
 (ns jiffy.parity-tests.local-time-test
-  (:require [jiffy.parity-tests.support :refer [test-proto-fn test-proto-fn!]]))
+  #?(:clj (:require [jiffy.parity-tests.support-2 :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support])
+     :cljs (:require [jiffy.parity-tests.support-2-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true])))
 
 (test-proto-fn jiffy.local-time jiffy.protocols.local-time/to-nano-of-day)
 (test-proto-fn jiffy.local-time jiffy.protocols.local-time/to-second-of-day)

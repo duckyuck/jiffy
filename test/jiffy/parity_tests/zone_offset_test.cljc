@@ -1,5 +1,6 @@
 (ns jiffy.parity-tests.zone-offset-test
-  (:require [jiffy.parity-tests.support :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!]]))
+  #?(:clj (:require [jiffy.parity-tests.support-2 :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support])
+     :cljs (:require [jiffy.parity-tests.support-2-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true])))
 
 (test-proto-fn jiffy.zone-offset jiffy.protocols.zone-offset/get-total-seconds)
 (test-proto-fn jiffy.zone-offset jiffy.protocols.time-comparable/compare-to)

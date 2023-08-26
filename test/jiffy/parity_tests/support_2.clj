@@ -108,10 +108,18 @@
                "--"
                (name f))))
 
-(defn get-spec [f]
+(defn get-defs-spec [f]
   (-> f
       s/get-spec
       :args))
+
+(defn get-legacy-spec [f]
+  (keyword (str (namespace f))
+           (str (kebab-case (name f)) "-args")))
+
+(defn get-spec [f]
+  (or (get-defs-spec f)
+      (get-legacy-spec f)))
 
 (defn invoke-jiffy [f args]
   (apply f args))
