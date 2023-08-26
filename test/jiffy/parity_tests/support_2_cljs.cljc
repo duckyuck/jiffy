@@ -16,12 +16,22 @@
       (let [actual-data (ex-data actual)]
         (and actual-data
              (= (:jiffy.exception/kind actual-data)
-                (:jiffy.exception/kind expected))))))
+                (:jiffy.exception/kind expected))))
+      false))
+
+(defn to-data [data]
+  (clojure.walk/postwalk
+   (fn [x]
+     (if (record? x)
+       (into {} x)
+       x))
+   data))
 
 (defn run-test [f {:keys [args result] :as data}]
   (let [actual (try-call f args)]
     (merge (dissoc data :result)
            {:same? (same? actual result)
+            :same-data? (= (to-data actual) (to-data result))
             :actual actual
             :expected result})))
 

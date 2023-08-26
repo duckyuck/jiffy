@@ -144,12 +144,13 @@
           java-result# (trycatch (invoke-java ~java-fn
                                               (map conversion/jiffy->java args#)
                                               {:static? ~static?}))]
-      (or (ignore-result? jiffy-result#)
-          (let [is-same?# (and (matching-types? jiffy-result# java-result#)
-                               (conversion/same? jiffy-result# java-result#))]
-            (when is-same?#
-              (store-results ~jiffy-fn args# (invoke-jiffy ~jiffy-fn args#)))
-            is-same?#)))))
+      (let [is-same?# (and (matching-types? jiffy-result# java-result#)
+                           (conversion/same? jiffy-result# java-result#))
+            ok?# (or is-same?#
+                     (ignore-result? jiffy-result#))]
+        (when ok?#
+          (store-results ~jiffy-fn args# (invoke-jiffy ~jiffy-fn args#)))
+        ok?#))))
 
 (def default-num-tests 1000)
 
