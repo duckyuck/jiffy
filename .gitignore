@@ -1,5 +1,7 @@
+.DS_Store
 .cpcache/
 /.nrepl-port
 target/
 cljs-test-runner-out/
 dev-resources/regression-corpus.edn
+node_modules/
