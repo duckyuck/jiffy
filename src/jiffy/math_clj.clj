@@ -20,18 +20,20 @@
 
 (defmethod add-exact* [java.lang.Integer java.lang.Integer]
   [x y]
-  (let [r (try* (+ x y)
-                (catch :default e
-                  (throw (ex JavaArithmeticException "integer overflow" {:x x :y y} e))))]
+  (let [r (try*
+           (+ x y)
+           (catch :default e
+             (throw (ex JavaArithmeticException "integer overflow" {:x x :y y} e))))]
     (when (>= (bit-length r) 32)
       (throw (ex JavaArithmeticException "integer overflow" {:x x :y y})))
     r))
 
 (defmethod add-exact* [java.lang.Long java.lang.Long]
   [x y]
-  (let [r (try* (math/add-exact x y)
-                (catch :default e
-                  (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
+  (let [r (try*
+           (math/add-exact x y)
+           (catch :default e
+             (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
     (when (neg? (bit-and (bit-xor x r) (bit-xor y r)))
       (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
     r))
@@ -45,9 +47,10 @@
 ;;     r))
 
 (defn subtract-exact [x y]
-  (let [r (try* (math/subtract-exact x y)
-                (catch :default e
-                  (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
+  (let [r (try*
+           (math/subtract-exact x y)
+           (catch :default e
+             (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
     (when (neg? (bit-and (bit-xor x y) (bit-xor x r)))
       (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
     r))

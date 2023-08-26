@@ -16,17 +16,16 @@
 (def integer-max-value 2147483647)
 
 (defn add-exact [x y]
-  (try* (clojure.core/+ x y)
-        ;; (math/add-exact x y)
-        (catch :default e
-          (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e)))))
+  (try*
+   (math/add-exact x y)
+   (catch :default e
+     (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e)))))
 
 (defn subtract-exact [x y]
-  (let [r (try* (math/subtract-exact x y)
-                (catch :default e
-                  (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
-    (when (neg? (bit-and (bit-xor x y) (bit-xor x r)))
-      (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
+  (let [r (try*
+           (math/subtract-exact x y)
+           (catch :default e
+             (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
     r))
 
 (defn to-int-exact [x]
@@ -50,37 +49,16 @@
     (inc (Math/floor (/ (Math/log (Math/abs n)) (Math/log 2))))))
 
 (defn multiply-exact [x y]
-  (let [r (try*
-           (* x y)
-           ;; (math/multiply-exact x y)
-           (catch :default e
-             (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))
-        ax (abs x)
-        ay (abs y)]
-    (when (> (bit-length r) 64)
-      (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
-    ;; (when (and (not (zero? (unsigned-bit-shift-right (bit-or ax ay) 31)))
-    ;;            (or (and (not (zero? y))
-    ;;                     (not (= x (/ r y))))
-    ;;                (and (= x long-max-value)
-    ;;                     (= y -1))))
-    ;;   (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
-    r))
+  (try*
+   (math/multiply-exact x y)
+   (catch :default e
+     (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e)))))
 
 (defn floor-div [x y]
-  (math/floor-div x y)
-  ;; (let [r (long (/ x y))]
-  ;;   (cond-> r
-  ;;     (and (neg? (bit-xor x y))
-  ;;          (not= (* r y) x))
-  ;;     dec))
-  )
-
+  (math/floor-div x y))
 
 (defn floor-mod [x y]
-  (math/floor-mod x y)
-  ;; (- x (*' y (math/floor-div x y)))
-  )
+  (math/floor-mod x y))
 
 (defn parse-int [s]
   (when (string? s)
