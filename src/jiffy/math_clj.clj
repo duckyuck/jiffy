@@ -15,7 +15,8 @@
                  (Math/log 2))))))
 
 (defmulti add-exact* (fn [x y] [(type x) (type y)]))
-(defn add-exact [x y] (add-exact* x y))
+(defn add-exact [x y]
+  (add-exact* x y))
 
 (defmethod add-exact* [java.lang.Integer java.lang.Integer]
   [x y]
@@ -64,7 +65,8 @@
   (Math/abs x))
 
 (defmulti multiply-exact* (fn [x y] [(type x) (type y)]))
-(defn multiply-exact [x y] (multiply-exact* x y))
+(defn multiply-exact [x y]
+  (multiply-exact* x y))
 
 (defmethod multiply-exact* [java.lang.Integer java.lang.Integer]
    [x y]

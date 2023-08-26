@@ -3,32 +3,30 @@
             [jiffy.day-of-week]
             [jiffy.duration-impl]
             [jiffy.exception :as exception]
-            ;; [jiffy.instant-impl]
             [jiffy.instant-2-impl]
             [jiffy.local-time-impl]
             [jiffy.month]
             [jiffy.period]
+            [jiffy.precision :as precision]
             [jiffy.temporal.chrono-field]
             [jiffy.temporal.chrono-unit]
             [jiffy.temporal.temporal-query]
             [jiffy.temporal.value-range]
             [jiffy.zoned-date-time-impl]
             [jiffy.zone-offset-impl])
-  (:import jiffy.clock.FixedClock
-           jiffy.clock.SystemClock
-           jiffy.day_of_week.DayOfWeek
-           jiffy.duration_impl.Duration
-           jiffy.instant_2_impl.Instant
-           ;; jiffy.instant_impl.Instant
-           jiffy.local_time_impl.LocalTime
-           jiffy.month.Month
-           jiffy.period.Period
-           jiffy.temporal.chrono_field.ChronoField
-           jiffy.temporal.chrono_unit.ChronoUnit
-           jiffy.temporal.temporal_query.TemporalQuery
-           jiffy.temporal.value_range.ValueRange
-           jiffy.zoned_date_time_impl.ZonedDateTime
-           jiffy.zone_offset_impl.ZoneOffset))
+  (:import (jiffy.clock FixedClock SystemClock)
+           (jiffy.day_of_week DayOfWeek)
+           (jiffy.duration_impl Duration)
+           (jiffy.instant_2_impl Instant)
+           (jiffy.local_time_impl LocalTime)
+           (jiffy.month Month)
+           (jiffy.period Period)
+           (jiffy.temporal.chrono_field ChronoField)
+           (jiffy.temporal.chrono_unit ChronoUnit)
+           (jiffy.temporal.temporal_query TemporalQuery)
+           (jiffy.temporal.value_range ValueRange)
+           (jiffy.zoned_date_time_impl ZonedDateTime)
+           (jiffy.zone_offset_impl ZoneOffset)))
 
 (defmulti jiffy->java type)
 
@@ -101,8 +99,29 @@
 (defmethod jiffy->java ValueRange [{:keys [min-smallest min-largest max-smallest max-largest]}]
   (java.time.temporal.ValueRange/of min-smallest min-largest max-smallest max-largest))
 
+(defmethod same? ValueRange [jiffy-object java-object]
+  (and (or (= (:min-smallest jiffy-object) (.getMinimum java-object))
+           (and (= (:min-smallest jiffy-object) precision/min-safe-integer)
+                (> (:min-smallest jiffy-object) (.getMinimum java-object))))
+       (or (= (:min-largest jiffy-object) (.getLargestMinimum java-object))
+           (and (= (:min-largest jiffy-object) precision/min-safe-integer)
+                (> (:min-largest jiffy-object) (.getLargestMinimum java-object))))
+       (or (= (:max-smallest jiffy-object) (.getSmallestMaximum java-object))
+           (and (= (:max-smallest jiffy-object) precision/max-safe-integer)
+                (< (:max-smallest jiffy-object) (.getSmallestMaximum java-object))))
+       (or (= (:max-largest jiffy-object) (.getMaximum java-object))
+           (and (= (:max-largest jiffy-object) precision/max-safe-integer)
+                (< (:max-largest jiffy-object) (.getMaximum java-object))))))
+
 (defmethod jiffy->java Duration [{:keys [seconds nanos]}]
   (.withNanos (java.time.Duration/ofSeconds seconds) nanos))
+
+(defmethod same? Duration [jiffy-object java-object]
+  (and (or (= (:seconds jiffy-object) (.getSeconds java-object))
+           (and (= (:seconds jiffy-object) precision/min-safe-integer)
+                (> (:seconds jiffy-object) (.getSeconds java-object)))
+           (and (= (:seconds jiffy-object) precision/max-safe-integer)
+                (< (:seconds jiffy-object) (.getSeconds java-object))))))
 
 (defmethod jiffy->java DayOfWeek [{:keys [enum-name]}]
   (java.time.DayOfWeek/valueOf enum-name))

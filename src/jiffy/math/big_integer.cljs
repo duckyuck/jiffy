@@ -1,5 +1,6 @@
 (ns jiffy.math.big-integer
-  (:require [jiffy.dev.wip :refer [wip]]
+  (:require [com.gfredericks.exact :as e]
+            [jiffy.dev.wip :refer [wip]]
             [jiffy.exception :refer [ex JavaArithmeticException] :refer-macros [try*]]))
 
 (defn value-of [val] val)

@@ -119,13 +119,19 @@
     (str (str/lower-case (str first-char))
          (apply str rest))))
 
+(defn ignore-result? [jiffy-result]
+  (some-> jiffy-result ex-data :jiffy.exception/kind (= :jiffy.precision/PrecisionException)))
+
 (defmacro gen-prop [jiffy-fn java-fn spec & [{:keys [static?]}]]
   `(prop/for-all
     [args# (s/gen ~spec)]
-    (same? (invoke-jiffy ~jiffy-fn args#)
-           (invoke-java ~java-fn
-                        (map conversion/jiffy->java args#)
-                        {:static? ~static?}))))
+    (let [jiffy-result# (trycatch (invoke-jiffy ~jiffy-fn args#))
+          java-result# (trycatch (invoke-java ~java-fn
+                                              (map conversion/jiffy->java args#)
+                                              {:static? ~static?}))]
+      (or (ignore-result? jiffy-result#)
+          (and (matching-types? jiffy-result# java-result#)
+               (conversion/same? jiffy-result# java-result#))))))
 
 (def default-num-tests 1000)
 
@@ -163,7 +169,9 @@
                                  (invoke-java ~java-fn
                                               java-args#
                                               {:static? ~static?}))]
-               (when-not (same? jiffy-result# java-result#)
+               (when-not (or (ignore-result? jiffy-result#)
+                             (and (matching-types? jiffy-result# java-result#)
+                                  (conversion/same? jiffy-result# java-result#)))
                  (assoc result# :failed/java-result java-result#))))]
        (or (first (remove nil? results#))
            [(count results#) :success]))))

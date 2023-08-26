@@ -3,13 +3,14 @@
             [jiffy.exception :refer [DateTimeException ex]]
             [jiffy.local-time-impl :refer [NANOS_PER_SECOND]]
             [jiffy.math :as math]
-            [jiffy.specs :as j]))
+            [jiffy.specs :as j]
+            [jiffy.precision :as precision]))
 
 (defrecord Instant [seconds nanos])
 
 (def EPOCH (->Instant 0 0))
-(def MAX_SECOND 31556889864403199)
-(def MIN_SECOND -31557014167219200)
+(def MAX_SECOND precision/max-safe-integer)
+(def MIN_SECOND precision/min-safe-integer)
 
 (s/def ::create-args (s/tuple ::j/second ::j/nano))
 (defn create [seconds nano-of-second]

@@ -3,13 +3,14 @@
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.math :as math]
-            [jiffy.specs :as j]))
+            [jiffy.specs :as j]
+            [jiffy.precision :as precision]))
 
 (def-record Instant ::instant [seconds ::j/second nanos ::j/nano])
 
 (def EPOCH (->Instant 0 0))
-(def MAX_SECOND 31556889864403199)
-(def MIN_SECOND -31557014167219200)
+(def MAX_SECOND precision/max-safe-integer)
+(def MIN_SECOND precision/min-safe-integer)
 
 (def-constructor create ::instant
   [seconds ::j/second

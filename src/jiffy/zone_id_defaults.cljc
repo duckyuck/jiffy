@@ -8,6 +8,7 @@
 
 (defmacro args [& x] `(s/tuple ::j/wip ~@x))
 
+(s/def ::zone-id nil?)
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L125
 (s/def ::normalized-args (args))
 (defn -normalized [this] (wip ::-normalized))
