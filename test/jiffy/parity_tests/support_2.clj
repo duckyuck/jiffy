@@ -122,7 +122,7 @@
          (apply str rest))))
 
 (defmacro store-results [jiffy-fn args jiffy-expr]
-  `(spit "regression-corpus.edn"
+  `(spit "dev-resources/regression-corpus.edn"
          (str
           (pr-str {:fn '~jiffy-fn
                    :args ~args

@@ -3,7 +3,7 @@
             [jiffy.edn-cljs]
             [jiffy.helper.macros :refer [load-edn-file] :refer-macros [load-edn-file] :include-macros true]))
 
-(def corpus #?(:cljs (load-edn-file "regression-corpus.edn")))
+(def corpus #?(:cljs (load-edn-file "dev-resources/regression-corpus.edn")))
 
 ;; TODO: replace this with something that allows testing with advanced compilation
 (defn fn->symbol [f]
