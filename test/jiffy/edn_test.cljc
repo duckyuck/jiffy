@@ -14,13 +14,13 @@
 (deftest print-edn-test
 
   ;; (is (= (pr-str (instant-impl/create 1692982727 544376000))
-  ;;        "#jiffy/instant{:seconds 1692982727, :nanos 544376000}"))
+  ;;        "#jiffy/instant {:seconds 1692982727, :nanos 544376000}"))
 
   (is (= (pr-str (instant-2-impl/create 1692982727 544376000))
-         "#jiffy/instant-2{:seconds 1692982727, :nanos 544376000}"))
+         "#jiffy/instant-2 {:seconds 1692982727, :nanos 544376000}"))
 
   (is (= (pr-str (duration-impl/create 1692982727 544376000))
-         "#jiffy/duration{:seconds 1692982727, :nanos 544376000}"))
+         "#jiffy/duration {:seconds 1692982727, :nanos 544376000}"))
 
   (testing "TemporalQuery"
     (is (= (pr-str temporal-queries/ZONE_ID)
@@ -139,13 +139,13 @@
 
 (deftest read-literal-test
 
-  ;; (is (= #jiffy/instant{:seconds 1692982727, :nanos 544376000}
+  ;; (is (= #jiffy/instant {:seconds 1692982727, :nanos 544376000}
   ;;        (instant-impl/create 1692982727 544376000)))
 
-  (is (= #jiffy/instant-2{:seconds 1692982727, :nanos 544376000}
+  (is (= #jiffy/instant-2 {:seconds 1692982727, :nanos 544376000}
          (instant-2-impl/create 1692982727 544376000)))
 
-  (is (= #jiffy/duration{:seconds 1692982727, :nanos 544376000}
+  (is (= #jiffy/duration {:seconds 1692982727, :nanos 544376000}
          (duration-impl/create 1692982727 544376000)))
 
   (testing "TemporalQuery"

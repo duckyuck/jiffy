@@ -37,12 +37,14 @@
          jiffy.duration-impl/Duration (-pr-writer [x w _] (-write w (jiffy.edn/to-string "duration" jiffy.edn/->map x)))
          jiffy.temporal.temporal-query/TemporalQuery (-pr-writer [x w _] (-write w (jiffy.edn/to-string "query" :name x)))
          jiffy.temporal.chrono-field/ChronoField (-pr-writer [x w _] (-write w (jiffy.edn/to-string "field" :enum-name x)))
-         jiffy.temporal.chrono-unit/ChronoUnit (-pr-writer [x w _] (-write w (jiffy.edn/to-string "unit" :enum-name x))))
+         jiffy.temporal.chrono-unit/ChronoUnit (-pr-writer [x w _] (-write w (jiffy.edn/to-string "unit" :enum-name x)))
+         jiffy.temporal.value-range/ValueRange (-pr-writer [x w _] (-write w (jiffy.edn/to-string "value-range" jiffy.edn/->map x))))
        (cljs.reader/register-tag-parser! (cljs.core/symbol "jiffy" "instant-2") jiffy.instant-2-impl/map->Instant)
        (cljs.reader/register-tag-parser! (cljs.core/symbol "jiffy" "duration") jiffy.duration-impl/map->Duration)
        (cljs.reader/register-tag-parser! (cljs.core/symbol "jiffy" "query") jiffy.temporal.temporal-queries/name->query)
        (cljs.reader/register-tag-parser! (cljs.core/symbol "jiffy" "field") jiffy.temporal.chrono-field/valueOf)
-       (cljs.reader/register-tag-parser! (cljs.core/symbol "jiffy" "unit") jiffy.temporal.chrono-unit/value-of)))
+       (cljs.reader/register-tag-parser! (cljs.core/symbol "jiffy" "unit") jiffy.temporal.chrono-unit/value-of)
+       (cljs.reader/register-tag-parser! (cljs.core/symbol "jiffy" "value-range") jiffy.temporal.value-range/map->ValueRange)))
 
 (comment
 

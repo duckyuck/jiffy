@@ -18,9 +18,9 @@
                    [jiffy.temporal.chrono_field ChronoField]
                    [jiffy.temporal.chrono_unit ChronoUnit])))
 
-(defn to-string [tag f x]
-  (let [x (f x)]
-    (str "#jiffy/" tag (when (string? x) " ") (pr-str x))))
+(defn to-string [tag f obj]
+  (let [value (f obj)]
+    (str "#jiffy/" tag " " (pr-str value))))
 
 (defn ->map [x] (into {} x))
 
@@ -42,4 +42,7 @@
             :write-fn :enum-name}
     :unit {:record ChronoUnit
            :read-fn 'jiffy.temporal.chrono-unit/value-of
-           :write-fn :enum-name}})
+           :write-fn :enum-name}
+    :value-range {:record ValueRange
+                  :read-fn 'jiffy.temporal.value-range/map->ValueRange
+                  :write-fn '->map}})

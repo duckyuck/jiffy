@@ -1,7 +1,7 @@
 (ns jiffy.parity-tests.corpus
-  (:require [jiffy.edn-cljs]
-            [jiffy.helper.macros :refer-macros [load-edn-file]]
-            [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [jiffy.edn-cljs]
+            [jiffy.helper.macros :refer-macros [load-edn-file] :include-macros true]))
 
 (def corpus (load-edn-file "regression-corpus.edn"))
 
@@ -23,10 +23,13 @@
     (filter #(= (:fn %) fn-sym) corpus)))
 
 (comment
+
+  (count corpus)
   
   (let [f jiffy.protocols.temporal.temporal-adjuster/adjust-into
         corpus (first (corpus-for-fn f))]
-    (apply f (:args corpus)))
+    {:cljs (apply f (:args corpus))
+     :clj (:result corpus)})
 
   )
 

@@ -2,7 +2,7 @@
   (:require [jiffy.edn :as edn])
   (:import [java.io Writer]))
 
-(defmacro defconverter [tag data]
+(defmacro defconverter! [tag data]
   (let [{:keys [record write-fn read-fn]} data]
     `(do
        (defmethod print-method ~record [x# ^Writer w#]
@@ -13,12 +13,12 @@
 
 (defmacro tags [] `~edn/tags)
 
-(defmacro defconverters []
+(defmacro defconverters! []
   `(do
      ~@(for [[tag# data#] (tags)]
-         `(defconverter ~(symbol tag#) ~data#))))
+         `(defconverter! ~(symbol tag#) ~data#))))
 
-(defconverters)
+(defconverters!)
 
 
 (comment
