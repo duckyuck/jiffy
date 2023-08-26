@@ -4,4 +4,10 @@
  jiffy/query jiffy.edn-clj/query
  jiffy/field jiffy.edn-clj/field
  jiffy/unit jiffy.edn-clj/unit
- jiffy/value-range jiffy.edn-clj/value-range}
+ jiffy/value-range jiffy.edn-clj/value-range
+ jiffy/period jiffy.edn-clj/period
+ jiffy/day-of-week jiffy.edn-clj/day-of-week
+ jiffy/local-time jiffy.edn-clj/local-time
+ jiffy/month jiffy.edn-clj/month
+ jiffy/zone-offset jiffy.edn-clj/zone-offset
+ jiffy/fixed-clock jiffy.edn-clj/fixed-clock}
