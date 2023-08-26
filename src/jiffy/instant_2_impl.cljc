@@ -20,7 +20,7 @@
     EPOCH
 
     (or (< seconds MIN_SECOND) (> seconds MAX_SECOND))
-    (throw (ex DateTimeException
+    (throw (ex :jiffy.precision/PrecisionException
                "Instant exceeds minimum or maximum instant"
                {:max-second MAX_SECOND
                 :min-second MIN_SECOND

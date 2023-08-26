@@ -12,21 +12,21 @@
             (throw (ex Foo "Foo"))
             (catch Foo f
               [Foo (ex-msg f)]))
-           [Foo "Foo"])))
+           [Foo "Foo: {}"])))
 
   (testing "considers exception hierarchy, catching Bar with Foo"
     (is (= (try*
             (throw (ex Bar "Bar"))
             (catch Foo f
               [Foo (ex-msg f)]))
-           [Foo "Bar"])))
+           [Foo "Bar: {}"])))
 
   (testing "supports :default"
     (is (= (try*
             (throw (ex Foo "Foo"))
             (catch :default f
               [Foo (ex-msg f)]))
-           [Foo "Foo"])))
+           [Foo "Foo: {}"])))
 
   (testing "multiple catch clauses"
     (is (= (try*
@@ -35,7 +35,7 @@
               [Bar (ex-msg b)])
             (catch Foo f
               [Foo (ex-msg f)]))
-           [Bar "Bar"])))
+           [Bar "Bar: {}"])))
 
   (testing "multiple catch clauses, catching Bar with Foo"
     (is (= (try*
@@ -44,4 +44,4 @@
               [Foo (ex-msg f)])
             (catch Bar b
               [Bar (ex-msg b)]))
-           [Foo "Bar"]))))
+           [Foo "Bar: {}"]))))
