@@ -16,10 +16,7 @@
 (def integer-max-value 2147483647)
 
 (defn add-exact [x y]
-  (try*
-   (math/add-exact x y)
-   (catch :default e
-     (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e)))))
+  (+ x y))
 
 (defn subtract-exact [x y]
   (let [r (try*

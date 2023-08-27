@@ -63,7 +63,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L246
 
 (s/def ::of-seconds-args ::impl/of-seconds-args)
-(def of-seconds #'impl/of-seconds)
+(defn of-seconds [& args] (apply impl/of-seconds args))
 (s/fdef of-seconds :args ::of-seconds-args :ret ::duration)
 
 (declare -plus
@@ -252,7 +252,9 @@
   (condp = divisor
     0 (throw (ex JavaArithmeticException "Cannot divide by zero" {:duration this :divisor divisor}))
     1 this
-    (create (big-decimal/divide (impl/to-big-decimal-seconds this) (big-decimal/value-of divisor) :rounding.mode/down))))
+    (create (big-decimal/to-decimal-places
+             (big-decimal/divide (impl/to-big-decimal-seconds this) (big-decimal/value-of divisor) :rounding.mode/down)
+             9))))
 
 (defn --divided-by-duration [this duration]
   (-> (impl/to-big-decimal-seconds this)
@@ -267,7 +269,7 @@
   (if (satisfies? duration/IDuration divisor)
     (--divided-by-duration this divisor)
     (--divided-by-long this divisor)))
-(s/fdef -divided-by :args ::divided-by-args :ret ::duration)
+(s/fdef -divided-by :args ::divided-by-args :ret (s/or :long (args ::j/long) :duration (args ::duration)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1055
 (s/def ::negated-args ::impl/negated-args)
@@ -537,7 +539,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L280
 (s/def ::of-nanos-args (s/tuple ::j/long))
-(def of-nanos impl/of-nanos)
+(defn of-nanos [& args] (apply impl/of-nanos args))
 (s/fdef of-nanos :args ::of-nanos-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L309

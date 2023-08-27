@@ -15,7 +15,7 @@
 
 (declare of-seconds -negated)
 
-(s/def ::create-args (s/tuple pos-int? ::j/nano-of-second))
+(s/def ::create-args (s/tuple ::j/pos-long ::j/nano-of-second))
 (defn create
   ([big-decimal-seconds]
    (let [nanos (-> big-decimal-seconds

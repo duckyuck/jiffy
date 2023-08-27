@@ -21,20 +21,3 @@
 
 (defn int-value [this]
   (e/integer->native this))
-
-
-;; Implementation based off `java.math.BigInteger`
-
-;; (defn value-of [val] (BigInteger/valueOf val))
-
-;; (defn divide-and-reminder [x y]
-;;   (try*
-;;    (.divideAndRemainder (biginteger x) (biginteger y))
-;;    (catch :default e
-;;      (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e)))))
-
-;; (defn bit-length [x] (.bitLength x))
-
-;; (defn long-value [x] (.longValue x))
-
-;; (defn int-value [x] (.intValue x))

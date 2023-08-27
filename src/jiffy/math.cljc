@@ -1,7 +1,7 @@
 (ns jiffy.math
   (:refer-clojure :exclude [abs parse-long])
   (:require [#?(:clj jiffy.math-clj :cljs jiffy.math-cljs) :as impl]
-            [jiffy.exception :refer [ex]]
+            [jiffy.exception :refer [ex JavaArithmeticException]]
             [jiffy.precision :as precision]))
 
 (def long-max-value precision/max-safe-integer)
@@ -24,6 +24,23 @@
                 :precise (precision/precise? result)
                 :arguments (vec arguments)}))))
 
+(defn assert-int-args! [description & arguments]
+  (when-not (every? precision/integer? arguments)
+    (throw (ex JavaArithmeticException
+               (str "integer overflow. " description " failed. Arguments cannot be precisly represented")
+               {:arguments (vec arguments)
+                :integer? (mapv precision/integer? arguments)}))))
+
+(defn assert-int-result! [description result & arguments]
+  (when-not (precision/integer? result)
+    (throw (ex JavaArithmeticException
+               (str "integer overflow. "description " failed. Result cannot be precisly represented")
+               {:result result
+                :integer? (precision/integer? result)
+                :arguments (vec arguments)}))))
+
+(defn assert-int! [description ])
+
 (defn abs [x]
   (assert-precise-args! 'abs x)
   (let [r (impl/abs x)]
@@ -36,22 +53,40 @@
     (assert-precise-result! 'add-exact r x y)
     r))
 
+(defn add-exact-int [x y]
+  (assert-int-args! 'add-exact-in x y)
+  (let [r (impl/add-exact x y)]
+    (assert-int-result! 'add-exact r x y)
+    r))
+
 (defn subtract-exact [x y]
   (assert-precise-args! 'subtract-exact x y)
   (let [r (impl/subtract-exact x y)]
     (assert-precise-result! 'subtract-exact r x y)
     r))
 
+(defn subtract-exact-int [x y]
+  (assert-precise-args! 'subtract-exact x y)
+  (let [r (impl/subtract-exact x y)]
+    (assert-precise-result! 'subtract-exact r x y)
+    r))
+
 (defn to-int-exact [x]
-  (assert-precise-args! 'to-int-exact x)
+  (assert-int-args! 'to-int-exact x)
   (let [r (impl/to-int-exact x)]
-    (assert-precise-result! 'subtract-exact r x)
+    (assert-int-result! 'subtract-exact r x)
     r))
 
 (defn multiply-exact [x y]
   (assert-precise-args! 'multiply-exact x y)
   (let [r (impl/multiply-exact x y)]
     (assert-precise-result! 'multiply-exact r x y)
+    r))
+
+(defn multiply-exact-int [x y]
+  (assert-int-args! 'multiply-exact-int x y)
+  (let [r (impl/multiply-exact x y)]
+    (assert-int-result! 'multiply-exact r x y)
     r))
 
 (defn floor-div [x y]
@@ -68,7 +103,7 @@
 
 (defn parse-int [s]
   (when-let [r (impl/parse-int s)]
-    (assert-precise-result! 'parse-int r s)
+    (assert-int-result! 'parse-int r s)
     r))
 
 (defn parse-long [s]

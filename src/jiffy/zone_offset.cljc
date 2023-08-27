@@ -174,7 +174,8 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L413
 (s/def ::of-total-seconds-args ::impl/of-total-seconds-args)
-(def of-total-seconds #'impl/of-total-seconds)
+(defn of-total-seconds [total-seconds]
+  (impl/of-total-seconds total-seconds))
 (s/fdef of-total-seconds :args ::of-total-seconds-args :ret ::zone-offset)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L316

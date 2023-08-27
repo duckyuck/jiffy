@@ -27,7 +27,7 @@
 (defmacro compare-math [values jiffy-expr java-expr]
   `(let [jiffy-result# (support/trycatch ~jiffy-expr)
          java-result# (support/trycatch ~java-expr)]
-     (or (support/ignore-result? jiffy-result#)
+     (or (support/precision-exception? jiffy-result#)
          (and (support/matching-types? jiffy-result# java-result#)
               (conversion/same? jiffy-result# java-result#))
          (throw (ex-info "Not same"

@@ -1,30 +1,63 @@
 (ns jiffy.math.big-decimal
   (:refer-clojure :exclude [divide])
-  (:require [jiffy.dev.wip :refer [wip]]))
+  (:require [com.gfredericks.exact :as e]
+            [decimal.core :as dc :include-macros true]
+            [jiffy.dev.wip :refer [wip]]
+            [jiffy.exception :refer [ex JavaArithmeticException]]
+            [jiffy.precision :as precision]))
+
+(dc/config!
+ {:rounding :round-down
+  :precision 1000
+  :to-exp-neg -100
+  :to-exp-pos 100})
 
 (defn add [x y]
-  (+ x y))
+  (dc/plus x y))
 
 (defn multiply [this big-decimal]
-  (* this big-decimal))
+  (dc/mul this big-decimal))
+
+(defn to-rounding [rounding]
+  (or ({:rounding.mode/down :round-down} rounding)
+      (throw (ex ::illegal-argument "Unsupported rounding mode" {:rounding-mode rounding}))))
 
 (defn divide [this other rounding-mode]
-  (wip ::divide))
+ (dc/with-config {:rounding (to-rounding rounding-mode)}
+   (dc/div this other)))
 
 (defn divide-to-integral-value [this divisor]
-  (wip ::divide-to-integral-value))
+  (let [r (dc/div' this divisor)]
+    (when-not (dc/finite? r)
+      (throw (ex JavaArithmeticException "divide-to-integral-value failed"
+                 {:this this :divisor divisor} e)))
+    r))
 
 (defn long-value-exact [this]
-  (wip ::long-value-exact))
+  (let [r (dc/to-number (dc/to-nearest this 1))]
+    (when-not (precision/precise? r)
+      (throw (ex JavaArithmeticException
+                 "long-value-exact failed. Result cannot be precisly represented"
+                 {:result r
+                  :precise (precision/precise? r)
+                  :arguments [this]})))
+    r))
 
 (defn value-of
   ([unscaled-val scale]
-   (wip ::value-of))
+   (dc/with-config {:precision 9 :rounding :round-down}
+     (dc/div unscaled-val (dc/pow 10 scale))))
   ([val]
-   (wip ::value-of)))
+   (dc/*decimal*. val)))
 
 (defn move-point-right [this points]
-  (wip ::move-point-right))
+  (dc/mul this (dc/pow 10 points)))
 
 (defn to-big-integer-exact [this]
-  (wip ::to-big-integer-exact))
+  (-> this
+      (dc/to-nearest 1)
+      dc/to-string
+      e/string->integer))
+
+(defn to-decimal-places [this places]
+  (dc/to-decimal-places this places))

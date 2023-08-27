@@ -27,7 +27,8 @@
 (s/def ::milli pos-int?)
 
 ;; divide by 1000 due to OpenJDK bug. toEpochMilli fails for MAX seconds
-(s/def ::second (s/int-in (/ -31557014167219200 1000) (/ 31556889864403200 1000)))
+;; (s/def ::second (s/int-in (/ -31557014167219200 1000) (/ 31556889864403200 1000)))
+(s/def ::second (int-in math/integer-min-value math/integer-max-value))
 (s/def ::year (int-in math/integer-min-value math/integer-max-value))
 (s/def ::month (int-in math/integer-min-value math/integer-max-value))
 (s/def ::day (int-in math/integer-min-value math/integer-max-value))

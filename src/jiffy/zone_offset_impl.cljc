@@ -3,7 +3,8 @@
             [jiffy.exception :refer [DateTimeException ex]]
             [jiffy.math :as math]
             [jiffy.local-time-impl :as local-time]
-            [jiffy.specs :as j]))
+            [jiffy.specs :as j]
+            [clojure.string :as str]))
 
 (defrecord ZoneOffset [id total-seconds])
 
@@ -77,24 +78,15 @@
   (--validate hours minutes seconds)
   (of-total-seconds (--total-seconds hours minutes seconds)))
 
-(defn- --parse-number [offset-id pos preceded-by-colon]
-  )
-
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L202
 (defn of [offset-id]
-  (if (= offset-id "Z")
+  (if (= "Z" offset-id)
     UTC
-    (let [[hours minutes seconds new-offset-id]
-          (case (count offset-id)
-            2 (let [offset-id (str (first offset-id) \0 (second offset-id))]
-                [(--parse-number offset-id 1 false) 0 0 offset-id])
-            3 [(--parse-number offset-id 1 false) 0 0]
-            5 [(--parse-number offset-id 1 false) (--parse-number offset-id 3 false) 0]
-            6 [(--parse-number offset-id 1 false) (--parse-number offset-id 4 true) 0]
-            7 [(--parse-number offset-id 1 false) (--parse-number offset-id 3 false) (--parse-number offset-id 5 false)]
-            9 [(--parse-number offset-id 1 false) (--parse-number offset-id 4 true) (--parse-number offset-id 7 true)]
-            (throw (ex DateTimeException (str "Invalid ID for ZoneOffset, invalid format: " offset-id) {:offset-id offset-id})))
-          offset-id-prefix (first (or new-offset-id offset-id))]
+    (let [[hours minutes seconds] (->> (-> offset-id
+                                           (str/replace #"[+-]" "")
+                                           (str/split #":"))
+                                       (map math/parse-int))
+          offset-id-prefix (first offset-id)]
       (when (and (not= offset-id-prefix \+)
                  (not= offset-id-prefix \-))
         (throw (ex DateTimeException (str "Invalid ID for ZoneOffset, plus/minus not found when expected: " offset-id))))

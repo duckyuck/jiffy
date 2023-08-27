@@ -38,13 +38,9 @@
       (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
     r))
 
-;; (defn add-exact [x y]
-;;   (let [r (try* (math/add-exact x y)
-;;                 (catch :default e
-;;                   (throw (ex JavaArithmeticException "long overflow" {:x x :y y} e))))]
-;;     (when (neg? (bit-and (bit-xor x r) (bit-xor y r)))
-;;       (throw (ex JavaArithmeticException "long overflow" {:x x :y y})))
-;;     r))
+(defmethod add-exact* [java.lang.Integer java.lang.Long]
+  [x y]
+  (add-exact (long x) y))
 
 (defn subtract-exact [x y]
   (let [r (try*
@@ -68,6 +64,7 @@
   (Math/abs x))
 
 (defmulti multiply-exact* (fn [x y] [(type x) (type y)]))
+
 (defn multiply-exact [x y]
   (multiply-exact* x y))
 
@@ -88,6 +85,10 @@
 (defmethod multiply-exact* [java.lang.Long java.lang.Integer]
    [x y]
    (multiply-exact* x (long y)))
+
+(defmethod multiply-exact* [java.lang.Integer java.lang.Long]
+  [x y]
+  (multiply-exact* (long x) y))
 
 (defn floor-div [x y]
   (math/floor-div x y))

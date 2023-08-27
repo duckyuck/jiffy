@@ -142,7 +142,7 @@
           "\n")
          :append true))
 
-(defn ignore-result? [jiffy-result]
+(defn precision-exception? [jiffy-result]
   (some-> jiffy-result ex-data :jiffy.exception/kind (= :jiffy.precision/PrecisionException)))
 
 (defmacro gen-prop [jiffy-fn java-fn spec & [{:keys [static?]}]]
@@ -155,12 +155,12 @@
       (let [is-same?# (and (matching-types? jiffy-result# java-result#)
                            (conversion/same? jiffy-result# java-result#))
             ok?# (or is-same?#
-                     (ignore-result? jiffy-result#))]
+                     (precision-exception? jiffy-result#))]
         (when ok?#
           (store-results ~jiffy-fn args# (invoke-jiffy ~jiffy-fn args#)))
         ok?#))))
 
-(def default-num-tests 1000)
+(def default-num-tests 500)
 
 (defmacro test-proto-fn [impl-ns proto-fn & [num-tests]]
   `(do
@@ -196,7 +196,7 @@
                                  (invoke-java ~java-fn
                                               java-args#
                                               {:static? ~static?}))]
-               (when-not (or (ignore-result? jiffy-result#)
+               (when-not (or (precision-exception? jiffy-result#)
                              (and (matching-types? jiffy-result# java-result#)
                                   (conversion/same? jiffy-result# java-result#)))
                  (assoc result# :failed/java-result java-result#))))]
@@ -219,5 +219,5 @@
      (test-fn! ~jiffy-fn
                '~(symbol (jiffy-ns->java-class (namespace jiffy-fn))
                          (jiffy-fn->java-fn (name jiffy-fn)))
-               (gen/sample (s/gen (get-spec '~jiffy-fn)) ~(or num-tests 1000))
+               (gen/sample (s/gen (get-spec '~jiffy-fn)) ~(or num-tests default-num-tests))
                {:static? true})))

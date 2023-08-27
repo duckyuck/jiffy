@@ -225,9 +225,9 @@
 (defn -multiplied-by [this scalar]
   (if (or (= this ZERO) (= scalar 1))
     this
-    (create (math/multiply-exact (:years this) (int scalar))
-            (math/multiply-exact (:months this) (int scalar))
-            (math/multiply-exact (:days this) (int scalar)))))
+    (create (math/multiply-exact-int (:years this) (int scalar))
+            (math/multiply-exact-int (:months this) (int scalar))
+            (math/multiply-exact-int (:days this) (int scalar)))))
 (s/fdef -multiplied-by :args ::multiplied-by-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L812
@@ -336,7 +336,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L205
 (s/def ::of-weeks-args (s/tuple ::j/int))
 (defn of-weeks [weeks]
-  (create 0 0 (math/multiply-exact weeks (int 7))))
+  (create 0 0 (math/multiply-exact-int weeks (int 7))))
 (s/fdef of-weeks :args ::of-weeks-args :ret ::period)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Period.java#L218
@@ -390,7 +390,7 @@
            [y m w d] (map #(-> (or (math/parse-int %) 0) (* factor) math/to-int-exact) nums)]
        (when (apply = nil nums)
          (throw (ex DateTimeParseException "Text cannot be parsed to a Period" {:parsed-data text :error-index 0})))
-       (create y m (math/add-exact (int d) (int (math/multiply-exact w (int 7))))))
+       (create y m (math/add-exact-int (int d) (int (math/multiply-exact-int w (int 7))))))
      (catch JavaArithmeticException e
        (throw e))
      (catch :default e

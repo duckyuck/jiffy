@@ -145,7 +145,7 @@
     (-> this (plus-nanos math/long-max-value) (plus-nanos 1))
     (plus-nanos this (- nanos-to-subtract))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1149
+;; https://github.com/unofficial-openjdk/openjdk/blob/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L1230
 (def-method to-epoch-milli ::j/long
   [this ::impl/instant]
   (if (and (neg? (:seconds this)) (pos? (:nanos this)))
