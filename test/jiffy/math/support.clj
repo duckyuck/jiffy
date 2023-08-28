@@ -2,7 +2,7 @@
   (:require [clojure.spec.gen.alpha :as gen]
             [clojure.walk :as walk]
             [jiffy.conversion :as conversion]
-            [jiffy.parity-tests.support-2 :as support]))
+            [jiffy.parity-tests.support-clj :as support]))
 
 (defn wrap [x]
   (walk/postwalk

@@ -7,7 +7,7 @@
             [com.gfredericks.exact :as exact]
             [jiffy.math.big-integer :as sut]
             [jiffy.math.support :refer [compare-math unwrap wrap]]
-            [jiffy.parity-tests.support-2 :as support]))
+            [jiffy.parity-tests.support-clj :as support]))
 
 (def digits [\0 \1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f])
 

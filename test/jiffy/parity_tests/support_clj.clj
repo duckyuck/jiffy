@@ -1,4 +1,4 @@
-(ns jiffy.parity-tests.support-2
+(ns jiffy.parity-tests.support-clj
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
@@ -157,7 +157,7 @@
             ok?# (or is-same?#
                      (precision-exception? jiffy-result#))]
         (when ok?#
-          (store-results ~jiffy-fn args# (invoke-jiffy ~jiffy-fn args#)))
+          (store-results ~jiffy-fn args# jiffy-result#))
         ok?#))))
 
 (def default-num-tests 500)
