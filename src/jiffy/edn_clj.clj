@@ -27,8 +27,8 @@
 
   ;; #jiffy/duration{:seconds 31556952, :nanos 0}
 
-  ;; (-> #jiffy/instant-2{:seconds 0, :nanos 0}
-  ;;     (jiffy.instant-2/plus-seconds 10)
-  ;;     (jiffy.instant-2/plus-nanos 10))
+  ;; (-> #jiffy/instant{:seconds 0, :nanos 0}
+  ;;     (jiffy.instant/plus-seconds 10)
+  ;;     (jiffy.instant/plus-nanos 10))
 
   )

@@ -42,8 +42,8 @@
             jiffy.format.resolver-style
             jiffy.format.sign-style
             jiffy.format.text-style
-            jiffy.instant-2-impl
-            [jiffy.instant-2 :as instant]
+            jiffy.instant-impl
+            [jiffy.instant :as instant]
             [jiffy.protocols.instant :as Instant]
             jiffy.local-date
             jiffy.local-date-time
@@ -120,7 +120,7 @@
   jiffy.format.resolver-style/keep-me
   jiffy.format.sign-style/keep-me
   jiffy.format.text-style/keep-me
-  jiffy.instant-2/keep-me
+  jiffy.instant/keep-me
   jiffy.local-date/keep-me
   jiffy.local-date-time/keep-me
   jiffy.local-time/keep-me

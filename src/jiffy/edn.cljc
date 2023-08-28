@@ -4,7 +4,7 @@
             [jiffy.clock #?@(:cljs [:refer [FixedClock]])]
             [jiffy.day-of-week #?@(:cljs [:refer [DayOfWeek]])]
             [jiffy.duration-impl #?@(:cljs [:refer [Duration]])]
-            [jiffy.instant-2-impl #?@(:cljs [:refer [Instant]])]
+            [jiffy.instant-impl #?@(:cljs [:refer [Instant]])]
             [jiffy.local-time-impl #?@(:cljs [:refer [LocalTime]])]
             [jiffy.month #?@(:cljs [:refer [Month]])]
             [jiffy.period #?@(:cljs [:refer [Period]])]
@@ -20,7 +20,7 @@
                    [jiffy.clock FixedClock]
                    [jiffy.day_of_week DayOfWeek]
                    [jiffy.duration_impl Duration]
-                   [jiffy.instant_2_impl Instant]
+                   [jiffy.instant_impl Instant]
                    [jiffy.local_time_impl LocalTime]
                    [jiffy.month Month]
                    [jiffy.period Period]
@@ -37,9 +37,9 @@
 (defn ->map [x] (into {} x))
 
 (def tags
-  `{:instant-2
+  `{:instant
     {:record Instant
-     :read-fn 'jiffy.instant-2-impl/map->Instant
+     :read-fn 'jiffy.instant-impl/map->Instant
      :write-fn '->map}
 
     :duration

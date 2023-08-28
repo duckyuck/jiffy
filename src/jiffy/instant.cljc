@@ -1,4 +1,4 @@
-(ns jiffy.instant-2
+(ns jiffy.instant
   (:refer-clojure :exclude [range get])
   (:require #?(:clj [clojure.spec.alpha :as s])
             #?(:cljs [cljs.spec.alpha :as s])
@@ -7,7 +7,7 @@
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.format.date-time-formatter :as date-time-formatter-impl]
             [jiffy.clock :as clock-impl]
-            [jiffy.instant-2-impl :refer [#?@(:cljs [Instant])] :as impl]
+            [jiffy.instant-impl :refer [#?@(:cljs [Instant])] :as impl]
             [jiffy.local-time-impl :refer [NANOS_PER_DAY NANOS_PER_SECOND SECONDS_PER_DAY SECONDS_PER_HOUR SECONDS_PER_MINUTE]]
             [jiffy.math :as math]
             [jiffy.offset-date-time :as offset-date-time]
@@ -33,14 +33,44 @@
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.temporal.temporal-query :as temporal-query]
             [jiffy.zoned-date-time :as zoned-date-time-impl]
-            [jiffy.instant-2-impl :as impl])
-  #?(:clj (:import [jiffy.instant_2_impl Instant])))
+            [jiffy.instant-impl :as impl])
+  #?(:clj (:import [jiffy.instant_impl Instant])))
 
 (def EPOCH impl/EPOCH)
 (def MAX_SECOND impl/MAX_SECOND)
 (def MIN_SECOND impl/MIN_SECOND)
 
+(s/def ::instant ::impl/instant)
 (def create impl/create)
+(def-constructor of-epoch-second ::instant
+  [epoch-milli ::j/milli]
+  (impl/of-epoch-second epoch-milli))
+(defn of-epoch-second [& args] (apply impl/of-epoch-second args))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L343
+(def-constructor of-epoch-milli ::instant
+  [epoch-milli ::j/milli]
+  (impl/of-epoch-milli epoch-milli))
+
+(def-constructor of-epoch-second ::instant
+  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L303
+  ([epoch-second ::j/second]
+   (impl/of-epoch-second epoch-second))
+
+  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L327
+  ([epoch-second ::j/second nano-adjustment ::j/nano]
+   (impl/of-epoch-second epoch-second nano-adjustment)))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L617
+(def-method get-epoch-second ::j/long
+  [this ::instant]
+  (:seconds this))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L617
+(def-method get-nano ::j/long
+  [this ::instant]
+  (:nanos this))
+
 
 (declare from
          to-epoch-milli
@@ -74,28 +104,10 @@
                        (* @dur))]
         (plus-nanos this (- result nod))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L343
-(def-constructor of-epoch-milli ::impl/instant
-  [epoch-milli ::j/milli]
-  (create (math/floor-div epoch-milli 1000)
-          (int (* (math/floor-mod epoch-milli 1000)
-                  1000000))))
-
-(def-constructor of-epoch-second ::impl/instant
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L303
-  ([epoch-second ::j/second]
-   (create epoch-second 0))
-
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L327
-  ([epoch-second ::j/second nano-adjustment ::j/nano]
-   (create
-    (math/add-exact epoch-second (math/floor-div nano-adjustment NANOS_PER_SECOND))
-    (math/floor-mod nano-adjustment NANOS_PER_SECOND))))
-
 (defn- --plus [this seconds-to-add nanos-to-add]
   (if (and (zero? seconds-to-add) (zero? nanos-to-add))
     this
-    (of-epoch-second
+    (impl/of-epoch-second
      (-> (:seconds this)
          (math/add-exact (long seconds-to-add))
          (math/add-exact (long (math/floor-div nanos-to-add NANOS_PER_SECOND))))
@@ -179,20 +191,10 @@
    other-instant ::impl/instant]
   (neg? (time-comparable/compare-to this other-instant)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L617
-(def-method get-epoch-second ::j/long
-  [this ::impl/instant]
-  (:seconds this))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L617
-(def-method get-nano ::j/long
-  [this ::impl/instant]
-  (:nanos this))
-
 (extend-type Instant
   instant/IInstant
-  (get-epoch-second [this] (get-epoch-second this))
-  (get-nano [this] (get-nano this))
+  (get-epoch-second [this] (impl/get-epoch-second this))
+  (get-nano [this] (impl/get-nano this))
   (truncated-to [this unit] (truncated-to this unit))
   (plus-seconds [this seconds-to-add] (plus-seconds this seconds-to-add))
   (plus-millis [this millis-to-add] (plus-millis this millis-to-add))
@@ -454,8 +456,8 @@
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L287
   ([clock ::clock/clock] (clock/instant clock)))
 
-(def MIN (of-epoch-second MIN_SECOND 0))
-(def MAX (of-epoch-second MAX_SECOND 999999999))
+(def MIN (impl/of-epoch-second MIN_SECOND 0))
+(def MAX (impl/of-epoch-second MAX_SECOND 999999999))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L367
 (def-constructor from ::impl/instant
@@ -463,7 +465,7 @@
   (if (satisfies? instant/IInstant temporal)
     temporal
     (try*
-     (of-epoch-second
+     (impl/of-epoch-second
       (temporal-accessor/get-long temporal chrono-field/INSTANT_SECONDS)
       (temporal-accessor/get temporal chrono-field/NANO_OF_SECOND))
      (catch :default e

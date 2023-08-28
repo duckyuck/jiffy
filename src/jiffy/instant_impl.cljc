@@ -1,7 +1,8 @@
-(ns jiffy.instant-2-impl
+(ns jiffy.instant-impl
   (:require #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
+            [jiffy.local-time-impl :refer [NANOS_PER_SECOND]]
             [jiffy.math :as math]
             [jiffy.specs :as j]
             [jiffy.precision :as precision]))
@@ -29,8 +30,19 @@
     :else
     (->Instant seconds nano-of-second)))
 
-(def-constructor of-epoch-milli ::instant
-  [epoch-milli ::j/milli]
+(def get-epoch-second :seconds)
+(def get-nano :nanos)
+
+(defn of-epoch-milli [epoch-milli]
   (create (math/floor-div epoch-milli 1000)
           (int (* (math/floor-mod epoch-milli 1000)
                   1000000))))
+
+(defn of-epoch-second
+  ([epoch-second]
+   (create epoch-second 0))
+
+  ([epoch-second nano-adjustment]
+   (create
+    (math/add-exact epoch-second (math/floor-div nano-adjustment NANOS_PER_SECOND))
+    (math/floor-mod nano-adjustment NANOS_PER_SECOND))))

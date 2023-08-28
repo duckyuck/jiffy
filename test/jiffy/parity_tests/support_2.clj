@@ -91,7 +91,7 @@
 
 (def ns->class-anomalies
   {"jiffy.time-comparable" "java.lang.Comparable"
-   "jiffy.instant-2" "java.time.Instant"})
+   "jiffy.instant" "java.time.Instant"})
 
 (defn jiffy-ns->java-class [jiffy-ns-str]
   (or (ns->class-anomalies jiffy-ns-str)

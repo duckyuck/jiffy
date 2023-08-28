@@ -3,7 +3,7 @@
             [jiffy.day-of-week]
             [jiffy.duration-impl]
             [jiffy.exception :as exception]
-            [jiffy.instant-2-impl]
+            [jiffy.instant-impl]
             [jiffy.local-time-impl]
             [jiffy.month]
             [jiffy.period]
@@ -17,7 +17,7 @@
   (:import (jiffy.clock FixedClock SystemClock)
            (jiffy.day_of_week DayOfWeek)
            (jiffy.duration_impl Duration)
-           (jiffy.instant_2_impl Instant)
+           (jiffy.instant_impl Instant)
            (jiffy.local_time_impl LocalTime)
            (jiffy.month Month)
            (jiffy.period Period)
