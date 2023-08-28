@@ -8,7 +8,6 @@
             [jiffy.day-of-week :as day-of-week]
             [jiffy.duration :as duration-impl]
             [jiffy.instant-2-impl :as instant-impl]
-            ;; [jiffy.instant :as instant-impl]
             [jiffy.month :as month]
             [jiffy.period :as period-impl]
             [jiffy.protocols.chrono.chrono-local-date-time-impl :as chrono-local-date-time-impl]
@@ -94,7 +93,6 @@
                                    ;; :jiffy.chrono.minguo-date/minguo-date
                                    ;; :jiffy.chrono.thai-buddhist-date/thai-buddhist-date
                                    :jiffy.instant-2-impl/instant
-                                   ;; :jiffy.instant/instant
                                    ;; :jiffy.local-date/local-date
                                    ;; :jiffy.local-date-time/local-date-time
                                    ;; :jiffy.local-time/local-time
@@ -174,7 +172,6 @@
 
   (gen/sample (s/gen (:args (s/get-spec #'instant-impl/of-epoch-milli))))
 
-  ;; (gen/sample (s/gen :jiffy.instant-2/instant))
   (gen/sample (s/gen :jiffy.instant/instant))
 
   (gen/sample (s/gen ::temporal-amount/temporal-amount))
@@ -186,7 +183,6 @@
    (gen/sample
     (s/gen (s/cat
             :this
-            ;; (s/spec :jiffy.instant-2/instant)
             (s/spec :jiffy.instant/instant)
             :amount-to-subtract
             (s/spec

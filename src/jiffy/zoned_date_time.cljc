@@ -6,7 +6,7 @@
             [jiffy.exception :refer [ex try* UnsupportedTemporalTypeException DateTimeException]]
             [jiffy.format.date-time-formatter :as date-time-formatter-impl]
             [jiffy.clock :as clock-impl]
-            [jiffy.instant-impl :as instant-impl]
+            [jiffy.instant-2-impl :as instant-2-impl]
             [jiffy.local-date :as local-date-impl]
             [jiffy.local-date-time :as local-date-time-impl]
             [jiffy.local-time :as local-time-impl]

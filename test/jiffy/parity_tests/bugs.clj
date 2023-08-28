@@ -1,7 +1,7 @@
 (ns jiffy.parity-tests.bugs
   (:require [clojure.test :refer [deftest is]]
             [jiffy.conversion :refer [jiffy->java]]
-            [jiffy.instant-impl :as instant-impl]))
+            [jiffy.instant-2-impl :as instant-impl]))
 
 (deftest java-toEpochMilli-bug
   (is (thrown-with-msg?

@@ -12,10 +12,8 @@
 (test-proto-fn jiffy.instant-2 jiffy.protocols.instant/minus-millis)
 (test-proto-fn jiffy.instant-2 jiffy.protocols.instant/minus-nanos)
 (test-proto-fn jiffy.instant-2 jiffy.protocols.instant/to-epoch-milli)
-
 ;; (test-proto-fn! jiffy.instant-2 jiffy.protocols.instant/at-offset)
 ;; (test-proto-fn! jiffy.instant-2 jiffy.protocols.instant/at-zone)
-
 (test-proto-fn jiffy.instant-2 jiffy.protocols.instant/is-after)
 (test-proto-fn jiffy.instant-2 jiffy.protocols.instant/is-before)
 (test-proto-fn jiffy.instant-2 jiffy.protocols.time-comparable/compare-to)
