@@ -1,5 +1,8 @@
 (ns jiffy.zone.zone-offset-transition-rule
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
+            [jiffy.enums #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.day-of-week :as day-of-week]
             [jiffy.protocols.local-time :as local-time]
@@ -9,12 +12,32 @@
             [jiffy.protocols.zone.zone-offset-transition-rule :as zone-offset-transition-rule]
             [jiffy.specs :as j]))
 
-(defrecord ZoneOffsetTransitionRule [])
+(s/def ::time-definition #{::UTC ::WALL ::STANDARD})
 
-(s/def ::create-args ::j/wip)
-(defn create [])
-(s/def ::zone-offset-transition-rule (j/constructor-spec ZoneOffsetTransitionRule create ::create-args))
-(s/fdef create :args ::create-args :ret ::zone-offset-transition-rule)
+(def-record ZoneOffsetTransitionRule ::zone-offset-transition-rule
+  [time-definition ::time-definition
+   midnight-end-of-day ::j/boolean
+   local-time ::local-time/local-time
+   month ::month/month
+   day-of-month-indicator ::j/int
+   day-of-week ::day-of-week/day-of-week
+   standard-offset ::zone-offset/zone-offset
+   offset-after ::zone-offset/zone-offset
+   offset-before ::zone-offset/zone-offset])
+
+(def-constructor create ::zone-offset-transition-rule
+  [time-definition ::time-definition
+   midnight-end-of-day ::j/boolean
+   local-time ::local-time/local-time
+   month ::month/month
+   day-of-month-indicator ::j/int
+   day-of-week ::day-of-week/day-of-week
+   standard-offset ::zone-offset/zone-offset
+   offset-after ::zone-offset/zone-offset
+   offset-before ::zone-offset/zone-offset]
+  (->ZoneOffsetTransitionRule
+   time-definition midnight-end-of-day local-time month day-of-month-indicator
+   day-of-week standard-offset offset-after offset-before))
 
 (defmacro args [& x] `(s/tuple ::zone-offset-transition-rule ~@x))
 

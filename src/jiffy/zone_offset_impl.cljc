@@ -91,5 +91,5 @@
                  (not= offset-id-prefix \-))
         (throw (ex DateTimeException (str "Invalid ID for ZoneOffset, plus/minus not found when expected: " offset-id))))
       (if (= offset-id-prefix \-)
-        (of-hours-minutes-seconds (- hours) (- minutes) (- seconds))
-        (of-hours-minutes-seconds hours minutes seconds)))))
+        (of-hours-minutes-seconds (- (or hours 0)) (- (or minutes 0)) (- (or seconds 0)))
+        (of-hours-minutes-seconds (or hours 0) (or minutes 0) (or seconds 0))))))

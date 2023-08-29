@@ -1,5 +1,7 @@
 (ns jiffy.zone.zone-rules
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.duration :as duration]
             [jiffy.protocols.instant :as instant]
@@ -7,14 +9,20 @@
             [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.protocols.zone.zone-offset-transition :as zone-offset-transition]
             [jiffy.protocols.zone.zone-rules :as zone-rules]
-            [jiffy.specs :as j]))
+            [jiffy.specs :as j]
+            [jiffy.protocols.zone.zone-offset-transition-rule :as transition-rule]
+            [jiffy.protocols.zone.zone-offset-transition :as transition]))
 
-(defrecord ZoneRules [])
+(def-record ZoneRules ::zone-rules
+  [fixed-offset ::j/boolean
+   transition-rules (s/+ ::transition-rule/zone-offset-transition-rule)
+   transitions (s/+ ::transition/zone-offset-transition)])
 
-(s/def ::create-args ::j/wip)
-(defn create [])
-(s/def ::zone-rules (j/constructor-spec ZoneRules create ::create-args))
-(s/fdef create :args ::create-args :ret ::zone-rules)
+(def-constructor create ::zone-rules
+  [fixed-offset ::j/boolean
+   transition-rules ::transition-rule/zone-offset-transition-rule
+   transitions ::transition/zone-offset-transition]
+  (->ZoneRules fixed-offset transition-rules transitions))
 
 (defmacro args [& x] `(s/tuple ::zone-rules ~@x))
 

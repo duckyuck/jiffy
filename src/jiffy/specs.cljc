@@ -61,4 +61,5 @@
 
 ;; Placeholder for incomplete specs
 (s/def ::wip (s/and keyword? #(= % ::wip)))
+(s/def ::undefined (s/and keyword? #(= % ::undefined)))
 (s/def ::locale any?)

@@ -69,3 +69,8 @@
 ;; (test-static-fn! jiffy.zoned-date-time/of-strict)
 ;; (test-static-fn! jiffy.zoned-date-time/from)
 ;; (test-static-fn! jiffy.zoned-date-time/parse)
+
+(comment
+
+  (jiffy.zoned-date-time/now)
+  )

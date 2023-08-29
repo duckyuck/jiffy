@@ -1,6 +1,8 @@
 (ns jiffy.local-time
   (:refer-clojure :exclude [format])
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.asserts :refer [require-non-nil]]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.exception :refer [ex JavaNullPointerException UnsupportedTemporalTypeException]]
@@ -29,7 +31,8 @@
             [jiffy.specs :as j]
             [jiffy.temporal.chrono-field :as chrono-field]
             [jiffy.temporal.chrono-unit :as chrono-unit]
-            [jiffy.temporal.temporal-query :as temporal-query])
+            [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.math :as math])
   #?(:clj (:import [jiffy.local_time_impl LocalTime])))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L132
@@ -74,9 +77,10 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L692
 (s/def ::to-second-of-day-args (args))
 (defn -to-second-of-day [this]
-  (+ (* (:hour this) SECONDS_PER_HOUR)
-     (* (:minute this) SECONDS_PER_MINUTE)
-     (:second this)))
+  (math/add-exact
+   (math/add-exact (math/multiply-exact (:hour this) SECONDS_PER_HOUR)
+                   (math/multiply-exact (:minute this) SECONDS_PER_MINUTE))
+   (:second this)))
 (s/fdef -to-second-of-day :args ::to-second-of-day-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L710
@@ -281,9 +285,9 @@
 (defn -to-epoch-second [this date offset]
   (require-non-nil date "date")
   (require-non-nil offset "offset")
-  (+ (* (chrono-local-date/to-epoch-day date) 86400)
+  (+ (math/multiply-exact (chrono-local-date/to-epoch-day date) 86400)
      (-to-second-of-day this)
-     (- (zone-offset/get-total-seconds offset))))
+     (math/subtract-exact (zone-offset/get-total-seconds offset))))
 (s/fdef -to-epoch-second :args ::to-epoch-second-args :ret ::j/long)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1550
@@ -471,17 +475,25 @@
                        (clock/get-zone zone-or-clock)))))
 (s/fdef now :ret ::local-time)
 
-(s/def ::of-args (args ::j/wip))
-(defn of
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L295
-  ([hour minute] (wip ::of))
+(def-constructor of ::local-time
+  ([hour ::j/hour-of-day
+    minute ::j/minute-of-hour]
+   (of hour minute 0 0))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L316
-  ([hour minute second] (wip ::of))
+  ([hour ::j/hour-of-day
+    minute ::j/minute-of-hour
+    second ::j/second-of-minute]
+   (of hour minute second 0))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L338
-  ([hour minute second nano-of-second] (wip ::of)))
-(s/fdef of :args ::of-args :ret ::local-time)
+  ([hour ::j/hour-of-day
+    minute ::j/minute-of-hour
+    second ::j/second-of-minute
+    nano-of-second ::j/nano-of-second]
+   (chrono-field/check-valid-value chrono-field/HOUR_OF_DAY hour)
+   (chrono-field/check-valid-value chrono-field/MINUTE_OF_HOUR minute)
+   (chrono-field/check-valid-value chrono-field/SECOND_OF_MINUTE second)
+   (chrono-field/check-valid-value chrono-field/NANO_OF_SECOND nano-of-second)
+   (impl/create hour minute second nano-of-second)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L379
 (s/def ::of-second-of-day-args (args ::j/long))

@@ -1,5 +1,7 @@
 (ns jiffy.local-date
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.dev.wip :refer [wip]]
             [jiffy.local-date-impl :refer [create #?@(:cljs [LocalDate])] :as impl]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
@@ -7,7 +9,6 @@
             [jiffy.protocols.chrono.chronology :as chronology]
             [jiffy.protocols.chrono.chrono-period :as chrono-period]
             [jiffy.protocols.chrono.era :as era]
-            [jiffy.protocols.chrono.iso-chronology :as iso-chronology]
             [jiffy.protocols.chrono.iso-era :as iso-era]
             [jiffy.protocols.clock :as clock]
             [jiffy.day-of-week :as day-of-week]
@@ -32,7 +33,8 @@
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal-query :as temporal-query])
+            [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.chrono.iso-chronology :as iso-chronology])
   #?(:clj (:import [jiffy.local_date_impl LocalDate])))
 
 (def DAYS_PER_CYCLE impl/DAYS_PER_CYCLE)
@@ -231,15 +233,34 @@
 (defn -length-of-year [this] (wip ::-length-of-year))
 (s/fdef -length-of-year :args ::length-of-year-args :ret ::j/int)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L609
-(s/def ::is-leap-year-args (args))
-(defn -is-leap-year [this] (wip ::-is-leap-year))
-(s/fdef -is-leap-year :args ::is-leap-year-args :ret ::j/boolean)
+(def-method -is-leap-year ::j/boolean
+  [this ::local-date]
+  (chronology/is-leap-year iso-chronology/INSTANCE (:year this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L682
-(s/def ::to-epoch-day-args (args))
-(defn -to-epoch-day [this] (wip ::-to-epoch-day))
-(s/fdef -to-epoch-day :args ::to-epoch-day-args :ret ::j/long)
+(def-method -to-epoch-day ::j/long
+  [this ::local-date]
+  (let [{:keys [year month day]} this]
+    (-> (* 365 year)
+        (cond-> (pos? year)
+          (+ (-> (+ year 3)
+                 (/ 4)
+                 long
+                 (- (long (/ (+ year 99) 100)))
+                 (+ (long (/ (+ year 399) 400)))))
+          :else
+          (- (-> (long (/ year -4))
+                 (- (long (/ year -100)))
+                 (+ (long (/ year -400))))))
+        (+ (-> (* 367 month)
+               (- 362)
+               (/ 12)
+               long))
+        (+ (dec day))
+        (cond-> (> month 2)
+          dec
+          (not (-is-leap-year this))
+          dec)
+        (- DAYS_0000_TO_1970))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L727
 (s/def ::get-chronology-args (args))
@@ -397,9 +418,13 @@
 
 ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L247
-(s/def ::of-args (args ::j/int ::month/month ::j/int))
-(defn of [of--overloaded-param-1 of--overloaded-param-2 of--overloaded-param-3] (wip ::of))
-(s/fdef of :args ::of-args :ret ::local-date)
+(def-constructor of ::local-date
+  [year ::j/year
+   month (s/or :number ::j/month-of-yearh
+               :month ::month/month)
+   day-of-month ::j/day-of-month]
+  ;; TODO handle overloaded arg month
+  (impl/create year month day-of-month))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L287
 (s/def ::of-year-day-args (args ::j/int ::j/int))

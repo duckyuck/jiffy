@@ -1,5 +1,7 @@
 (ns jiffy.chrono.iso-chronology
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.chrono.abstract-chronology :as abstract-chronology]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
@@ -25,12 +27,9 @@
             [jiffy.protocols.zoned-date-time :as zoned-date-time]
             [jiffy.specs :as j]))
 
-(defrecord IsoChronology [])
+(def-record IsoChronology ::iso-chronology [wip ::j/wip])
 
-(s/def ::create-args ::j/wip)
-(defn create [])
-(s/def ::iso-chronology (j/constructor-spec IsoChronology create ::create-args))
-(s/fdef create :args ::create-args :ret ::iso-chronology)
+(def-constructor create ::iso-chronology [] (IsoChronology. ::wip))
 
 (defmacro args [& x] `(s/tuple ::iso-chronology ~@x))
 
@@ -123,9 +122,12 @@
 (s/fdef -date-now :args ::date-now-args :ret ::local-date/local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/IsoChronology.java#L475
-(s/def ::is-leap-year-args (args ::j/long))
-(defn -is-leap-year [this proleptic-year] (wip ::-is-leap-year))
-(s/fdef -is-leap-year :args ::is-leap-year-args :ret ::j/boolean)
+(def-method -is-leap-year ::j/boolean
+  [this ::iso-chronology
+   proleptic-year ::j/long]
+  (and (zero? (bit-and proleptic-year 3))
+       (or (not (zero? (mod proleptic-year 100)))
+           (zero? (mod proleptic-year 400)))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/IsoChronology.java#L480
 (s/def ::proleptic-year-args (args ::era/era ::j/int))
@@ -185,6 +187,4 @@
   (range [this field] (-range this field))
   (period [this years months days] (-period this years months days)))
 
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/IsoChronology.java#L131
-(def INSTANCE ::INSTANCE--not-implemented)
+(def INSTANCE (create))

@@ -1,6 +1,8 @@
 (ns jiffy.zone-id
   (:require [clojure.spec.alpha :as s]
             [jiffy.asserts :as assert]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.dev.wip :refer [wip]]
             [jiffy.exception :refer [try* ex DateTimeException JavaNullPointerException JavaIllegalArgumentException]]
             [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
@@ -105,6 +107,15 @@
 (def SHORT_IDS ::SHORT_IDS--not-implemented)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L271
-(defn system-default []
-  #?(:clj (.toZoneId (java.util.TimeZone/getDefault))))
-(s/fdef system-default :ret ::zone-id)
+(def-constructor system-default ::zone-id
+  []
+  #?(:clj
+     (-> (java.util.TimeZone/getDefault)
+         .getID
+         of))
+  #?(:cljs
+     (-> (js/Intl.DateTimeFormat)
+         (.resolvedOptions)
+         .-timeZone
+         of)))
+

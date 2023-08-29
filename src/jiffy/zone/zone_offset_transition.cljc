@@ -1,20 +1,32 @@
 (ns jiffy.zone.zone-offset-transition
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.duration :as duration]
             [jiffy.protocols.instant :as instant]
             [jiffy.protocols.local-date-time :as local-date-time]
+            [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
             [jiffy.protocols.time-comparable :as time-comparable]
             [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.protocols.zone.zone-offset-transition :as zone-offset-transition]
             [jiffy.specs :as j]))
 
-(defrecord ZoneOffsetTransition [])
+(def-record ZoneOffsetTransition ::zone-offset-transition
+  [epoch-second ::j/pos-int
+   transition ::local-date-time/local-date-time
+   offset-before ::zone-offset/zone-offset
+   offset-after ::zone-offset/zone-offset])
 
-(s/def ::create-args ::j/wip)
-(defn create [])
-(s/def ::zone-offset-transition (j/constructor-spec ZoneOffsetTransition create ::create-args))
-(s/fdef create :args ::create-args :ret ::zone-offset-transition)
+(def-constructor create ::zone-offset-transition
+  [transition ::local-date-time/local-date-time
+   offset-before ::zone-offset/zone-offset
+   offset-after ::zone-offset/zone-offset]
+  (->ZoneOffsetTransition
+   (chrono-local-date-time/to-epoch-second transition offset-before)
+   transition
+   offset-before
+   offset-after))
 
 (defmacro args [& x] `(s/tuple ::zone-offset-transition ~@x))
 

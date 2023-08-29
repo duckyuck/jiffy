@@ -1,5 +1,7 @@
 (ns jiffy.local-time-impl
-  (:require [jiffy.temporal.chrono-field :as chrono-field]
+  (:require #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
+            [jiffy.temporal.chrono-field :as chrono-field]
             [jiffy.specs :as j]
             [clojure.spec.alpha :as s]
             [jiffy.local-time-constants :as consts]))
@@ -18,16 +20,18 @@
 (def NANOS_PER_HOUR consts/NANOS_PER_HOUR)
 (def NANOS_PER_DAY consts/NANOS_PER_DAY)
 
-(defrecord LocalTime [hour minute second nano])
+(def-record LocalTime ::local-time
+  [hour ::j/hour-of-day
+   minute ::j/minute-of-hour
+   second ::j/second-of-minute
+   nano ::j/nano-of-second])
 
-(s/def ::create-args (s/tuple ::j/hour-of-day
-                              ::j/minute-of-hour
-                              ::j/second-of-minute
-                              ::j/nano-of-second))
-(defn create [hour minute second nano]
+(def-constructor create ::local-time
+  [hour ::j/hour-of-day
+   minute ::j/minute-of-hour
+   second ::j/second-of-minute
+   nano ::j/nano-of-second]
   (->LocalTime hour minute second nano))
-(s/def ::local-time (j/constructor-spec LocalTime create ::create-args))
-(s/fdef create :args ::create-args :ret ::local-time)
 
 (defmacro args [& x] `(s/tuple ::local-time ~@x))
 

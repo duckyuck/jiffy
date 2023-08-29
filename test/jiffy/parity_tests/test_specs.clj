@@ -1,13 +1,13 @@
 (ns jiffy.parity-tests.test-specs
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
-            ;; [com.gfredericks.test.chuck :as chuck]
-            ;; [com.gfredericks.test.chuck.generators :as gen']
             [jiffy.clock :as clock-impl]
             [jiffy.conversion :as conversion]
             [jiffy.day-of-week :as day-of-week]
             [jiffy.duration :as duration-impl]
             [jiffy.instant-impl :as instant-impl]
+            [jiffy.local-date-time-impl :as local-date-time-impl]
+            [jiffy.local-time-impl :as local-time-impl]
             [jiffy.month :as month]
             [jiffy.period :as period-impl]
             [jiffy.protocols.chrono.chrono-local-date-time-impl :as chrono-local-date-time-impl]
@@ -40,19 +40,27 @@
             [jiffy.protocols.zoned-date-time :as zoned-date-time]
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.protocols.zone-offset :as zone-offset]
+            [jiffy.protocols.zone.zone-offset-transition :as ZoneOffsetTransition]
+            [jiffy.protocols.zone.zone-offset-transition-rule :as ZoneOffsetTransitionRule]
             [jiffy.temporal.chrono-field :as chrono-field]
             [jiffy.temporal.chrono-unit :as chrono-unit]
             [jiffy.temporal.temporal-adjusters :as temporal-adjusters-impl]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.temporal.temporal-query :as temporal-query]
             [jiffy.zoned-date-time :as zoned-date-time-impl]
-            [jiffy.zone-offset :as zone-offset-impl]))
+            [jiffy.zone-offset :as zone-offset-impl]
+            [jiffy.zone.zone-offset-transition :as zone-offset-transition]
+            [jiffy.zone.zone-offset-transition-rule :as transition-rule]))
 
 (s/def ::duration/duration ::duration-impl/duration)
 (s/def ::period/period ::period-impl/period)
 (s/def ::instant/instant ::instant-impl/instant)
+(s/def ::local-date-time/local-date-time ::local-date-time-impl/local-date-time)
+(s/def ::local-time/local-time ::local-time-impl/local-time)
 (s/def ::zone-offset/zone-offset ::zone-offset-impl/zone-offset)
 (s/def ::zoned-date-time/zoned-date-time ::zoned-date-time-impl/zoned-date-time)
+(s/def ::ZoneOffsetTransition/zone-offset-transition ::zone-offset-transition/zone-offset-transition)
+(s/def ::ZoneOffsetTransitionRule/zone-offset-transition-rule ::transition-rule/zone-offset-transition-rule)
 
 (s/def ::clock/clock
   (s/with-gen #(satisfies? clock/IClock %)
@@ -192,7 +200,19 @@
 
   (gen/sample (s/gen :jiffy.protocols.temporal.temporal-field/temporal-field))
 
-  (conversion/jiffy->java (first (gen/sample (s/gen :jiffy.zoned-date-time/zoned-date-time))))
+  (first (gen/sample (s/gen :jiffy.zoned-date-time/zoned-date-time)))
+
+  (conversion/jiffy->java (:date-time (first (gen/sample (s/gen :jiffy.zoned-date-time/zoned-date-time)))))
+
+  (gen/sample (s/gen :jiffy.zone.zone-offset-transition-rule/zone-offset-transition-rule))
+
+  (-> :jiffy.zone.zone-rules/zone-rules
+      s/gen
+      gen/sample)
+
+  zone-offset-transition-rule
+
+
 
   (satisfies? temporal/ITemporal
               (first (gen/sample (s/gen :jiffy.zoned-date-time/zoned-date-time))))

@@ -42,6 +42,10 @@
   [x y]
   (add-exact (long x) y))
 
+(defmethod add-exact* [java.lang.Long java.lang.Integer]
+  [x y]
+  (add-exact x (long y)))
+
 (defn subtract-exact [x y]
   (let [r (try*
            (math/subtract-exact x y)

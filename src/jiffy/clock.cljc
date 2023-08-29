@@ -1,11 +1,14 @@
 (ns jiffy.clock
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.clock :as clock]
             [jiffy.protocols.duration :as duration]
             [jiffy.protocols.instant :as instant]
-            [jiffy.protocols.zone-id :as zone-id]
             [jiffy.instant-impl :as instant-impl]
+            [jiffy.protocols.zone-id :as ZoneId]
+            [jiffy.zone-id :as zone-id]
             [jiffy.zone-offset :as zone-offset]
             [jiffy.specs :as j])
   #?(:clj (:import [jiffy.zone_offset_impl ZoneOffset])))
@@ -19,7 +22,7 @@
 
 (defrecord SystemClock [zone])
 
-(s/def ::create-system-clock-args (s/tuple ::zone-id/zone-id))
+(s/def ::create-system-clock-args (s/tuple ::ZoneId/zone-id))
 (defn create-system-clock [zone-id] (->SystemClock zone-id))
 (s/def ::system-clock (j/constructor-spec SystemClock create-system-clock ::create-system-clock-args))
 (s/fdef create-system-clock :args ::create-system-clock-args :ret ::clock)
@@ -28,9 +31,9 @@
 
 (s/def ::get-zone-system-clock-args (sc-args))
 (defn -get-zone-system-clock [this] (:zone this))
-(s/fdef -get-zone-system-clock :args ::get-zone-system-clock-args :ret ::zone-id/zone-id)
+(s/fdef -get-zone-system-clock :args ::get-zone-system-clock-args :ret ::ZoneId/zone-id)
 
-(s/def ::with-zone-system-clock-args (sc-args ::zone-id/zone-id))
+(s/def ::with-zone-system-clock-args (sc-args ::ZoneId/zone-id))
 (defn -with-zone-system-clock [this zone]
   (if (= (:zone this) zone)
     this
@@ -74,7 +77,7 @@
 
 (defrecord FixedClock [instant zone])
 
-(s/def ::create-fixed-clock-args (s/tuple ::instant/instant ::zone-id/zone-id))
+(s/def ::create-fixed-clock-args (s/tuple ::instant/instant ::ZoneId/zone-id))
 (defn create-fixed-clock [instant zone] (->FixedClock instant zone))
 (s/def ::fixed-clock (j/constructor-spec FixedClock create-fixed-clock ::create-fixed-clock-args))
 (s/fdef create-fixed-clock :args ::create-fixed-clock-args :ret ::clock)
@@ -83,9 +86,9 @@
 
 (s/def ::get-zone-fixed-clock-args (fc-args))
 (defn -get-zone-fixed-clock [this] (:zone this))
-(s/fdef -get-zone-fixed-clock :args ::get-zone-fixed-clock-args :ret ::zone-id/zone-id)
+(s/fdef -get-zone-fixed-clock :args ::get-zone-fixed-clock-args :ret ::ZoneId/zone-id)
 
-(s/def ::with-zone-fixed-clock-args (fc-args ::zone-id/zone-id))
+(s/def ::with-zone-fixed-clock-args (fc-args ::ZoneId/zone-id))
 (defn -with-zone-fixed-clock [this zone]
   (if (= (:zone this) zone)
     this
@@ -112,26 +115,27 @@
 
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L183
-(defn system-default-zone [] (wip ::system-default-zone))
-(s/fdef system-default-zone :ret ::clock)
+(def-constructor system-default-zone ::clock
+  []
+  (create-system-clock (zone-id/system-default)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L202
-(s/def ::system-args (s/tuple ::zone-id/zone-id))
+(s/def ::system-args (s/tuple ::ZoneId/zone-id))
 (defn system [zone] (wip ::system))
 (s/fdef system :args ::system-args :ret ::clock)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L231
-(s/def ::tick-millis-args (s/tuple ::zone-id/zone-id))
+(s/def ::tick-millis-args (s/tuple ::ZoneId/zone-id))
 (defn tick-millis [zone] (wip ::tick-millis))
 (s/fdef tick-millis :args ::tick-millis-args :ret ::clock)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L255
-(s/def ::tick-seconds-args (s/tuple ::zone-id/zone-id))
+(s/def ::tick-seconds-args (s/tuple ::ZoneId/zone-id))
 (defn tick-seconds [zone] (wip ::tick-seconds))
 (s/fdef tick-seconds :args ::tick-seconds-args :ret ::clock)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L278
-(s/def ::tick-minutes-args (s/tuple ::zone-id/zone-id))
+(s/def ::tick-minutes-args (s/tuple ::ZoneId/zone-id))
 (defn tick-minutes [zone] (wip ::tick-minutes))
 (s/fdef tick-minutes :args ::tick-minutes-args :ret ::clock)
 
@@ -141,7 +145,7 @@
 (s/fdef tick :args ::tick-args :ret ::clock)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L348
-(s/def ::fixed-args (s/tuple ::instant/instant ::zone-id/zone-id))
+(s/def ::fixed-args (s/tuple ::instant/instant ::ZoneId/zone-id))
 (defn fixed [fixed-instant zone] (create-fixed-clock fixed-instant zone))
 (s/fdef fixed :args ::fixed-args :ret ::clock)
 

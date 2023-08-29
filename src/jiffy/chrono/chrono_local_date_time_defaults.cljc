@@ -19,7 +19,8 @@
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal-query :as temporal-query]))
+            [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.math :as math]))
 
 (s/def ::chrono-local-date-time ::chrono-local-date-time/chrono-local-date-time)
 
@@ -74,7 +75,13 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L470
 (s/def ::to-epoch-second-args ::j/wip)
-(defn -to-epoch-second [this offset] (wip ::-to-epoch-second))
+(defn -to-epoch-second [this offset]
+  (let [epoch-day (-> this chrono-local-date-time/to-local-date chrono-local-date/to-epoch-day)
+        secs (->> this
+                  chrono-local-date-time/to-local-time
+                  local-time/to-second-of-day
+                  (math/add-exact (math/multiply-exact epoch-day 86400)))]
+    (->> offset zone-offset/get-total-seconds (math/subtract-exact secs))))
 (s/fdef -to-epoch-second :args ::to-epoch-second-args :ret ::j/long)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L506

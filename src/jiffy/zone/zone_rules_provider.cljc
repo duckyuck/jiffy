@@ -1,16 +1,19 @@
 (ns jiffy.zone.zone-rules-provider
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.zone.zone-rules :as zone-rules]
             [jiffy.protocols.zone.zone-rules-provider :as zone-rules-provider]
-            [jiffy.specs :as j]))
+            [jiffy.specs :as j]
+            [jiffy.zone.zone-rules-store :as store]))
 
-(defrecord ZoneRulesProvider [])
+(def-record ZoneRulesProvider ::zone-rules-provider
+  [wip ::j/wip])
 
-(s/def ::create-args ::j/wip)
-(defn create [])
-(s/def ::zone-rules-provider (j/constructor-spec ZoneRulesProvider create ::create-args))
-(s/fdef create :args ::create-args :ret ::zone-rules-provider)
+(def-constructor create ::zone-rules-provider
+  []
+  (ZoneRulesProvider. ::wip))
 
 (defmacro args [& x] `(s/tuple ::zone-rules-provider ~@x))
 
@@ -46,9 +49,10 @@
 (s/fdef get-available-zone-ids :ret ::j/wip)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRulesProvider.java#L232
-(s/def ::get-rules-args (args string? ::j/boolean))
-(defn get-rules [zone-id for-caching] (wip ::get-rules))
-(s/fdef get-rules :args ::get-rules-args :ret ::zone-rules/zone-rules)
+(def-constructor get-rules ::zone-rules/zone-rules
+  [zone-id string?
+   for-caching ::j/boolean]
+  (get @store/zone-id->rules zone-id))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRulesProvider.java#L261
 (s/def ::get-versions-args (args string?))

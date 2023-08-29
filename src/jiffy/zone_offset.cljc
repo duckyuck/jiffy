@@ -1,5 +1,7 @@
 (ns jiffy.zone-offset
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.specs :as j]
             [jiffy.protocols.temporal.temporal :as temporal]
@@ -31,10 +33,9 @@
 
 (defmacro args [& x] `(s/tuple ::zone-offset ~@x))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L473
-(s/def ::get-total-seconds-args (args))
-(defn -get-total-seconds [this] (:total-seconds this))
-(s/fdef -get-total-seconds :args ::get-total-seconds-args :ret ::j/int)
+(def-method -get-total-seconds ::j/int
+  [this ::zone-offset]
+  (:total-seconds this))
 
 (extend-type ZoneOffset
   zone-offset/IZoneOffset
@@ -51,10 +52,9 @@
   time-comparable/ITimeComparable
   (compare-to [this other] (-compare-to this other)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L491
-(s/def ::get-id-args (args))
-(defn -get-id [this] (:id this))
-(s/fdef -get-id :args ::get-id-args :ret string?)
+(def-method -get-id string?
+  [this ::zone-offset]
+  (:id this))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L504
 (s/def ::get-rules-args (args))

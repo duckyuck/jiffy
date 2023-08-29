@@ -4,6 +4,8 @@
             [jiffy.duration-impl]
             [jiffy.exception :as exception]
             [jiffy.instant-impl]
+            [jiffy.local-date-impl]
+            [jiffy.local-date-time-impl]
             [jiffy.local-time-impl]
             [jiffy.month]
             [jiffy.period]
@@ -18,6 +20,8 @@
            (jiffy.day_of_week DayOfWeek)
            (jiffy.duration_impl Duration)
            (jiffy.instant_impl Instant)
+           (jiffy.local_date_impl LocalDate)
+           (jiffy.local_date_time_impl LocalDateTime)
            (jiffy.local_time_impl LocalTime)
            (jiffy.month Month)
            (jiffy.period Period)
@@ -138,8 +142,15 @@
 (defmethod jiffy->java LocalTime [{:keys [hour minute second nano]}]
   (java.time.LocalTime/of hour minute second nano))
 
-(defmethod jiffy->java ZonedDateTime [{:keys [local-date zone offset]}]
-  (java.time.ZonedDateTime/ofLocal (jiffy->java local-date)
+(defmethod jiffy->java LocalDate [{:keys [year month day]}]
+  (java.time.LocalDate/of year month day))
+
+(defmethod jiffy->java LocalDateTime [{:keys [date time]}]
+  (java.time.LocalDateTime/of (jiffy->java date)
+                              (jiffy->java time)))
+
+(defmethod jiffy->java ZonedDateTime [{:keys [date-time zone offset]}]
+  (java.time.ZonedDateTime/ofLocal (jiffy->java date-time)
                                    (jiffy->java zone)
                                    (jiffy->java offset)))
 
