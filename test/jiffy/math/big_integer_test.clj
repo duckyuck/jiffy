@@ -7,7 +7,7 @@
             [com.gfredericks.exact :as exact]
             [jiffy.math.big-integer :as sut]
             [jiffy.math.support :refer [compare-math unwrap wrap]]
-            [jiffy.parity-tests.support-clj :as support]))
+            [jiffy.support-clj :as support]))
 
 (def digits [\0 \1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f])
 
@@ -58,7 +58,7 @@
                                                                              1000)))]
                 (let [[x y] (unwrap values)]
                   (compare-math values                                
-                                (sut/divide-and-reminder x y)
+                                (sut/divide-and-reminder (biginteger x) (biginteger y))
                                 (.divideAndRemainder (biginteger x) (biginteger y))))))
 
 (defspec bit-length 1000

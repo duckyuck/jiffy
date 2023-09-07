@@ -33,13 +33,13 @@
 
 (defmacro args [& x] `(s/tuple ::zone-offset ~@x))
 
-(def-method -get-total-seconds ::j/int
+(def-method get-total-seconds ::j/int
   [this ::zone-offset]
   (:total-seconds this))
 
 (extend-type ZoneOffset
   zone-offset/IZoneOffset
-  (get-total-seconds [this] (-get-total-seconds this)))
+  (get-total-seconds [this] (get-total-seconds this)))
 
 ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L703
@@ -52,7 +52,7 @@
   time-comparable/ITimeComparable
   (compare-to [this other] (-compare-to this other)))
 
-(def-method -get-id string?
+(def-method get-id string?
   [this ::zone-offset]
   (:id this))
 
@@ -63,7 +63,7 @@
 
 (extend-type ZoneOffset
   zone-id/IZoneId
-  (get-id [this] (-get-id this))
+  (get-id [this] (get-id this))
   (get-rules [this] (-get-rules this)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L529

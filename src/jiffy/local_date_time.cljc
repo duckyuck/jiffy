@@ -39,184 +39,210 @@
 (defmacro args [& x] `(s/tuple ::local-date-time ~@x))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L749
-(s/def ::get-year-args (args))
-(defn -get-year [this] (wip ::-get-year))
-(s/fdef -get-year :args ::get-year-args :ret ::j/int)
+(def-method -get-year ::j/int
+  [this ::local-date-time]
+  (wip ::-get-year))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L763
-(s/def ::get-month-value-args (args))
-(defn -get-month-value [this] (wip ::-get-month-value))
-(s/fdef -get-month-value :args ::get-month-value-args :ret ::j/int)
+(def-method -get-month-value ::j/int
+  [this ::local-date-time]
+  (wip ::-get-month-value))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L778
-(s/def ::get-month-args (args))
-(defn -get-month [this] (wip ::-get-month))
-(s/fdef -get-month :args ::get-month-args :ret ::month/month)
+(def-method -get-month ::month/month
+  [this ::local-date-time]
+  (wip ::-get-month))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L789
-(s/def ::get-day-of-month-args (args))
-(defn -get-day-of-month [this] (wip ::-get-day-of-month))
-(s/fdef -get-day-of-month :args ::get-day-of-month-args :ret ::j/int)
+(def-method -get-day-of-month ::j/int
+  [this ::local-date-time]
+  (wip ::-get-day-of-month))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L800
-(s/def ::get-day-of-year-args (args))
-(defn -get-day-of-year [this] (wip ::-get-day-of-year))
-(s/fdef -get-day-of-year :args ::get-day-of-year-args :ret ::j/int)
+(def-method -get-day-of-year ::j/int
+  [this ::local-date-time]
+  (wip ::-get-day-of-year))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L817
-(s/def ::get-day-of-week-args (args))
-(defn -get-day-of-week [this] (wip ::-get-day-of-week))
-(s/fdef -get-day-of-week :args ::get-day-of-week-args :ret ::day-of-week/day-of-week)
+(def-method -get-day-of-week ::day-of-week/day-of-week
+  [this ::local-date-time]
+  (wip ::-get-day-of-week))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L840
-(s/def ::get-hour-args (args))
-(defn -get-hour [this] (wip ::-get-hour))
-(s/fdef -get-hour :args ::get-hour-args :ret ::j/int)
+(def-method -get-hour ::j/int
+  [this ::local-date-time]
+  (wip ::-get-hour))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L849
-(s/def ::get-minute-args (args))
-(defn -get-minute [this] (wip ::-get-minute))
-(s/fdef -get-minute :args ::get-minute-args :ret ::j/int)
+(def-method -get-minute ::j/int
+  [this ::local-date-time]
+  (wip ::-get-minute))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L858
-(s/def ::get-second-args (args))
-(defn -get-second [this] (wip ::-get-second))
-(s/fdef -get-second :args ::get-second-args :ret ::j/int)
+(def-method -get-second ::j/int
+  [this ::local-date-time]
+  (wip ::-get-second))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L867
-(s/def ::get-nano-args (args))
-(defn -get-nano [this] (wip ::-get-nano))
-(s/fdef -get-nano :args ::get-nano-args :ret ::j/int)
+(def-method -get-nano ::j/int
+  [this ::local-date-time]
+  (wip ::-get-nano))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L989
-(s/def ::with-year-args (args ::j/int))
-(defn -with-year [this year] (wip ::-with-year))
-(s/fdef -with-year :args ::with-year-args :ret ::local-date-time)
+(def-method -with-year ::local-date-time
+  [this ::local-date-time
+   year ::j/int]
+  (wip ::-with-year))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1005
-(s/def ::with-month-args (args ::j/int))
-(defn -with-month [this month] (wip ::-with-month))
-(s/fdef -with-month :args ::with-month-args :ret ::local-date-time)
+(def-method -with-month ::local-date-time
+  [this ::local-date-time
+   month ::j/int]
+  (wip ::-with-month))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1022
-(s/def ::with-day-of-month-args (args ::j/int))
-(defn -with-day-of-month [this day-of-month] (wip ::-with-day-of-month))
-(s/fdef -with-day-of-month :args ::with-day-of-month-args :ret ::local-date-time)
+(def-method -with-day-of-month ::local-date-time
+  [this ::local-date-time
+   day-of-month ::j/int]
+  (wip ::-with-day-of-month))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1038
-(s/def ::with-day-of-year-args (args ::j/int))
-(defn -with-day-of-year [this day-of-year] (wip ::-with-day-of-year))
-(s/fdef -with-day-of-year :args ::with-day-of-year-args :ret ::local-date-time)
+(def-method -with-day-of-year ::local-date-time
+  [this ::local-date-time
+   day-of-year ::j/int]
+  (wip ::-with-day-of-year))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1052
-(s/def ::with-hour-args (args ::j/int))
-(defn -with-hour [this hour] (wip ::-with-hour))
-(s/fdef -with-hour :args ::with-hour-args :ret ::local-date-time)
+(def-method -with-hour ::local-date-time
+  [this ::local-date-time
+   hour ::j/int]
+  (wip ::-with-hour))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1066
-(s/def ::with-minute-args (args ::j/int))
-(defn -with-minute [this minute] (wip ::-with-minute))
-(s/fdef -with-minute :args ::with-minute-args :ret ::local-date-time)
+(def-method -with-minute ::local-date-time
+  [this ::local-date-time
+   minute ::j/int]
+  (wip ::-with-minute))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1080
-(s/def ::with-second-args (args ::j/int))
-(defn -with-second [this second] (wip ::-with-second))
-(s/fdef -with-second :args ::with-second-args :ret ::local-date-time)
+(def-method -with-second ::local-date-time
+  [this ::local-date-time
+   second ::j/int]
+  (wip ::-with-second))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1094
-(s/def ::with-nano-args (args ::j/int))
-(defn -with-nano [this nano-of-second] (wip ::-with-nano))
-(s/fdef -with-nano :args ::with-nano-args :ret ::local-date-time)
+(def-method -with-nano ::local-date-time
+  [this ::local-date-time
+   nano-of-second ::j/int]
+  (wip ::-with-nano))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1120
-(s/def ::truncated-to-args (args ::temporal-unit/temporal-unit))
-(defn -truncated-to [this unit] (wip ::-truncated-to))
-(s/fdef -truncated-to :args ::truncated-to-args :ret ::local-date-time)
+(def-method -truncated-to ::local-date-time
+  [this ::local-date-time
+   unit ::temporal-unit/temporal-unit]
+  (wip ::-truncated-to))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1220
-(s/def ::plus-years-args (args ::j/long))
-(defn -plus-years [this years] (wip ::-plus-years))
-(s/fdef -plus-years :args ::plus-years-args :ret ::local-date-time)
+(def-method -plus-years ::local-date-time
+  [this ::local-date-time
+   years ::j/long]
+  (wip ::-plus-years))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1245
-(s/def ::plus-months-args (args ::j/long))
-(defn -plus-months [this months] (wip ::-plus-months))
-(s/fdef -plus-months :args ::plus-months-args :ret ::local-date-time)
+(def-method -plus-months ::local-date-time
+  [this ::local-date-time
+   months ::j/long]
+  (wip ::-plus-months))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1265
-(s/def ::plus-weeks-args (args ::j/long))
-(defn -plus-weeks [this weeks] (wip ::-plus-weeks))
-(s/fdef -plus-weeks :args ::plus-weeks-args :ret ::local-date-time)
+(def-method -plus-weeks ::local-date-time
+  [this ::local-date-time
+   weeks ::j/long]
+  (wip ::-plus-weeks))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1285
-(s/def ::plus-days-args (args ::j/long))
-(defn -plus-days [this days] (wip ::-plus-days))
-(s/fdef -plus-days :args ::plus-days-args :ret ::local-date-time)
+(def-method -plus-days ::local-date-time
+  [this ::local-date-time
+   days ::j/long]
+  (wip ::-plus-days))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1300
-(s/def ::plus-hours-args (args ::j/long))
-(defn -plus-hours [this hours] (wip ::-plus-hours))
-(s/fdef -plus-hours :args ::plus-hours-args :ret ::local-date-time)
+(def-method -plus-hours ::local-date-time
+  [this ::local-date-time
+   hours ::j/long]
+  (wip ::-plus-hours))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1313
-(s/def ::plus-minutes-args (args ::j/long))
-(defn -plus-minutes [this minutes] (wip ::-plus-minutes))
-(s/fdef -plus-minutes :args ::plus-minutes-args :ret ::local-date-time)
+(def-method -plus-minutes ::local-date-time
+  [this ::local-date-time
+   minutes ::j/long]
+  (wip ::-plus-minutes))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1326
-(s/def ::plus-seconds-args (args ::j/long))
-(defn -plus-seconds [this seconds] (wip ::-plus-seconds))
-(s/fdef -plus-seconds :args ::plus-seconds-args :ret ::local-date-time)
+(def-method -plus-seconds ::local-date-time
+  [this ::local-date-time
+   seconds ::j/long]
+  (wip ::-plus-seconds))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1339
-(s/def ::plus-nanos-args (args ::j/long))
-(defn -plus-nanos [this nanos] (wip ::-plus-nanos))
-(s/fdef -plus-nanos :args ::plus-nanos-args :ret ::local-date-time)
+(def-method -plus-nanos ::local-date-time
+  [this ::local-date-time
+   nanos ::j/long]
+  (wip ::-plus-nanos))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1419
-(s/def ::minus-years-args (args ::j/long))
-(defn -minus-years [this years] (wip ::-minus-years))
-(s/fdef -minus-years :args ::minus-years-args :ret ::local-date-time)
+(def-method -minus-years ::local-date-time
+  [this ::local-date-time
+   years ::j/long]
+  (wip ::-minus-years))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1443
-(s/def ::minus-months-args (args ::j/long))
-(defn -minus-months [this months] (wip ::-minus-months))
-(s/fdef -minus-months :args ::minus-months-args :ret ::local-date-time)
+(def-method -minus-months ::local-date-time
+  [this ::local-date-time
+   months ::j/long]
+  (wip ::-minus-months))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1462
-(s/def ::minus-weeks-args (args ::j/long))
-(defn -minus-weeks [this weeks] (wip ::-minus-weeks))
-(s/fdef -minus-weeks :args ::minus-weeks-args :ret ::local-date-time)
+(def-method -minus-weeks ::local-date-time
+  [this ::local-date-time
+   weeks ::j/long]
+  (wip ::-minus-weeks))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1481
-(s/def ::minus-days-args (args ::j/long))
-(defn -minus-days [this days] (wip ::-minus-days))
-(s/fdef -minus-days :args ::minus-days-args :ret ::local-date-time)
+(def-method -minus-days ::local-date-time
+  [this ::local-date-time
+   days ::j/long]
+  (wip ::-minus-days))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1495
-(s/def ::minus-hours-args (args ::j/long))
-(defn -minus-hours [this hours] (wip ::-minus-hours))
-(s/fdef -minus-hours :args ::minus-hours-args :ret ::local-date-time)
+(def-method -minus-hours ::local-date-time
+  [this ::local-date-time
+   hours ::j/long]
+  (wip ::-minus-hours))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1508
-(s/def ::minus-minutes-args (args ::j/long))
-(defn -minus-minutes [this minutes] (wip ::-minus-minutes))
-(s/fdef -minus-minutes :args ::minus-minutes-args :ret ::local-date-time)
+(def-method -minus-minutes ::local-date-time
+  [this ::local-date-time
+   minutes ::j/long]
+  (wip ::-minus-minutes))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1521
-(s/def ::minus-seconds-args (args ::j/long))
-(defn -minus-seconds [this seconds] (wip ::-minus-seconds))
-(s/fdef -minus-seconds :args ::minus-seconds-args :ret ::local-date-time)
+(def-method -minus-seconds ::local-date-time
+  [this ::local-date-time
+   seconds ::j/long]
+  (wip ::-minus-seconds))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1534
-(s/def ::minus-nanos-args (args ::j/long))
-(defn -minus-nanos [this nanos] (wip ::-minus-nanos))
-(s/fdef -minus-nanos :args ::minus-nanos-args :ret ::local-date-time)
+(def-method -minus-nanos ::local-date-time
+  [this ::local-date-time
+   nanos ::j/long]
+  (wip ::-minus-nanos))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1765
-(s/def ::at-offset-args (args ::zone-offset/zone-offset))
-(defn -at-offset [this offset] (wip ::-at-offset))
-(s/fdef -at-offset :args ::at-offset-args :ret ::offset-date-time/offset-date-time)
+(def-method -at-offset ::offset-date-time/offset-date-time
+  [this ::local-date-time
+   offset ::zone-offset/zone-offset]
+  (wip ::-at-offset))
 
 (extend-type LocalDateTime
   local-date-time/ILocalDateTime
@@ -259,9 +285,10 @@
 
 ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1819
-(s/def ::compare-to-args (args ::chrono-local-date-time/chrono-local-date-time))
-(defn -compare-to [this compare-to--overloaded-param] (wip ::-compare-to))
-(s/fdef -compare-to :args ::compare-to-args :ret ::j/int)
+(def-method -compare-to ::j/int
+  [this ::local-date-time
+   compare-to--overloaded-param ::chrono-local-date-time/chrono-local-date-time]
+  (wip ::-compare-to))
 
 (extend-type LocalDateTime
   time-comparable/ITimeComparable
@@ -278,29 +305,34 @@
   (:time this))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1750
-(s/def ::format-args (args ::date-time-formatter/date-time-formatter))
-(defn -format [this formatter] (wip ::-format))
-(s/fdef -format :args ::format-args :ret string?)
+(def-method -format string?
+  [this ::local-date-time
+   formatter ::date-time-formatter/date-time-formatter]
+  (wip ::-format))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1799
-(s/def ::at-zone-args (args ::zone-id/zone-id))
-(defn -at-zone [this zone] (wip ::-at-zone))
-(s/fdef -at-zone :args ::at-zone-args :ret ::zoned-date-time/zoned-date-time)
+(def-method -at-zone ::zoned-date-time/zoned-date-time
+  [this ::local-date-time
+   zone ::zone-id/zone-id]
+  (wip ::-at-zone))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1856
-(s/def ::is-after-args (args ::chrono-local-date-time/chrono-local-date-time))
-(defn -is-after [this other] (wip ::-is-after))
-(s/fdef -is-after :args ::is-after-args :ret ::j/boolean)
+(def-method -is-after ::j/boolean
+  [this ::local-date-time
+   other ::chrono-local-date-time/chrono-local-date-time]
+  (chrono-local-date-time-defaults/-is-after this other))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1885
-(s/def ::is-before-args (args ::chrono-local-date-time/chrono-local-date-time))
-(defn -is-before [this other] (wip ::-is-before))
-(s/fdef -is-before :args ::is-before-args :ret ::j/boolean)
+(def-method -is-before ::j/boolean
+  [this ::local-date-time
+   other ::chrono-local-date-time/chrono-local-date-time]
+  (wip ::-is-before))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1914
-(s/def ::is-equal-args (args ::chrono-local-date-time/chrono-local-date-time))
-(defn -is-equal [this other] (wip ::-is-equal))
-(s/fdef -is-equal :args ::is-equal-args :ret ::j/boolean)
+(def-method -is-equal ::j/boolean
+  [this ::local-date-time
+   other ::chrono-local-date-time/chrono-local-date-time]
+  (wip ::-is-equal))
 
 (extend-type LocalDateTime
   chrono-local-date-time/IChronoLocalDateTime
@@ -314,37 +346,48 @@
   (to-epoch-second [this offset]
     (chrono-local-date-time-defaults/-to-epoch-second this offset)))
 
-(s/def ::with-args (args ::j/wip))
-(defn -with
+(def-method -with ::local-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L917
-  ([this adjuster] (wip ::-with))
+  ([this ::local-date-time
+    adjuster ::temporal-adjuster/temporal-adjuster]
+   (wip ::-with))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L515
-  ([this new-date new-time] (wip ::-with)))
-(s/fdef -with :args ::with-args :ret ::chrono-local-date-time/chrono-local-date-time)
+  ([this ::local-date-time
+    field ::temporal-field/temporal-field
+    new-value ::j/long]
+   (wip ::-with)))
 
-(s/def ::plus-args (args ::j/wip))
-(defn -plus
+(def-method -plus ::local-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1146
-  ([this amount-to-add] (wip ::-plus))
+  ([this ::local-date-time
+    amount-to-add ::temporal-amount/temporal-amount]
+   (wip ::-plus))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1182
-  ([this amount-to-add unit] (wip ::-plus)))
-(s/fdef -plus :args ::plus-args :ret ::chrono-local-date-time/chrono-local-date-time)
+  ([this ::local-date-time
+    amount-to-add ::j/long
+    unit ::temporal-unit/temporal-unit]
+   (wip ::-plus)))
 
-(s/def ::minus-args (args ::j/wip))
-(defn -minus
+(def-method -minus ::local-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1365
-  ([this amount-to-subtract] (wip ::-minus))
+  ([this ::local-date-time
+    amount-to-subtract ::temporal-amount/temporal-amount]
+   (wip ::-minus))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1394
-  ([this amount-to-subtract unit] (wip ::-minus)))
-(s/fdef -minus :args ::minus-args :ret ::chrono-local-date-time/chrono-local-date-time)
+  ([this ::local-date-time
+    amount-to-subtract ::j/long
+    unit ::temporal-unit/temporal-unit]
+   (wip ::-minus)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1682
-(s/def ::until-args (args ::temporal/temporal ::temporal-unit/temporal-unit))
-(defn -until [this end-exclusive unit] (wip ::-until))
-(s/fdef -until :args ::until-args :ret ::j/long)
+(def-method -until ::j/long
+  [this ::local-date-time
+   end-exclusive ::temporal/temporal
+   unit  ::temporal-unit/temporal-unit]
+  (wip ::-until))
 
 (extend-type LocalDateTime
   temporal/ITemporal
@@ -361,29 +404,34 @@
 
 ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L574
-(s/def ::is-supported-args (args ::temporal-field/temporal-field))
-(defn -is-supported [this is-supported--overloaded-param] (wip ::-is-supported))
-(s/fdef -is-supported :args ::is-supported-args :ret ::j/boolean)
+(def-method -is-supported ::j/boolean
+  [this ::local-date-time
+   is-supported--overloaded-param ::temporal-field/temporal-field]
+  (wip ::-is-supported))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L648
-(s/def ::range-args (args ::temporal-field/temporal-field))
-(defn -range [this field] (wip ::-range))
-(s/fdef -range :args ::range-args :ret ::value-range/value-range)
+(def-method -range ::value-range/value-range
+  [this ::local-date-time
+   field ::temporal-field/temporal-field]
+  (wip ::-range))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L685
-(s/def ::get-args (args ::temporal-field/temporal-field))
-(defn -get [this field] (wip ::-get))
-(s/fdef -get :args ::get-args :ret ::j/int)
+(def-method -get ::j/int
+  [this ::local-date-time
+   field ::temporal-field/temporal-field]
+  (wip ::-get))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L717
-(s/def ::get-long-args (args ::temporal-field/temporal-field))
-(defn -get-long [this field] (wip ::-get-long))
-(s/fdef -get-long :args ::get-long-args :ret ::j/long)
+(def-method -get-long ::j/long
+  [this ::local-date-time
+   field ::temporal-field/temporal-field]
+  (wip ::-get-long))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1595
-(s/def ::query-args (args ::temporal-query/temporal-query))
-(defn -query [this query] (wip ::-query))
-(s/fdef -query :args ::query-args :ret ::j/wip)
+(def-method -query ::j/wip
+  [this ::local-date-time
+   query ::temporal-query/temporal-query]
+  (wip ::-query))
 
 (extend-type LocalDateTime
   temporal-accessor/ITemporalAccessor
@@ -394,25 +442,26 @@
   (query [this query] (-query this query)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1628
-(s/def ::adjust-into-args (args ::temporal/temporal))
-(defn -adjust-into [this temporal] (wip ::-adjust-into))
-(s/fdef -adjust-into :args ::adjust-into-args :ret ::temporal/temporal)
+(def-method -adjust-into ::temporal/temporal
+  [this ::local-date-time
+   temporal ::temporal/temporal]
+  (wip ::-adjust-into))
 
 (extend-type LocalDateTime
   temporal-adjuster/ITemporalAdjuster
   (adjust-into [this temporal] (-adjust-into this temporal)))
 
-(s/def ::now-args (args ::j/wip))
-(defn now
+(def-constructor now ::local-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L179
   ([] (wip ::now))
 
   ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L195
-  ([now--overloaded-param] (wip ::now)))
-(s/fdef now :args ::now-args :ret ::local-date-time)
+  ([now--overloaded-param (s/or :zone-id ::zone-id/zone-id
+                                :clock ::clock/clock)]
+   (wip ::now)))
 
-(def-method of ::local-date-time
+(def-constructor of ::local-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L373
   ([date ::LocalDate/local-date
     time ::LocalTime/local-time]
@@ -455,28 +504,32 @@
             (local-time/of hour minute second nano-of-second))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L393
-(s/def ::of-instant-args (args ::instant/instant ::zone-id/zone-id))
-(defn of-instant [instant zone] (wip ::of-instant))
-(s/fdef of-instant :args ::of-instant-args :ret ::local-date-time)
+(def-constructor of-instant ::local-date-time
+  [instant ::instant/instant
+   zone  ::zone-id/zone-id]
+  (wip ::of-instant))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L416
-(s/def ::of-epoch-second-args (args ::j/long ::j/int ::zone-offset/zone-offset))
-(defn of-epoch-second [epoch-second nano-of-second offset] (wip ::of-epoch-second))
-(s/fdef of-epoch-second :args ::of-epoch-second-args :ret ::local-date-time)
+(def-constructor of-epoch-second ::local-date-time
+  [epoch-second ::j/long
+   nano-of-second ::j/int
+   offset ::zone-offset/zone-offset]
+  (wip ::of-epoch-second))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L447
-(s/def ::from-args (args ::temporal-accessor/temporal-accessor))
-(defn from [temporal] (wip ::from))
-(s/fdef from :args ::from-args :ret ::local-date-time)
+(def-constructor from ::local-date-time
+  [temporal ::temporal-accessor/temporal-accessor]
+  (wip ::from))
 
-(s/def ::parse-args (args ::j/wip))
-(defn parse
+(def-constructor parse ::local-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L476
-  ([text] (wip ::parse))
+  ([text ::j/char-sequence]
+   (wip ::parse))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L490
-  ([text formatter] (wip ::parse)))
-(s/fdef parse :args ::parse-args :ret ::local-date-time)
+  ([text ::j/char-sequence
+    formatter ::date-time-formatter/date-time-formatter]
+   (wip ::parse)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L144
 (def MIN ::MIN--not-implemented)

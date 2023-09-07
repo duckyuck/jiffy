@@ -42,7 +42,7 @@
 (def MAX ::MAX--not-implemented)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L141
-(def MIDNIGHT ::MIDNIGHT--not-implemented)
+(def MIDNIGHT impl/MIDNIGHT)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L145
 (def NOON ::NOON--not-implemented)
@@ -285,9 +285,10 @@
 (defn -to-epoch-second [this date offset]
   (require-non-nil date "date")
   (require-non-nil offset "offset")
-  (+ (math/multiply-exact (chrono-local-date/to-epoch-day date) 86400)
-     (-to-second-of-day this)
-     (math/subtract-exact (zone-offset/get-total-seconds offset))))
+  (-> (chrono-local-date/to-epoch-day date)
+      (math/multiply-exact 86400)
+      (math/add-exact (-to-second-of-day this))
+      (math/subtract-exact (zone-offset/get-total-seconds offset))))
 (s/fdef -to-epoch-second :args ::to-epoch-second-args :ret ::j/long)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1550

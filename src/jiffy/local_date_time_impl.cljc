@@ -7,7 +7,6 @@
             [jiffy.local-time-impl :as local-time]
             [jiffy.specs :as j]))
 
-(defrecord LocalDateTime [date time])
 (def-record LocalDateTime ::local-date-time
   [date ::local-date/local-date
    time ::local-time/local-time])

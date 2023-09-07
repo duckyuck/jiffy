@@ -1,6 +1,8 @@
 (ns jiffy.chrono.chrono-local-date-time-defaults
   (:refer-clojure :exclude [format ])
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
             [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
@@ -25,81 +27,103 @@
 (s/def ::chrono-local-date-time ::chrono-local-date-time/chrono-local-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L192
-(s/def ::get-chronology-args ::j/wip)
-(defn -get-chronology [this] (wip ::-get-chronology))
-(s/fdef -get-chronology :args ::get-chronology-args :ret ::chronology/chronology)
+(def-method -get-chronology ::chronology/chronology
+  [this ::chrono-local-date-time]
+  (wip ::-get-chronology))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L236
-(s/def ::is-supported-args ::j/wip)
-(defn -is-supported [this field] (wip ::-is-supported))
-(s/fdef -is-supported :args ::is-supported-args :ret ::j/boolean)
+(def-method -is-supported ::j/boolean
+  [this ::chrono-local-date-time
+   unit ::temporal-unit/temporal-unit]
+  (wip ::-is-supported))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L272
-(s/def ::with-args ::j/wip)
-(defn -with [this adjuster] (wip ::-with))
-(s/fdef -with :args ::with-args :ret ::chrono-local-date-time)
+(def-method -with ::chrono-local-date-time
+  [this ::chrono-local-date-time
+   adjuster ::temporal-adjuster/temporal-adjuster]
+  (wip ::-with))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L290
-(s/def ::plus-args ::j/wip)
-(defn -plus [this amount] (wip ::-plus))
-(s/fdef -plus :args ::plus-args :ret ::chrono-local-date-time)
+(def-method -plus ::chrono-local-date-time
+  [this ::chrono-local-date-time
+   amount ::temporal-amount/temporal-amount]
+  (wip ::-plus))
 
-(s/def ::minus-args ::j/wip)
-(defn -minus
+
+(def-method -minus ::chrono-local-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L308
-  ([this amount] (wip ::-minus))
+  ([this ::chrono-local-date-time
+    amount ::temporal-amount/temporal-amount]
+   (wip ::-minus))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L318
-  ([this amount-to-subtract unit] (wip ::-minus)))
-(s/fdef -minus :args ::minus-args :ret ::chrono-local-date-time)
+  ([this ::chrono-local-date-time
+    amount-to-subtract ::j/long
+    unit ::temporal-unit/temporal-unit]
+   (wip ::-minus)))
+
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L343
-(s/def ::query-args ::j/wip)
-(defn -query [this query] (wip ::-query))
-(s/fdef -query :args ::query-args :ret ::j/wip)
+(def-method -query ::j/wip
+  [this ::chrono-local-date-time
+   query ::temporal-query/temporal-query]
+  (wip ::-query))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L384
-(s/def ::adjust-into-args ::j/wip)
-(defn -adjust-into [this temporal] (wip ::-adjust-into))
-(s/fdef -adjust-into :args ::adjust-into-args :ret ::temporal/temporal)
+(def-method -adjust-into ::temporal/temporal
+  [this ::chrono-local-date-time
+   temporal ::temporal/temporal]
+  (wip ::-adjust-into))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L404
-(s/def ::format-args ::j/wip)
-(defn -format [this formatter] (wip ::-format))
-(s/fdef -format :args ::format-args :ret string?)
+(def-method -format string?
+  [this ::chrono-local-date-time
+   formatter ::date-time-formatter/date-time-formatter]
+  (wip ::-format))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L452
-(s/def ::to-instant-args ::j/wip)
-(defn -to-instant [this offset] (wip ::-to-instant))
-(s/fdef -to-instant :args ::to-instant-args :ret ::instant/instant)
+(def-method -to-instant ::instant/instant
+  [this ::chrono-local-date-time
+   offset ::zone-offset/zone-offset]
+  (wip ::-to-instant))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L470
-(s/def ::to-epoch-second-args ::j/wip)
-(defn -to-epoch-second [this offset]
+(def-method -to-epoch-second ::j/long
+  [this ::chrono-local-date-time
+   offset ::zone-offset/zone-offset]
   (let [epoch-day (-> this chrono-local-date-time/to-local-date chrono-local-date/to-epoch-day)
         secs (->> this
                   chrono-local-date-time/to-local-time
                   local-time/to-second-of-day
                   (math/add-exact (math/multiply-exact epoch-day 86400)))]
     (->> offset zone-offset/get-total-seconds (math/subtract-exact secs))))
-(s/fdef -to-epoch-second :args ::to-epoch-second-args :ret ::j/long)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L506
-(s/def ::compare-to-args ::j/wip)
-(defn -compare-to [this other] (wip ::-compare-to))
-(s/fdef -compare-to :args ::compare-to-args :ret ::j/int)
+(def-method -compare-to ::j/int
+  [this ::chrono-local-date-time
+   other ::chrono-local-date-time]
+  (wip ::-compare-to))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L531
-(s/def ::is-after-args ::j/wip)
-(defn -is-after [this other] (wip ::-is-after))
-(s/fdef -is-after :args ::is-after-args :ret ::j/boolean)
+(def-method -is-after ::j/boolean
+  [this ::chrono-local-date-time
+   other ::chrono-local-date-time]
+  (let [this-ep-day (-> this chrono-local-date-time/to-local-date chrono-local-date/to-epoch-day)
+        other-ep-day (-> other chrono-local-date-time/to-local-date chrono-local-date/to-epoch-day)
+        this-nano-of-day (-> this chrono-local-date-time/to-local-time local-time/to-nano-of-day)
+        other-nano-of-day (-> other chrono-local-date-time/to-local-time local-time/to-nano-of-day)]
+    (or (> this-ep-day other-ep-day)
+        (and (= this-ep-day other-ep-day)
+             (> this-nano-of-day other-nano-of-day)))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L552
-(s/def ::is-before-args ::j/wip)
-(defn -is-before [this other] (wip ::-is-before))
-(s/fdef -is-before :args ::is-before-args :ret ::j/boolean)
+(def-method -is-before  ::j/boolean
+  [this ::chrono-local-date-time
+   other ::chrono-local-date-time]
+  (wip ::-is-before))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L573
-(s/def ::is-equal-args ::j/wip)
-(defn -is-equal [this other] (wip ::-is-equal))
-(s/fdef -is-equal :args ::is-equal-args :ret ::j/boolean)
+(def-method -is-equal ::j/boolean
+  [this ::chrono-local-date-time
+   other ::chrono-local-date-time]
+  (wip ::-is-equal))

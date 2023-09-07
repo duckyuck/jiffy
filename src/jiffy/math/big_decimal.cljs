@@ -30,7 +30,7 @@
   (let [r (dc/div' this divisor)]
     (when-not (dc/finite? r)
       (throw (ex JavaArithmeticException "divide-to-integral-value failed"
-                 {:this this :divisor divisor} e)))
+                 {:this this :divisor divisor})))
     r))
 
 (defn long-value-exact [this]

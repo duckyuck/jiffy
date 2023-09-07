@@ -13,6 +13,8 @@
 (def MAX_SECOND precision/max-safe-integer)
 (def MIN_SECOND precision/min-safe-integer)
 
+(defn instant? [x] (instance? Instant x))
+
 (def-constructor create ::instant
   [seconds ::j/second
    nano-of-second ::j/nano]

@@ -42,10 +42,6 @@
 
 (s/def ::instant ::impl/instant)
 (def create impl/create)
-(def-constructor of-epoch-second ::instant
-  [epoch-milli ::j/milli]
-  (impl/of-epoch-second epoch-milli))
-(defn of-epoch-second [& args] (apply impl/of-epoch-second args))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L343
 (def-constructor of-epoch-milli ::instant
@@ -58,7 +54,8 @@
    (impl/of-epoch-second epoch-second))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L327
-  ([epoch-second ::j/second nano-adjustment ::j/nano]
+  ([epoch-second ::j/second
+    nano-adjustment ::j/nano]
    (impl/of-epoch-second epoch-second nano-adjustment)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L617

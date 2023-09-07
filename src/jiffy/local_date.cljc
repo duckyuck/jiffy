@@ -438,7 +438,7 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L340
 (s/def ::of-epoch-day-args ::impl/of-epoch-day-args)
-(def of-epoch-day #'impl/of-epoch-day)
+(defn of-epoch-day [epoch-day] (impl/of-epoch-day epoch-day))
 (s/fdef of-epoch-day :args ::of-epoch-day-args :ret ::local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L391

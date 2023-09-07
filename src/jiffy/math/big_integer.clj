@@ -2,22 +2,21 @@
   (:require [clojure.math :as math]
             [com.gfredericks.exact :as e]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.exception :refer [ex JavaArithmeticException try*]]))
+            [jiffy.exception :refer [ex JavaArithmeticException try*]])
+  (:import java.math.BigDecimal
+           java.math.BigInteger))
 
 (defn value-of [val]
-  (e/integer->native val))
+  (BigInteger/valueOf val))
 
 (defn divide-and-reminder [this val]
-  [(let [r (e// (bigint this) val)]
-     (if (e/ratio? r)
-       (bigint r)
-       r))
-   (e/rem this val)])
+  (.divideAndRemainder this val))
 
-(defn bit-length [this] (.bitLength this))
+(defn bit-length [this]
+  (.bitLength this))
 
 (defn long-value [this]
-  (e/integer->native this))
+  (.longValue this))
 
 (defn int-value [this]
-  (e/integer->native this))
+  (.intValue this))

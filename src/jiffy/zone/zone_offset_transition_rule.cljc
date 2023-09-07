@@ -7,6 +7,8 @@
             [jiffy.day-of-week :as day-of-week]
             [jiffy.protocols.local-time :as local-time]
             [jiffy.month :as month]
+            [jiffy.local-time-impl :as local-time-impl]
+            [jiffy.protocols.local-time :as local-time]
             [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.protocols.zone.zone-offset-transition :as zone-offset-transition]
             [jiffy.protocols.zone.zone-offset-transition-rule :as zone-offset-transition-rule]
@@ -14,16 +16,22 @@
 
 (s/def ::time-definition #{::UTC ::WALL ::STANDARD})
 
-(def-record ZoneOffsetTransitionRule ::zone-offset-transition-rule
+(def-record ZoneOffsetTransitionRule ::record
   [time-definition ::time-definition
    midnight-end-of-day ::j/boolean
-   local-time ::local-time/local-time
+   local-time (s/and ::local-time/local-time (comp zero? :nano))
    month ::month/month
-   day-of-month-indicator ::j/int
+   day-of-month-indicator (s/and (s/int-in -28 31) (complement zero?))
    day-of-week ::day-of-week/day-of-week
    standard-offset ::zone-offset/zone-offset
    offset-after ::zone-offset/zone-offset
    offset-before ::zone-offset/zone-offset])
+
+(s/def ::zone-offset-transition-rule
+  (s/and ::record
+         (fn [{:keys [midnight-end-of-day local-time]}]
+           (or (not midnight-end-of-day)
+               (= local-time local-time-impl/MIDNIGHT)))))
 
 (def-constructor create ::zone-offset-transition-rule
   [time-definition ::time-definition

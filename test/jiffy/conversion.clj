@@ -15,8 +15,11 @@
             [jiffy.temporal.temporal-query]
             [jiffy.temporal.value-range]
             [jiffy.zoned-date-time-impl]
-            [jiffy.zone-offset-impl])
-  (:import (jiffy.clock FixedClock SystemClock)
+            [jiffy.zone-offset-impl]
+            [jiffy.zone.zone-offset-transition-rule]
+            [jiffy.zone.zone-rules])
+  (:import java.lang.reflect.Constructor
+           (jiffy.clock FixedClock SystemClock)
            (jiffy.day_of_week DayOfWeek)
            (jiffy.duration_impl Duration)
            (jiffy.instant_impl Instant)
@@ -30,16 +33,17 @@
            (jiffy.temporal.temporal_query TemporalQuery)
            (jiffy.temporal.value_range ValueRange)
            (jiffy.zoned_date_time_impl ZonedDateTime)
-           (jiffy.zone_offset_impl ZoneOffset)))
+           (jiffy.zone_offset_impl ZoneOffset)
+           (jiffy.zone.zone_offset_transition_rule ZoneOffsetTransitionRule)
+           (jiffy.zone.zone_rules_impl ZoneRules)))
 
 (defmulti jiffy->java type)
 
 (defmethod jiffy->java :default
-  [jiffy-object]
-  (if (record? jiffy-object)
-    (throw (ex-info (str "Shit! We're missing implementation of multimethod 'jiffy.conversion/jiffy->java' for record "
-                         (type jiffy-object) ". Please do some more programming!") {:record jiffy-object}))
-    jiffy-object))
+  [object]
+  (when-not (nil? object)
+    (throw (ex-info (str "Shit! We're missing implementation of multimethod 'jiffy.conversion/jiffy->java' for type "
+                         (type object) ". Please do some more programming!") {:object object}))))
 
 (defmulti same? (fn [jiffy-object java-object] (type jiffy-object)))
 
@@ -75,11 +79,18 @@
     (= (kind->class (::exception/kind (ex-data ex)))
        (type java-object))))
 
-(defmethod jiffy->java clojure.lang.ArraySeq [coll]
-  (mapv jiffy->java coll))
+(doseq [class [java.lang.Integer
+               java.lang.Long
+               java.lang.Boolean
+               java.lang.String
+               java.math.BigInteger
+               java.math.BigDecimal]]
+  (defmethod jiffy->java class [x] x))
 
-(defmethod jiffy->java clojure.lang.PersistentVector [coll]
-  (mapv jiffy->java coll))
+(doseq [class [clojure.lang.ArraySeq
+               clojure.lang.PersistentVector
+               clojure.lang.LazySeq]]
+  (defmethod jiffy->java class [coll] (mapv jiffy->java coll)))
 
 (defmethod jiffy->java Instant [{:keys [seconds nanos]}]
   (.plusNanos (java.time.Instant/ofEpochSecond seconds) nanos))
@@ -162,3 +173,54 @@
 
 (defmethod jiffy->java FixedClock [{:keys [instant zone]}]
   (java.time.Clock/fixed (jiffy->java instant) (jiffy->java zone)))
+
+(defn set-private-property [obj property-name new-value]
+  (let [field (.getDeclaredField (class obj) property-name)]
+    (.setAccessible field true)
+    (.set field obj new-value)
+    obj))
+
+(defn create-zone-rules [zone-offset]
+  (let [cls (Class/forName "java.time.zone.ZoneRules")
+        constructor (.getDeclaredConstructor cls (into-array Class [java.time.ZoneOffset]))]
+    (.setAccessible constructor true)
+    (.newInstance constructor (into-array Object [zone-offset]))))
+
+(defn jiffy->zone-rules [{:keys [standard-transitions
+                                 standard-offsets
+                                 savings-instant-transitions
+                                 savings-local-transitions
+                                 wall-offsets
+                                 last-rules] :as jiffy}]
+  (let [zone-rules (create-zone-rules (java.time.ZoneOffset/of "Z"))]
+    jiffy
+    (cond-> zone-rules
+      standard-transitions (set-private-property "standardTransitions" (long-array (jiffy->java standard-transitions)))
+      standard-offsets (set-private-property "standardOffsets" (into-array java.time.ZoneOffset (jiffy->java standard-offsets)))
+      savings-instant-transitions (set-private-property "savingsInstantTransitions" (long-array (jiffy->java savings-instant-transitions)))
+      savings-local-transitions (set-private-property "savingsLocalTransitions" (into-array java.time.LocalDateTime (jiffy->java savings-local-transitions)))
+      wall-offsets (set-private-property "wallOffsets" (into-array java.time.ZoneOffset (jiffy->java wall-offsets)))
+      last-rules (set-private-property "lastRules" (into-array java.time.zone.ZoneOffsetTransitionRule (jiffy->java last-rules))))))
+
+(defmethod jiffy->java ZoneRules [arg]
+  (jiffy->zone-rules arg))
+
+(defmethod jiffy->java ZoneOffsetTransitionRule [{:keys [time-definition
+                                                         midnight-end-of-day
+                                                         local-time
+                                                         month
+                                                         day-of-month-indicator
+                                                         day-of-week
+                                                         standard-offset
+                                                         offset-after
+                                                         offset-before]}]
+  (java.time.zone.ZoneOffsetTransitionRule/of
+    (jiffy->java month)
+    (jiffy->java day-of-month-indicator)
+    (jiffy->java day-of-week)
+    (jiffy->java local-time)
+    (jiffy->java midnight-end-of-day)
+    (java.time.zone.ZoneOffsetTransitionRule$TimeDefinition/valueOf (name time-definition))
+    (jiffy->java standard-offset)
+    (jiffy->java offset-after)
+    (jiffy->java offset-before)))

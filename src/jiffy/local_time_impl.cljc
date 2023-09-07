@@ -33,6 +33,8 @@
    nano ::j/nano-of-second]
   (->LocalTime hour minute second nano))
 
+(def MIDNIGHT (create 0 0 0 0))
+
 (defmacro args [& x] `(s/tuple ::local-time ~@x))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L397

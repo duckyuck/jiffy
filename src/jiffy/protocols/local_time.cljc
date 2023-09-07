@@ -31,3 +31,4 @@
   (is-before [this other]))
 
 (s/def ::local-time #(satisfies? ILocalTime %))
+(s/def ::local-time-no-nano #(satisfies? ILocalTime %))
