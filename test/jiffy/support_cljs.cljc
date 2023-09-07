@@ -1,9 +1,9 @@
-(ns jiffy.parity-tests.support-cljs
+(ns jiffy.support-cljs
   (:require [cljs.test :refer [deftest is testing]]
             [clojure.string :as str]
             [jiffy.edn-cljs]
             [jiffy.exception :refer [ex try*]]
-            [jiffy.parity-tests.corpus :as corpus]))
+            [jiffy.corpus :as corpus]))
 
 (defn try-call [f args]
   (try*
@@ -45,8 +45,8 @@
     (if-not (seq failures)
       [num-tests :ok]
       (for [failure (take 3 failures)]
-        {:expr `(~'jiffy.parity-tests.support-cljs/same?
-                 (~'jiffy.parity-tests.support-cljs/try-call ~(:fn failure) [~@(:args failure)])
+        {:expr `(~'jiffy.support-cljs/same?
+                 (~'jiffy.support-cljs/try-call ~(:fn failure) [~@(:args failure)])
                  ~(:expected failure))
          :failure failure}))))
 

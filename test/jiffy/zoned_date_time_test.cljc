@@ -1,6 +1,6 @@
-(ns jiffy.parity-tests.zoned-date-time-test
-  #?(:clj (:require [jiffy.parity-tests.support-clj :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support])
-     :cljs (:require [jiffy.parity-tests.support-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true])))
+(ns jiffy.zoned-date-time-test
+  #?(:clj (:require [jiffy.support-clj :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support])
+     :cljs (:require [jiffy.support-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true])))
 
 ;; (test-proto-fn! jiffy.zoned-date-time jiffy.protocols.zoned-date-time/with-fixed-offset-zone)
 ;; (test-proto-fn! jiffy.zoned-date-time jiffy.protocols.zoned-date-time/get-year)

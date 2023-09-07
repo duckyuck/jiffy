@@ -1,4 +1,4 @@
-(ns jiffy.parity-tests.support-clj
+(ns jiffy.support-clj
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
@@ -9,14 +9,10 @@
             [jiffy.edn-clj :include-macros true]
             [jiffy.exception :refer [try*]]
             [jiffy.math :as math]
-            [jiffy.parity-tests.test-specs]
-            [jiffy.specs :as j]))
+            [jiffy.specs :as j]
+            [jiffy.test-specs]))
 
-(comment
-
-  :jiffy.edn-clj/keep
-
-  )
+:jiffy.edn-clj/keep
 
 (defn partition-between
   [pred? coll]
@@ -192,13 +188,11 @@
                    result# {:failed/jiffy-args args#
                             :failed/jiffy-result jiffy-result#
                             :failed/java-args java-args#}
-                   java-result# (trycatch
-                                 (invoke-java ~java-fn
-                                              java-args#
-                                              {:static? ~static?}))]
+                   java-result# (trycatch (invoke-java ~java-fn java-args# {:static? ~static?}))]
                (when-not (or (precision-exception? jiffy-result#)
                              (and (matching-types? jiffy-result# java-result#)
-                                  (conversion/same? jiffy-result# java-result#)))
+                                  (or (conversion/same? jiffy-result# java-result#)
+                                      (conversion/same? jiffy-result# java-result#))))
                  (assoc result# :failed/java-result java-result#))))]
        (or (first (remove nil? results#))
            [(count results#) :success]))))
@@ -215,6 +209,7 @@
 
 (defmacro test-static-fn! [jiffy-fn & [num-tests]]
   `(do
+     (require 'jiffy.conversion)
      (require '~(symbol (namespace jiffy-fn)))
      (test-fn! ~jiffy-fn
                '~(symbol (jiffy-ns->java-class (namespace jiffy-fn))

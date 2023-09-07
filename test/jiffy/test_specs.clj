@@ -1,4 +1,4 @@
-(ns jiffy.parity-tests.test-specs
+(ns jiffy.test-specs
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [jiffy.clock :as clock-impl]
@@ -10,7 +10,8 @@
             [jiffy.local-time-impl :as local-time-impl]
             [jiffy.month :as month]
             [jiffy.period :as period-impl]
-            [jiffy.protocols.chrono.chrono-local-date-time-impl :as chrono-local-date-time-impl]
+            [jiffy.protocols.chrono.chrono-local-date-time-impl
+             :as chrono-local-date-time-impl]
             [jiffy.protocols.chrono.chrono-period-impl :as chrono-period-impl]
             [jiffy.protocols.chrono.hijrah-date :as hijrah-date]
             [jiffy.protocols.chrono.hijrah-era :as hijrah-era]
@@ -41,7 +42,9 @@
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.protocols.zone.zone-offset-transition :as ZoneOffsetTransition]
-            [jiffy.protocols.zone.zone-offset-transition-rule :as ZoneOffsetTransitionRule]
+            [jiffy.protocols.zone.zone-offset-transition-rule
+             :as ZoneOffsetTransitionRule]
+            [jiffy.protocols.zone.zone-rules :as ZoneRules]
             [jiffy.temporal.chrono-field :as chrono-field]
             [jiffy.temporal.chrono-unit :as chrono-unit]
             [jiffy.temporal.temporal-adjusters :as temporal-adjusters-impl]
@@ -50,7 +53,12 @@
             [jiffy.zoned-date-time :as zoned-date-time-impl]
             [jiffy.zone-offset :as zone-offset-impl]
             [jiffy.zone.zone-offset-transition :as zone-offset-transition]
-            [jiffy.zone.zone-offset-transition-rule :as transition-rule]))
+            [jiffy.zone.zone-offset-transition-rule :as transition-rule]
+            [jiffy.zone.zone-rules :as zone-rules]
+            [jiffy.zone.zone-rules-conversion]
+            [jiffy.zone.zone-rules-store :as zone-rules-store]))
+
+:jiffy.zone.zone-rules-conversion/keep
 
 (s/def ::duration/duration ::duration-impl/duration)
 (s/def ::period/period ::period-impl/period)
@@ -61,6 +69,7 @@
 (s/def ::zoned-date-time/zoned-date-time ::zoned-date-time-impl/zoned-date-time)
 (s/def ::ZoneOffsetTransition/zone-offset-transition ::zone-offset-transition/zone-offset-transition)
 (s/def ::ZoneOffsetTransitionRule/zone-offset-transition-rule ::transition-rule/zone-offset-transition-rule)
+(s/def ::zone-rules/zone-rules (set (vals @zone-rules-store/zone-id->rules)))
 
 (s/def ::clock/clock
   (s/with-gen #(satisfies? clock/IClock %)
@@ -205,6 +214,8 @@
   (conversion/jiffy->java (:date-time (first (gen/sample (s/gen :jiffy.zoned-date-time/zoned-date-time)))))
 
   (gen/sample (s/gen :jiffy.zone.zone-offset-transition-rule/zone-offset-transition-rule))
+
+  (gen/sample (s/gen :jiffy.protocols.zone.zone-rules/zone-rules))
 
   (-> :jiffy.zone.zone-rules/zone-rules
       s/gen

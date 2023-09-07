@@ -1,6 +1,6 @@
-(ns jiffy.parity-tests.day-of-week-test
-  #?(:clj (:require [jiffy.parity-tests.support-clj :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support])
-     :cljs (:require [jiffy.parity-tests.support-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true])))
+(ns jiffy.day-of-week-test
+  #?(:clj (:require [jiffy.support-clj :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support])
+     :cljs (:require [jiffy.support-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true])))
 
 (test-proto-fn jiffy.day-of-week jiffy.day-of-week/get-value)
 ;; (test-proto-fn! jiffy.day-of-week jiffy.day-of-week/get-display-name)

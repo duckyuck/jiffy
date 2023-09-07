@@ -1,6 +1,6 @@
-(ns jiffy.parity-tests.duration-test
-  #?(:clj (:require [jiffy.parity-tests.support-clj :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support])
-     :cljs (:require [jiffy.parity-tests.support-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true])))
+(ns jiffy.duration-test
+  #?(:clj (:require [jiffy.support-clj :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support])
+     :cljs (:require [jiffy.support-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true])))
 
 (test-proto-fn jiffy.duration jiffy.protocols.duration/is-zero)
 (test-proto-fn jiffy.duration jiffy.protocols.duration/is-negative)

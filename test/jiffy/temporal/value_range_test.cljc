@@ -1,6 +1,6 @@
-(ns jiffy.parity-tests.value-range-test
-  #?(:clj (:require [jiffy.parity-tests.support-clj :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support])
-     :cljs (:require [jiffy.parity-tests.support-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true])))
+(ns jiffy.temporal.value-range-test
+  #?(:clj (:require [jiffy.support-clj :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support])
+     :cljs (:require [jiffy.support-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true])))
 
 (test-proto-fn jiffy.temporal.value-range jiffy.protocols.temporal.value-range/is-fixed)
 (test-proto-fn jiffy.temporal.value-range jiffy.protocols.temporal.value-range/get-minimum)

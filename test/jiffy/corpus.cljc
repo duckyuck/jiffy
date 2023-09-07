@@ -1,4 +1,4 @@
-(ns jiffy.parity-tests.corpus
+(ns jiffy.corpus
   (:require [clojure.string :as str]
             [jiffy.edn-cljs]
             [jiffy.helper.macros :refer [load-edn-file] :refer-macros [load-edn-file] :include-macros true]))
