@@ -199,6 +199,8 @@
 
 (defmacro test-proto-fn! [impl-ns proto-fn & [num-tests]]
   `(do
+     (require 'jiffy.conversion)
+     (require 'jiffy.test-specs)
      (require '~(symbol (namespace proto-fn)))
      (require '~(symbol impl-ns))
      (test-fn! ~proto-fn
@@ -210,6 +212,7 @@
 (defmacro test-static-fn! [jiffy-fn & [num-tests]]
   `(do
      (require 'jiffy.conversion)
+     (require 'jiffy.test-specs)
      (require '~(symbol (namespace jiffy-fn)))
      (test-fn! ~jiffy-fn
                '~(symbol (jiffy-ns->java-class (namespace jiffy-fn))

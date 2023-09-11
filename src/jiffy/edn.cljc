@@ -5,7 +5,9 @@
             [jiffy.day-of-week #?@(:cljs [:refer [DayOfWeek]])]
             [jiffy.duration-impl #?@(:cljs [:refer [Duration]])]
             [jiffy.instant-impl #?@(:cljs [:refer [Instant]])]
+            [jiffy.local-date-impl #?@(:cljs [:refer [LocalDate]])]
             [jiffy.local-time-impl #?@(:cljs [:refer [LocalTime]])]
+            [jiffy.local-date-time-impl #?@(:cljs [:refer [LocalDateTime]])]
             [jiffy.month #?@(:cljs [:refer [Month]])]
             [jiffy.period #?@(:cljs [:refer [Period]])]
             [jiffy.temporal.temporal-queries]
@@ -15,20 +17,27 @@
             [jiffy.temporal.chrono-unit #?@(:cljs [:refer [ChronoUnit]])]
             [jiffy.zone-offset]
             [jiffy.zone-offset-impl #?@(:cljs [:refer [ZoneOffset]])]
+            [jiffy.zone.zone-offset-transition-rule #?@(:cljs [:refer [ZoneOffsetTransitionRule]])]
+            [jiffy.zone.zone-rules-impl #?@(:cljs [:refer [ZoneRules]])]
+
             )
   #?(:clj (:import [java.io Writer]
                    [jiffy.clock FixedClock]
                    [jiffy.day_of_week DayOfWeek]
                    [jiffy.duration_impl Duration]
                    [jiffy.instant_impl Instant]
+                   [jiffy.local_date_impl LocalDate]
                    [jiffy.local_time_impl LocalTime]
+                   [jiffy.local_date_time_impl LocalDateTime]
                    [jiffy.month Month]
                    [jiffy.period Period]
                    [jiffy.temporal.value_range ValueRange]
                    [jiffy.temporal.temporal_query TemporalQuery]
                    [jiffy.temporal.chrono_field ChronoField]
                    [jiffy.temporal.chrono_unit ChronoUnit]
-                   [jiffy.zone_offset_impl ZoneOffset])))
+                   [jiffy.zone_offset_impl ZoneOffset]
+                   [jiffy.zone.zone_offset_transition_rule ZoneOffsetTransitionRule]
+                   [jiffy.zone.zone_rules_impl ZoneRules])))
 
 (defn to-string [tag f obj]
   (let [value (f obj)]
@@ -77,9 +86,19 @@
      :read-fn 'jiffy.day-of-week/value-of
      :write-fn :enum-name}
 
+    :local-date
+    {:record LocalDate
+     :read-fn 'jiffy.local-date-impl/map->LocalDate
+     :write-fn '->map}
+
     :local-time
     {:record LocalTime
      :read-fn 'jiffy.local-time-impl/map->LocalTime
+     :write-fn '->map}
+
+    :local-date-time
+    {:record LocalDateTime
+     :read-fn 'jiffy.local-date-time-impl/map->LocalDateTime
      :write-fn '->map}
 
     :month
@@ -95,4 +114,16 @@
     :fixed-clock
     {:record FixedClock
      :read-fn 'jiffy.clock/map->FixedClock
-     :write-fn '->map}})
+     :write-fn '->map}
+
+    :zone-offset-transition-rule
+    {:record ZoneOffsetTransitionRule
+     :read-fn 'jiffy.zone.zone-offset-transition-rule/map->ZoneOffsetTransitionRule
+     :write-fn '->map}
+
+    :zone-rules
+    {:record ZoneRules
+     :read-fn 'jiffy.zone.zone-rules-impl/map->ZoneRules
+     :write-fn '->map}
+
+    })

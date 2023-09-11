@@ -18,7 +18,7 @@
 (defn local-date? [x] (instance? LocalDate x))
 
 (defn valid? [{:keys [year month day]}]
-  (try
+  (try*
     (chrono-field/check-valid-value chrono-field/YEAR year)
     (chrono-field/check-valid-value chrono-field/MONTH_OF_YEAR month)
     (chrono-field/check-valid-value chrono-field/DAY_OF_MONTH day)
@@ -30,7 +30,7 @@
                     (#{4 6 9 11} month) 30
                     :else 31)]
           (<= day dom)))
-    (catch Exception e
+    (catch :default e
       false)))
 
 (s/def ::local-date (s/and ::local-date-record valid?))

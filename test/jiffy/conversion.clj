@@ -144,8 +144,11 @@
 (defmethod jiffy->java ZoneOffset [{:keys [total-seconds]}]
   (java.time.ZoneOffset/ofTotalSeconds total-seconds))
 
-(defmethod jiffy->java Month [{:keys [enum-name]}]
+(defn jiffy->month [{:keys [enum-name]}]
   (java.time.Month/valueOf enum-name))
+
+(defmethod jiffy->java Month [arg]
+  (jiffy->month arg))
 
 (defmethod jiffy->java Period [{:keys [years months days]}]
   (java.time.Period/of years months days))

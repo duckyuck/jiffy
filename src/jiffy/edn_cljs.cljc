@@ -35,6 +35,16 @@
    (do
  (cljs.core/extend-protocol
   cljs.core/IPrintWithWriter
+  jiffy.zone.zone-offset-transition-rule/ZoneOffsetTransitionRule
+  (-pr-writer
+   [x w _]
+   (-write
+    w
+    (jiffy.edn/to-string "zone-offset-transition-rule" jiffy.edn/->map x)))
+  jiffy.local-date-time-impl/LocalDateTime
+  (-pr-writer
+   [x w _]
+   (-write w (jiffy.edn/to-string "local-date-time" jiffy.edn/->map x)))
   jiffy.zone-offset-impl/ZoneOffset
   (-pr-writer [x w _] (-write w (jiffy.edn/to-string "zone-offset" :id x)))
   jiffy.instant-impl/Instant
@@ -63,6 +73,10 @@
   (-pr-writer
    [x w _]
    (-write w (jiffy.edn/to-string "duration" jiffy.edn/->map x)))
+  jiffy.local-date-impl/LocalDate
+  (-pr-writer
+   [x w _]
+   (-write w (jiffy.edn/to-string "local-date" jiffy.edn/->map x)))
   jiffy.clock/FixedClock
   (-pr-writer
    [x w _]
@@ -72,7 +86,17 @@
    [x w _]
    (-write w (jiffy.edn/to-string "period" jiffy.edn/->map x)))
   jiffy.temporal.temporal-query/TemporalQuery
-  (-pr-writer [x w _] (-write w (jiffy.edn/to-string "query" :name x))))
+  (-pr-writer [x w _] (-write w (jiffy.edn/to-string "query" :name x)))
+  jiffy.zone.zone-rules-impl/ZoneRules
+  (-pr-writer
+   [x w _]
+   (-write w (jiffy.edn/to-string "zone-rules" jiffy.edn/->map x))))
+ (cljs.reader/register-tag-parser!
+  (cljs.core/symbol "jiffy" "zone-offset-transition-rule")
+  jiffy.zone.zone-offset-transition-rule/map->ZoneOffsetTransitionRule)
+ (cljs.reader/register-tag-parser!
+  (cljs.core/symbol "jiffy" "local-date-time")
+  jiffy.local-date-time-impl/map->LocalDateTime)
  (cljs.reader/register-tag-parser!
   (cljs.core/symbol "jiffy" "zone-offset")
   jiffy.zone-offset/of)
@@ -101,6 +125,9 @@
   (cljs.core/symbol "jiffy" "duration")
   jiffy.duration-impl/map->Duration)
  (cljs.reader/register-tag-parser!
+  (cljs.core/symbol "jiffy" "local-date")
+  jiffy.local-date-impl/map->LocalDate)
+ (cljs.reader/register-tag-parser!
   (cljs.core/symbol "jiffy" "fixed-clock")
   jiffy.clock/map->FixedClock)
  (cljs.reader/register-tag-parser!
@@ -108,5 +135,8 @@
   jiffy.period/map->Period)
  (cljs.reader/register-tag-parser!
   (cljs.core/symbol "jiffy" "query")
-  jiffy.temporal.temporal-queries/name->query))
+  jiffy.temporal.temporal-queries/name->query)
+ (cljs.reader/register-tag-parser!
+  (cljs.core/symbol "jiffy" "zone-rules")
+  jiffy.zone.zone-rules-impl/map->ZoneRules))
 )

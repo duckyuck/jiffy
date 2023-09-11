@@ -5,8 +5,14 @@
  jiffy/unit jiffy.edn-clj/unit
  jiffy/value-range jiffy.edn-clj/value-range
  jiffy/period jiffy.edn-clj/period
- jiffy/day-of-week jiffy.edn-clj/day-of-week
+ jiffy/day-of-week jiffy.edn-clj/day-of-we
+ jiffy/local-date jiffy.edn-clj/local-date
  jiffy/local-time jiffy.edn-clj/local-time
+ jiffy/local-date-time jiffy.edn-clj/local-date-time
  jiffy/month jiffy.edn-clj/month
  jiffy/zone-offset jiffy.edn-clj/zone-offset
- jiffy/fixed-clock jiffy.edn-clj/fixed-clock}
+ jiffy/fixed-clock jiffy.edn-clj/fixed-clock
+ jiffy/zone-rules jiffy.edn-clj/zone-rules
+ jiffy/zone-offset-transition-rule jiffy.edn-clj/zone-offset-transition-rule
+
+ }

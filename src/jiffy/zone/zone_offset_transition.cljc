@@ -11,7 +11,7 @@
             [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.protocols.zone.zone-offset-transition :as zone-offset-transition]
             [jiffy.specs :as j]
-            [jiffy.zone.zone-offset-transition-impl :refer [#?@(:cljs [ZoneOffsetTransitionInstant])] :as impl])
+            [jiffy.zone.zone-offset-transition-impl :refer [#?@(:cljs [ZoneOffsetTransition])] :as impl])
   #?(:clj (:import [jiffy.zone.zone_offset_transition_impl ZoneOffsetTransition])))
 
 (s/def ::zone-offset-transition ::impl/zone-offset-transition)

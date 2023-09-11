@@ -1,9 +1,9 @@
 (ns jiffy.local-date
-  (:refer-clojure :exclude [range get second])
+  (:refer-clojure :exclude [range get format second])
   (:require [clojure.spec.alpha :as s]
             #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
-            [jiffy.exception :refer [DateTimeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
+            [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.local-date-impl :refer [create #?@(:cljs [LocalDate])] :as impl]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
@@ -162,6 +162,8 @@
     (impl/of year month day-of-month)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1139
+(declare of-year-day)
+
 (def-method with-day-of-year ::local-date
   [this ::local-date
    day-of-year ::j/int]
@@ -194,6 +196,8 @@
       (resolve-previous-valid new-year new-month day))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1371
+(declare length-of-month)
+
 (def-method plus-days ::local-date
   [{:keys [year month day] :as this} ::local-date
    days-to-add ::j/long]
@@ -671,7 +675,7 @@
                (not leap?))
       (throw (ex DateTimeException (str "Invalid date 'DayOfYear 366' as '" year "' is not a leap year")
                  {:year year :day-of-year day-of-year})))
-    (let [moy (month/of (inc (/ (dec day-of-year) 31)))
+    (let [moy (month/of (inc (long (/ (dec day-of-year) 31))))
           month-end (-> (month/-first-day-of-year moy leap?)
                         (+ (month/-length moy leap?))
                         (- 1))
