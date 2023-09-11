@@ -212,7 +212,7 @@
   (let [cmp (compare (:seconds this) (:seconds other-instant))]
     (if-not (zero? cmp)
       cmp
-      (- (:nanos this) (:nanos other-instant)))))
+      (math/subtract-exact (:nanos this) (:nanos other-instant)))))
 
 (extend-type Instant
   time-comparable/ITimeComparable

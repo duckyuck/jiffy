@@ -18,7 +18,8 @@
             [jiffy.protocols.local-date :as local-date]
             [jiffy.local-date :as local-date-impl]
             [jiffy.instant-impl :as instant-impl]
-            [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time])
+            [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
+            [jiffy.protocols.time-comparable :as time-comparable])
   #?(:clj (:import [jiffy.zone.zone_rules_impl ZoneRules])))
 
 (s/def ::zone-rules ::impl/zone-rules)
@@ -49,13 +50,18 @@
        :last-rules
        (map #(transition-rule/create-transition % year))))
 
+(defn greater? [x y]
+  (if (number? x)
+    (> x y)
+    (pos? (time-comparable/compare-to x y))))
+
 (defn find-index [coll object]
   (->> coll
        sort
        (map-indexed (fn [idx n]
                       (cond
                         (= n object) idx
-                        (or (> n object)) (- (- idx) 1)
+                        (or (greater? n object)) (- (- idx) 1)
                         (= idx (dec (count coll))) (- (- idx) 2)
                         )))
        (drop-while nil?)

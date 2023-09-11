@@ -1,6 +1,8 @@
 (ns jiffy.chrono.chrono-local-date-defaults
   (:refer-clojure :exclude [format ])
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.specs :as j]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
@@ -17,7 +19,9 @@
             [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
             [jiffy.protocols.temporal.temporal-field :as temporal-field]
             [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]))
+            [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
+            [jiffy.temporal.chrono-field :as chrono-field]
+            [jiffy.temporal.chrono-unit :as chrono-unit]))
 
 (s/def ::chrono-local-date ::chrono-local-date/chrono-local-date)
 
@@ -38,9 +42,17 @@
 
 ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L386
-(s/def ::is-supported-args ::j/wip)
-(defn -is-supported [this is-supported--overloaded-param] (wip ::-is-supported))
-(s/fdef -is-supported :args ::is-supported-args :ret ::j/boolean)
+(def-method -is-supported ::j/boolean
+  [this ::chrono-local-date/chrono-local-date
+   field-or-unit (s/or ::temporal-field/temporal-field
+                       ::temporal-unit/temporal-unit)]
+  (if (satisfies? temporal-field/ITemporalField field-or-unit)
+    (if (satisfies? chrono-field/IChronoField field-or-unit)
+      (temporal-field/is-date-based field-or-unit)
+      (and field-or-unit (temporal-field/is-supported-by field-or-unit this)))
+    (if (chrono-unit/chrono-unit? field-or-unit)
+      (temporal-unit/is-date-based field-or-unit)
+      (and field-or-unit (temporal-unit/is-supported-by field-or-unit this)))))
 
 (s/def ::with-args ::j/wip)
 (defn -with

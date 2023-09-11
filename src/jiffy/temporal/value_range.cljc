@@ -111,8 +111,8 @@
 ;; Java example: "Invalid value for NanoOfSecond (valid values 0 - -1/0): -1"
 (defn --gen-invalid-field-message [this field value]
   (if field
-    (str "Invalid value for " field " (valid values " this "): " value)
-    (str "Invalid value (valid values " this "): " value)))
+    (str "Invalid value for " (pr-str field) " (valid values " (pr-str this) "): " (pr-str value))
+    (str "Invalid value (valid values " (pr-str this) "): " (pr-str value))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L309
 (s/def ::check-valid-value-args (args ::j/long ::temporal-field/temporal-field))

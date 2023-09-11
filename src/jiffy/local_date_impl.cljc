@@ -1,14 +1,47 @@
 (ns jiffy.local-date-impl
-  (:require [clojure.spec.alpha :as s]
+  (:require #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
+            [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.specs :as j]
-            [jiffy.temporal.chrono-field :as chrono-field]))
+            [jiffy.temporal.chrono-field :as chrono-field]
+            [clojure.spec.alpha :as s]
+            [jiffy.protocols.month :as month]
+            [jiffy.asserts :as asserts]
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.chrono.iso-chronology :as iso-chronology-2]))
 
-(defrecord LocalDate [year month day])
+(def-record LocalDate ::local-date-record
+  [year ::j/year
+   month ::j/month-of-year
+   day ::j/day-of-month])
 
-(s/def ::create-args (s/tuple ::j/year ::j/month-of-year ::j/day-of-month))
-(def create ->LocalDate)
-(s/def ::local-date (j/constructor-spec LocalDate create ::create-args))
-(s/fdef create :args ::create-args :ret ::local-date)
+(defn local-date? [x] (instance? LocalDate x))
+
+(defn valid? [{:keys [year month day]}]
+  (try
+    (chrono-field/check-valid-value chrono-field/YEAR year)
+    (chrono-field/check-valid-value chrono-field/MONTH_OF_YEAR month)
+    (chrono-field/check-valid-value chrono-field/DAY_OF_MONTH day)
+    (or (<= day 28)
+        (let [dom (cond
+                    (= month 2) (if (chronology/is-leap-year iso-chronology-2/INSTANCE year)
+                                  29
+                                  28)
+                    (#{4 6 9 11} month) 30
+                    :else 31)]
+          (<= day dom)))
+    (catch Exception e
+      false)))
+
+(s/def ::local-date (s/and ::local-date-record valid?))
+
+(def-constructor create ::local-date
+  [year ::j/year
+   month ::j/month-of-year
+   day ::j/day-of-month]
+  (if (valid? {:year year :month month :day day})
+    (->LocalDate year month day)
+    (throw (ex DateTimeException (str "Invalid date. Month: '" month "', day: '" day "'")))))
 
 (def DAYS_PER_CYCLE 146097)
 (def DAYS_0000_TO_1970 (- (* DAYS_PER_CYCLE 5) ( + (* 30 365) 7)))
@@ -17,30 +50,46 @@
 
 (defn- --day-est [zero-day year-est]
   (- zero-day (-> (* 365 year-est)
-                  (+ (/ year-est 4))
-                  (- (/ year-est 100))
-                  (+ (/ year-est 400)))))
+                  (+ (long (/ year-est 4)))
+                  (- (long (/ year-est 100)))
+                  (+ (long (/ year-est 400))))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L340
-(s/def ::of-epoch-day-args (args ::j/long))
-(defn of-epoch-day [epoch-day]
+(def-constructor of-epoch-day ::local-date
+  [epoch-day ::j/long]
+  (chrono-field/check-valid-value chrono-field/EPOCH_DAY epoch-day)
   (let [[adjust zero-day] (let [zero-day (- (+ epoch-day DAYS_0000_TO_1970) 60)]
                             (if-not (neg? zero-day)
                               [0 zero-day]
-                              (let [adjust-cycles (/ (inc zero-day) (dec DAYS_PER_CYCLE))]
+                              (let [adjust-cycles (dec (long (/ (inc zero-day) DAYS_PER_CYCLE)))]
                                 [(* adjust-cycles 400)
                                  (+ zero-day (* (- adjust-cycles) DAYS_PER_CYCLE))])))
-        [year-est day-est] (let [year-est (/ (+ (* 400 zero-day) 591) DAYS_PER_CYCLE)
+        [year-est day-est] (let [year-est (long (/ (+ (* 400 zero-day) 591) DAYS_PER_CYCLE))
                                  day-est (--day-est zero-day year-est)]
                              (if-not (neg? day-est)
                                [year-est day-est]
                                [(dec year-est) (--day-est zero-day (dec year-est))]))
         year-est (+ year-est adjust)
         march-doy-0 day-est
-        march-month-0 (/ (+ (* march-doy-0 5) 2) 153)
+        march-month-0 (long (/ (+ (* march-doy-0 5) 2) 153))
         month (-> march-month-0 (+ 2) (mod 12) (+ 1))
-        dom (- march-doy-0 (-> march-month-0 (* 306) (+ 5) (/ 10) (+ 1)))
-        year-est (+ year-est (/ march-month-0 10))
+        dom (-> march-doy-0
+                (- (-> march-month-0 (* 306) (+ 5) (/ 10) long))
+                (+ 1))
+        year-est (+ year-est (long (/ march-month-0 10)))
         year (chrono-field/check-valid-int-value chrono-field/YEAR year-est)]
     (create year month dom)))
-(s/fdef of-epoch-day :args ::of-epoch-day-args :ret ::local-date)
+
+(def-constructor of ::local-date
+  [year ::j/year
+   month (s/or :number ::j/month-of-yearh
+               :month ::month/month)
+   day-of-month ::j/day-of-month]
+  (chrono-field/check-valid-value chrono-field/YEAR year)
+  (chrono-field/check-valid-value chrono-field/DAY_OF_MONTH day-of-month)
+  (if (satisfies? month/IMonth month)
+    (asserts/require-non-nil month "month")
+    (chrono-field/check-valid-value chrono-field/MONTH_OF_YEAR month))
+  (if (satisfies? month/IMonth month)
+    (create year (month/get-value month) day-of-month)
+    (create year month day-of-month)))

@@ -10,23 +10,11 @@
             [jiffy.protocols.time-comparable :as time-comparable]
             [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.protocols.zone.zone-offset-transition :as zone-offset-transition]
-            [jiffy.specs :as j]))
+            [jiffy.specs :as j]
+            [jiffy.zone.zone-offset-transition-impl :refer [#?@(:cljs [ZoneOffsetTransitionInstant])] :as impl])
+  #?(:clj (:import [jiffy.zone.zone_offset_transition_impl ZoneOffsetTransition])))
 
-(def-record ZoneOffsetTransition ::zone-offset-transition
-  [epoch-second ::j/pos-int
-   transition ::local-date-time/local-date-time
-   offset-before ::zone-offset/zone-offset
-   offset-after ::zone-offset/zone-offset])
-
-(def-constructor create ::zone-offset-transition
-  [transition ::local-date-time/local-date-time
-   offset-before ::zone-offset/zone-offset
-   offset-after ::zone-offset/zone-offset]
-  (->ZoneOffsetTransition
-   (chrono-local-date-time/to-epoch-second transition offset-before)
-   transition
-   offset-before
-   offset-after))
+(s/def ::zone-offset-transition ::impl/zone-offset-transition)
 
 (defmacro args [& x] `(s/tuple ::zone-offset-transition ~@x))
 
@@ -111,5 +99,6 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneOffsetTransition.java#L138
 (s/def ::of-args (args ::local-date-time/local-date-time ::zone-offset/zone-offset ::zone-offset/zone-offset))
-(defn of [transition offset-before offset-after] (wip ::of))
+(defn of [transition offset-before offset-after]
+  (impl/of transition offset-before offset-after))
 (s/fdef of :args ::of-args :ret ::zone-offset-transition)

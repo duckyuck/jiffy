@@ -4,7 +4,9 @@
   )
 
 (test-proto-fn jiffy.zone.zone-rules jiffy.protocols.zone.zone-rules/is-fixed-offset)
+
 ;; (test-proto-fn! jiffy.zone.zone-rules jiffy.protocols.zone.zone-rules/get-offset)
+
 ;; (test-proto-fn! jiffy.zone.zone-rules jiffy.protocols.zone.zone-rules/get-valid-offsets)
 ;; (test-proto-fn! jiffy.zone.zone-rules jiffy.protocols.zone.zone-rules/get-transition)
 ;; (test-proto-fn! jiffy.zone.zone-rules jiffy.protocols.zone.zone-rules/get-standard-offset)

@@ -6,6 +6,7 @@
             [jiffy.day-of-week :as day-of-week]
             [jiffy.duration :as duration-impl]
             [jiffy.instant-impl :as instant-impl]
+            [jiffy.local-date-impl :as local-date-impl]
             [jiffy.local-date-time-impl :as local-date-time-impl]
             [jiffy.local-time-impl :as local-time-impl]
             [jiffy.month :as month]
@@ -70,6 +71,22 @@
 (s/def ::ZoneOffsetTransition/zone-offset-transition ::zone-offset-transition/zone-offset-transition)
 (s/def ::ZoneOffsetTransitionRule/zone-offset-transition-rule ::transition-rule/zone-offset-transition-rule)
 (s/def ::zone-rules/zone-rules (set (vals @zone-rules-store/zone-id->rules)))
+
+(s/def ::local-date/local-date ::local-date-impl/local-date)
+
+;; (->> (s/gen (s/and ::local-date-impl/local-date
+;;                    local-date-impl/valid?
+;;                    ))
+;;      (gen/sample ))
+
+;; (->> (s/tuple ~@fields-spec)
+;;      s/gen
+;;      (gen/such-that (fn [~(vec field-names)]
+;;                       (if (seq ~args)
+;;                         (do
+;;                           ~@args)
+;;                         true)))
+;;      (gen/fmap #(apply constructor# %)))
 
 (s/def ::clock/clock
   (s/with-gen #(satisfies? clock/IClock %)

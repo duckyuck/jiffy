@@ -10,6 +10,7 @@
             [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
             [jiffy.protocols.temporal.temporal :as temporal]
             [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.month :as month]
             [jiffy.protocols.temporal.value-range :as value-range]
             [jiffy.specs :as j]
             [jiffy.temporal.chrono-field :as chrono-field]
@@ -17,17 +18,6 @@
             [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.temporal.temporal-query :as temporal-query]))
-
-(defprotocol IMonth
-  (get-value [this])
-  (get-display-name [this style locale])
-  (plus [this months])
-  (minus [this months])
-  (length [this leap-year])
-  (min-length [this])
-  (max-length [this])
-  (first-day-of-year [this leap-year])
-  (first-month-of-quarter [this]))
 
 (defrecord Month [ordinal enum-name])
 
@@ -55,7 +45,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Month.java
 (s/def ::values-args empty?)
 (defn values [] (sort-by :ordinal (vals @enums)))
-(s/fdef values :ret (s/coll-of #(satisfies? IMonth %)))
+(s/fdef values :ret (s/coll-of #(satisfies? month/IMonth %)))
 
 (defmacro args [& x] `(s/tuple ::month ~@x))
 
@@ -137,7 +127,7 @@
 (s/fdef -first-month-of-quarter :args ::first-month-of-quarter-args :ret ::month)
 
 (extend-type Month
-  IMonth
+  month/IMonth
   (get-value [this] (-get-value this))
   (get-display-name [this style locale] (-get-display-name this style locale))
   (plus [this months] (-plus this months))

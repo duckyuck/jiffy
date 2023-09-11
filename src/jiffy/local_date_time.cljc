@@ -41,7 +41,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L749
 (def-method -get-year ::j/int
   [this ::local-date-time]
-  (wip ::-get-year))
+  (-> this :date :year))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L763
 (def-method -get-month-value ::j/int
@@ -287,8 +287,13 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L1819
 (def-method -compare-to ::j/int
   [this ::local-date-time
-   compare-to--overloaded-param ::chrono-local-date-time/chrono-local-date-time]
-  (wip ::-compare-to))
+   other ::chrono-local-date-time/chrono-local-date-time]
+  (if-not (satisfies? local-date-time/ILocalDateTime other)
+    (chrono-local-date-time-defaults/-compare-to this other)
+    (let [cmp (time-comparable/compare-to (:date this) (:date other))]
+      (if (zero? cmp)
+        (time-comparable/compare-to (:time this) (:time other))
+        cmp))))
 
 (extend-type LocalDateTime
   time-comparable/ITimeComparable

@@ -205,22 +205,25 @@
 (defmethod jiffy->java ZoneRules [arg]
   (jiffy->zone-rules arg))
 
-(defmethod jiffy->java ZoneOffsetTransitionRule [{:keys [time-definition
-                                                         midnight-end-of-day
-                                                         local-time
-                                                         month
-                                                         day-of-month-indicator
-                                                         day-of-week
-                                                         standard-offset
-                                                         offset-after
-                                                         offset-before]}]
+(defn jiffy->zone-offset-transition-rule [{:keys [time-definition
+                                                  midnight-end-of-day
+                                                  local-time
+                                                  month
+                                                  day-of-month-indicator
+                                                  day-of-week
+                                                  standard-offset
+                                                  offset-after
+                                                  offset-before]}]
   (java.time.zone.ZoneOffsetTransitionRule/of
-    (jiffy->java month)
-    (jiffy->java day-of-month-indicator)
-    (jiffy->java day-of-week)
-    (jiffy->java local-time)
-    (jiffy->java midnight-end-of-day)
-    (java.time.zone.ZoneOffsetTransitionRule$TimeDefinition/valueOf (name time-definition))
-    (jiffy->java standard-offset)
-    (jiffy->java offset-after)
-    (jiffy->java offset-before)))
+   (jiffy->java month)
+   (jiffy->java day-of-month-indicator)
+   (jiffy->java day-of-week)
+   (jiffy->java local-time)
+   (jiffy->java midnight-end-of-day)
+   (java.time.zone.ZoneOffsetTransitionRule$TimeDefinition/valueOf (name time-definition))
+   (jiffy->java standard-offset)
+   (jiffy->java offset-after)
+   (jiffy->java offset-before)))
+
+(defmethod jiffy->java ZoneOffsetTransitionRule [arg]
+  (jiffy->zone-offset-transition-rule arg))

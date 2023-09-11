@@ -1,6 +1,7 @@
 (ns jiffy.dev.defs-clj
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
+            [jiffy.protocols.time-comparable :as time-comparable]
             [orchestra.core :refer [defn-spec]]
             ;; [orchestra.spec.test :refer [instrument unstrument]]
             [clojure.string :as str]))
@@ -14,7 +15,14 @@
                  "." record)
         tag-reader-fn (symbol (str 'map-> record))]
     `(do
-       (defrecord ~record ~(vec field-names))
+       (defrecord ~record
+           ~(vec field-names)
+         java.lang.Comparable
+         (compareTo [this# other#]
+           (if (satisfies? time-comparable/ITimeComparable this#)
+             (time-comparable/compare-to this# other#)
+             (throw (ex-info (str "Object does not implement ITimeComparable: " this#)
+                             {:this this# :other other#})))))
        (letfn [(constructor# ~constructor-args
                  (new ~record ~@constructor-args))]
          (s/def ~spec-name
@@ -64,5 +72,24 @@
   (gen/sample (s/gen integer?))
 
   (def-record MyRecord ::my-record [a number? b keyword?])
+
+  (extend-type MyRecord
+    time-comparable/ITimeComparable
+    (compare-to [this other]
+      (compare (:a this) (:a other))))
+
+  (= (MyRecord. 1 :foo)
+     (MyRecord. 2 :bar))
+
+  [(compare (MyRecord. 1 :foo)
+            (MyRecord. 2 :bar))
+
+   (compare (MyRecord. 1 :bar)
+            (MyRecord. 1 :foo))
+
+   (compare (MyRecord. 2 :bar)
+            (MyRecord. 1 :foo))]
+
+
 
   )
