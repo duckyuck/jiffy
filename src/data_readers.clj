@@ -15,5 +15,6 @@
  jiffy/zone-rules jiffy.edn-clj/zone-rules
  jiffy/zone-offset-transition-rule jiffy.edn-clj/zone-offset-transition-rule
  jiffy/zoned-date-time jiffy.edn-clj/zoned-date-time
+ jiffy/zone-region jiffy.edn-clj/zone-region
 
  }

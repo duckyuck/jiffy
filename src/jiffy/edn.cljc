@@ -8,6 +8,7 @@
             [jiffy.local-date-impl #?@(:cljs [:refer [LocalDate]])]
             [jiffy.local-time-impl #?@(:cljs [:refer [LocalTime]])]
             [jiffy.local-date-time-impl #?@(:cljs [:refer [LocalDateTime]])]
+            [jiffy.zone-region-impl #?@(:cljs [:refer [ZonedRegion]])]
             [jiffy.month #?@(:cljs [:refer [Month]])]
             [jiffy.period #?@(:cljs [:refer [Period]])]
             [jiffy.temporal.temporal-queries]
@@ -29,6 +30,7 @@
                    [jiffy.local_date_impl LocalDate]
                    [jiffy.local_time_impl LocalTime]
                    [jiffy.local_date_time_impl LocalDateTime]
+                   [jiffy.zone_region_impl ZoneRegion]
                    [jiffy.month Month]
                    [jiffy.period Period]
                    [jiffy.temporal.value_range ValueRange]
@@ -125,5 +127,10 @@
     {:record ZoneRules
      :read-fn 'jiffy.zone.zone-rules-impl/map->ZoneRules
      :write-fn '->map}
+
+    :zone-region
+    {:record ZoneRegion
+     :read-fn 'jiffy.zone-region-impl/of-id*
+     :write-fn :id}
 
     })
