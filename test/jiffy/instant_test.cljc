@@ -16,11 +16,14 @@
 ;; (test-proto-fn! jiffy.instant jiffy.protocols.instant/at-zone)
 (test-proto-fn jiffy.instant jiffy.protocols.instant/is-after)
 (test-proto-fn jiffy.instant jiffy.protocols.instant/is-before)
+
 (test-proto-fn jiffy.instant jiffy.protocols.time-comparable/compare-to)
+
 (test-proto-fn jiffy.instant jiffy.protocols.temporal.temporal/with)
 (test-proto-fn jiffy.instant jiffy.protocols.temporal.temporal/plus)
 (test-proto-fn jiffy.instant jiffy.protocols.temporal.temporal/minus)
 (test-proto-fn jiffy.instant jiffy.protocols.temporal.temporal/until)
+
 (test-proto-fn jiffy.instant jiffy.protocols.temporal.temporal-accessor/is-supported)
 (test-proto-fn jiffy.instant jiffy.protocols.temporal.temporal-accessor/range)
 (test-proto-fn jiffy.instant jiffy.protocols.temporal.temporal-accessor/get)

@@ -46,4 +46,10 @@
 
 (test-proto-fn jiffy.local-time jiffy.protocols.temporal.temporal-adjuster/adjust-into)
 
-
+(test-static-fn jiffy.local-time/of-nano-of-day)
+(test-static-fn jiffy.local-time/of-instant)
+;; (test-static-fn! jiffy.local-time/now)
+(test-static-fn jiffy.local-time/of)
+(test-static-fn jiffy.local-time/of-second-of-day)
+(test-static-fn jiffy.local-time/from)
+;; (test-static-fn! jiffy.local-time/parse)

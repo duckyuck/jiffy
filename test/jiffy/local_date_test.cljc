@@ -62,7 +62,6 @@
 (test-static-fn jiffy.local-date/of)
 (test-static-fn jiffy.local-date/of-year-day)
 (test-static-fn! jiffy.local-date/of-instant)
-
 (test-static-fn jiffy.local-date/of-epoch-day)
 (test-static-fn! jiffy.local-date/from)
 ;; (test-static-fn! jiffy.local-date/parse)

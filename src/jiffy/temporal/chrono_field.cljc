@@ -15,6 +15,7 @@
             [jiffy.temporal.value-range :as value-range-impl]
             [jiffy.year-impl :as year]))
 
+;; TODO: remove protocol?
 (defprotocol IChronoField
   (check-valid-value [this value])
   (check-valid-int-value [this value]))

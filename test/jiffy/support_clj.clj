@@ -217,15 +217,24 @@
            (for [args# ~args-samples]
              (let [jiffy-result# (trycatch (invoke-jiffy ~jiffy-fn args#))
                    java-args# (mapv jiffy->java args#)
+                   ;; (try
+                   ;;   (mapv jiffy->java args#)
+                   ;;   (catch Exception e#
+                   ;;     (throw (ex-info "Failed to convert from Jiffy to Java"
+                   ;;                     {:failed/jiffy-args args#
+                   ;;                      :failed/jiffy-result jiffy-result#}))))
                    result# {:failed/jiffy-args args#
                             :failed/jiffy-result jiffy-result#
                             :failed/java-args java-args#}
                    java-result# (trycatch (invoke-java ~java-fn java-args# {:static? ~static?}))]
-               (when-not (or (precision-exception? jiffy-result#)
-                             (and (matching-types? jiffy-result# java-result#)
-                                  (or (conversion/same? jiffy-result# java-result#)
-                                      (conversion/same? jiffy-result# java-result#))))
-                 (assoc result# :failed/java-result java-result#))))]
+               (try
+                 (when-not (or (precision-exception? jiffy-result#)
+                               (and (matching-types? jiffy-result# java-result#)
+                                    (or (conversion/same? jiffy-result# java-result#)
+                                        (conversion/same? jiffy-result# java-result#))))
+                   (assoc result# :failed/java-result java-result#))
+                 (catch Exception e#
+                   (assoc result# :failed/java-result e#)))))]
        (or (first (remove nil? results#))
            [(count results#) :success]))))
 

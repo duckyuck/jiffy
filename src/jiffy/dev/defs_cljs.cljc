@@ -14,29 +14,12 @@
         constructor-args (vec (repeatedly (count fields) gensym))]
     `(do
        (defrecord ~record ~(vec field-names))
-       ;; (letfn [(constructor# ~constructor-args
-       ;;           (new ~record ~@constructor-args))]
-       ;;   (s/def ~spec-name
-       ;;     (s/with-gen #(instance? ~record %)
-       ;;       (fn [] (->> (s/tuple ~@fields-spec)
-       ;;                   s/gen
-       ;;                   (gen/such-that (fn [~(vec field-names)]
-       ;;                                    (if (seq ~args)
-       ;;                                      (do
-       ;;                                        ~@args)
-       ;;                                      true)))
-       ;;                   (gen/fmap #(apply constructor# %)))))))
        (letfn [(constructor# ~constructor-args
                  (new ~record ~@constructor-args))]
          (s/def ~spec-name
            (s/with-gen #(instance? ~record %)
              (fn [] (->> (s/tuple ~@fields-spec)
                          s/gen
-                         (gen/such-that (fn [~(vec field-names)]
-                                          (if (seq ~args)
-                                            (do
-                                              ~@args)
-                                            true)))
                          (gen/fmap #(apply constructor# %)))))))
        ~record)))
 

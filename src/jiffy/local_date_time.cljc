@@ -43,7 +43,9 @@
             [jiffy.asserts :as asserts]
             [jiffy.temporal.chrono-unit :as chrono-unit]
             [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
-            [jiffy.temporal.temporal-queries :as temporal-queries])
+            [jiffy.temporal.temporal-queries :as temporal-queries]
+            [jiffy.protocols.zone.zone-rules :as zone-rules]
+            [jiffy.clock :as clock-impl])
   #?(:clj (:import [jiffy.local_date_time_impl LocalDateTime])))
 
 (s/def ::local-date-time ::impl/local-date-time)
@@ -426,6 +428,11 @@
    offset ::zone-offset/zone-offset]
   (chrono-local-date-time-defaults/-to-epoch-second this offset))
 
+(def-method to-instant ::instant/instant
+  [this ::local-date-time
+   offset ::zone-offset/zone-offset]
+  (chrono-local-date-time-defaults/-to-instant this offset))
+
 (extend-type LocalDateTime
   chrono-local-date-time/IChronoLocalDateTime
   (to-local-date [this] (to-local-date this))
@@ -435,7 +442,12 @@
   (is-after [this other] (is-after this other))
   (is-before [this other] (is-before this other))
   (is-equal [this other] (is-equal this other))
-  (to-epoch-second [this offset] (to-epoch-second this offset)))
+
+  ;; defaults from ChronoLocalDateTime
+  (to-epoch-second [this offset] (to-epoch-second this offset))
+  (to-instant [this offset] (to-instant this offset)))
+
+;; extend with defaults from
 
 (def-method with ::local-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L917
@@ -640,13 +652,24 @@
 
 (def-constructor now ::local-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L179
-  ([] (wip ::now))
+  ([]
+   (now (clock-impl/system-default-zone)))
 
   ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L195
-  ([now--overloaded-param (s/or :zone-id ::zone-id/zone-id
-                                :clock ::clock/clock)]
-   (wip ::now)))
+  ([clock-or-zone-id (s/or :clock ::clock/clock
+                           :zone-id ::zone-id/zone-id)]
+   (if (satisfies? zone-id/IZoneId clock-or-zone-id)
+     (now (clock-impl/system clock-or-zone-id))
+     (do
+       (asserts/require-non-nil clock-or-zone-id "clock")
+       (let [now (clock/instant clock-or-zone-id)]
+         (impl/of-epoch-second (instant/get-epoch-second now)
+                               (instant/get-nano now)
+                               (-> clock-or-zone-id
+                                   clock/get-zone
+                                   zone-id/get-rules
+                                   (zone-rules/get-offset now))))))))
 
 (def-constructor of ::local-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L373
@@ -662,8 +685,7 @@
     day-of-month ::j/day-of-month
     hour ::j/hour-of-day
     minute ::j/minute-of-hour]
-   (impl/of (local-date-impl/of year month day-of-month)
-            (local-time-impl/of hour minute)))
+   (impl/of year month day-of-month hour minute))
 
   ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L260
@@ -674,8 +696,7 @@
     hour ::j/hour-of-day
     minute ::j/minute-of-hour
     second ::j/second-of-minute]
-   (impl/of (local-date-impl/of year month day-of-month)
-            (local-time-impl/of hour minute second)))
+   (impl/of year month day-of-month hour minute second))
 
   ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L285
@@ -687,21 +708,26 @@
     minute ::j/minute-of-hour
     second ::j/second-of-minute
     nano-of-second ::j/nano-of-second]
-   (impl/of (local-date-impl/of year month day-of-month)
-            (local-time-impl/of hour minute second nano-of-second))))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L393
-(def-constructor of-instant ::local-date-time
-  [instant ::instant/instant
-   zone  ::zone-id/zone-id]
-  (wip ::of-instant))
+   (impl/of year month day-of-month hour minute second nano-of-second)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L416
 (def-constructor of-epoch-second ::local-date-time
   [epoch-second ::j/long
    nano-of-second ::j/int
    offset ::zone-offset/zone-offset]
-  (wip ::of-epoch-second))
+  (impl/of-epoch-second epoch-second nano-of-second offset))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L393
+(def-constructor of-instant ::local-date-time
+  [instant ::instant/instant
+   zone  ::zone-id/zone-id]
+  (asserts/require-non-nil instant "instant")
+  (asserts/require-non-nil zone "zone")
+  (let [rules (zone-id/get-rules zone)
+        offset (zone-rules/get-offset rules instant)]
+    (of-epoch-second (instant/get-epoch-second instant)
+                     (instant/get-nano instant)
+                     offset)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L447
 (def-constructor from ::local-date-time

@@ -8,6 +8,8 @@
             [jiffy.local-date-impl #?@(:cljs [:refer [LocalDate]])]
             [jiffy.local-time-impl #?@(:cljs [:refer [LocalTime]])]
             [jiffy.local-date-time-impl #?@(:cljs [:refer [LocalDateTime]])]
+            [jiffy.zoned-date-time-impl #?@(:cljs [:refer [ZonedDateTime]])]
+            [jiffy.offset-date-time-impl #?@(:cljs [:refer [OffsetDateTime]])]
             [jiffy.zone-region-impl #?@(:cljs [:refer [ZonedRegion]])]
             [jiffy.month #?@(:cljs [:refer [Month]])]
             [jiffy.period #?@(:cljs [:refer [Period]])]
@@ -20,7 +22,6 @@
             [jiffy.zone-offset-impl #?@(:cljs [:refer [ZoneOffset]])]
             [jiffy.zone.zone-offset-transition-rule #?@(:cljs [:refer [ZoneOffsetTransitionRule]])]
             [jiffy.zone.zone-rules-impl #?@(:cljs [:refer [ZoneRules]])]
-
             )
   #?(:clj (:import [java.io Writer]
                    [jiffy.clock FixedClock]
@@ -30,6 +31,8 @@
                    [jiffy.local_date_impl LocalDate]
                    [jiffy.local_time_impl LocalTime]
                    [jiffy.local_date_time_impl LocalDateTime]
+                   [jiffy.zoned_date_time_impl ZonedDateTime]
+                   [jiffy.offset_date_time_impl OffsetDateTime]
                    [jiffy.zone_region_impl ZoneRegion]
                    [jiffy.month Month]
                    [jiffy.period Period]
@@ -132,5 +135,15 @@
     {:record ZoneRegion
      :read-fn 'jiffy.zone-region-impl/of-id*
      :write-fn :id}
+
+    :zoned-date-time
+    {:record ZonedDateTime
+     :read-fn 'jiffy.zoned-date-time-impl/map->ZonedDateTime
+     :write-fn '->map}
+
+    :offset-date-time
+    {:record OffsetDateTime
+     :read-fn 'jiffy.offset-date-time-impl/map->OffsetDateTime
+     :write-fn '->map}
 
     })

@@ -66,9 +66,9 @@
     r))
 
 (defn subtract-exact-int [x y]
-  (assert-precise-args! 'subtract-exact x y)
+  (assert-int-args! 'subtract-exact x y)
   (let [r (impl/subtract-exact x y)]
-    (assert-precise-result! 'subtract-exact r x y)
+    (assert-int-result! 'subtract-exact-int r x y)
     r))
 
 (defn to-int-exact [x]
@@ -110,3 +110,10 @@
   (when-let [r (impl/parse-long s)]
     (assert-precise-result! 'parse-long r s)
     r))
+
+(defn compare [x y]
+  (assert-precise-args! 'compare x y)
+  (cond
+    (= x y) 0
+    (< x y) -1
+    :else 1))

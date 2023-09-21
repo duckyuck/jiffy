@@ -460,19 +460,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L367
 (def-constructor from ::impl/instant
   [temporal ::temporal-accessor/temporal-accessor]
-  (if (satisfies? instant/IInstant temporal)
-    temporal
-    (try*
-     (impl/of-epoch-second
-      (temporal-accessor/get-long temporal chrono-field/INSTANT_SECONDS)
-      (temporal-accessor/get temporal chrono-field/NANO_OF_SECOND))
-     (catch :default e
-       (throw (ex DateTimeException
-                  (str "Unable to obtain Instant from TemporalAccessor: "
-                       temporal " of type " (type temporal))
-                  {:temporal temporal
-                   :type (type temporal)}
-                  e))))))
+  (impl/from temporal))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L394
 (def-constructor parse ::impl/instant

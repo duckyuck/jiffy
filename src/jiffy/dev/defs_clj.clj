@@ -15,25 +15,21 @@
                  "." record)
         tag-reader-fn (symbol (str 'map-> record))]
     `(do
-       (defrecord ~record
-           ~(vec field-names)
+       (defrecord ~record ~(vec field-names)
          java.lang.Comparable
          (compareTo [this# other#]
            (if (satisfies? time-comparable/ITimeComparable this#)
              (time-comparable/compare-to this# other#)
              (throw (ex-info (str "Object does not implement ITimeComparable: " this#)
                              {:this this# :other other#})))))
-       (letfn [(constructor# ~constructor-args
-                 (new ~record ~@constructor-args))]
+       (letfn [(constructor# [~@field-names]
+                 ~(if (seq args)
+                   `(do ~@args)
+                   `(new ~record ~@field-names)))]
          (s/def ~spec-name
            (s/with-gen #(instance? ~record %)
              (fn [] (->> (s/tuple ~@fields-spec)
                          s/gen
-                         (gen/such-that (fn [~(vec field-names)]
-                                          (if (seq ~args)
-                                            (do
-                                              ~@args)
-                                            true)))
                          (gen/fmap #(apply constructor# %)))))))
        ~record)))
 

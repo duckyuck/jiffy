@@ -51,6 +51,7 @@
 (test-proto-fn jiffy.local-date-time jiffy.protocols.chrono.chrono-local-date-time/is-before)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.chrono.chrono-local-date-time/is-equal)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.chrono.chrono-local-date-time/to-epoch-second)
+(test-proto-fn jiffy.local-date-time jiffy.protocols.chrono.chrono-local-date-time/to-instant)
 
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal/with)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal/plus)
@@ -58,22 +59,16 @@
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal/until)
 
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal-accessor/is-supported)
-
-;; "not implemented: :jiffy.local-time/-range"
-;; (test-proto-fn! jiffy.local-date-time jiffy.protocols.temporal.temporal-accessor/range)
-
-;; "not implemented: :jiffy.local-time/-get"
-;; (test-proto-fn! jiffy.local-date-time jiffy.protocols.temporal.temporal-accessor/get)
-
-;; "not implemented: :jiffy.local-time/-get-long"
-;; (test-proto-fn! jiffy.local-date-time jiffy.protocols.temporal.temporal-accessor/get-long)
-
+(test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal-accessor/range)
+(test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal-accessor/get)
+(test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal-accessor/get-long)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal-accessor/query)
+
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal-adjuster/adjust-into)
 
 ;; (test-static-fn! jiffy.local-date-time/now)
-;; (test-static-fn! jiffy.local-date-time/of)
-;; (test-static-fn! jiffy.local-date-time/of-instant)
-;; (test-static-fn! jiffy.local-date-time/of-epoch-second)
-;; (test-static-fn! jiffy.local-date-time/from)
+(test-static-fn! jiffy.local-date-time/of)
+(test-static-fn jiffy.local-date-time/of-instant)
+(test-static-fn jiffy.local-date-time/of-epoch-second)
+(test-static-fn jiffy.local-date-time/from)
 ;; (test-static-fn! jiffy.local-date-time/parse)

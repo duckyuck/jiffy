@@ -25,7 +25,8 @@
             [jiffy.math :as math]
             [jiffy.temporal.chrono-unit :as chrono-unit]
             [jiffy.temporal.temporal-queries :as temporal-queries]
-            [jiffy.temporal.chrono-field :as chrono-field]))
+            [jiffy.temporal.chrono-field :as chrono-field]
+            [jiffy.instant-impl :as instant-impl]))
 
 (s/def ::chrono-local-date-time ::chrono-local-date-time/chrono-local-date-time)
 
@@ -109,22 +110,25 @@
    formatter ::date-time-formatter/date-time-formatter]
   (wip ::-format))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L452
-(def-method -to-instant ::instant/instant
-  [this ::chrono-local-date-time
-   offset ::zone-offset/zone-offset]
-  (wip ::-to-instant))
-
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L470
 (def-method -to-epoch-second ::j/long
   [this ::chrono-local-date-time
    offset ::zone-offset/zone-offset]
   (let [epoch-day (-> this chrono-local-date-time/to-local-date chrono-local-date/to-epoch-day)
-        secs (->> this
-                  chrono-local-date-time/to-local-time
-                  local-time/to-second-of-day
-                  (math/add-exact (math/multiply-exact epoch-day 86400)))]
+        secs (-> this
+                 chrono-local-date-time/to-local-time
+                 local-time/to-second-of-day
+                 (math/add-exact (math/multiply-exact epoch-day 86400)))]
     (->> offset zone-offset/get-total-seconds (math/subtract-exact secs))))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L452
+(def-method -to-instant ::instant/instant
+  [this ::chrono-local-date-time
+   offset ::zone-offset/zone-offset]
+  (instant-impl/of-epoch-second (-to-epoch-second this offset)
+                                (-> this
+                                    chrono-local-date-time/to-local-time
+                                    local-time/get-nano)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L506
 (def-method -compare-to ::j/int

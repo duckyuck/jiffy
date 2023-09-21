@@ -648,7 +648,7 @@
            this
            (with-year this (- 1 (get-year this))))
 
-         (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:this this :field field})))))))
+         (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " (pr-str field)) {:this this :field field})))))))
 
 (defn with-field [this field new-value]
   (if (instance? java.time.temporal.ChronoField field)

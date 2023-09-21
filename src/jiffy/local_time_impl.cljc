@@ -33,13 +33,14 @@
    nano ::j/nano-of-second]
   (->LocalTime hour minute second nano))
 
-(def MIDNIGHT (create 0 0 0 0))
-
-(defmacro args [& x] `(s/tuple ::local-time ~@x))
+(def MIN (create 0 0 0 0))
+(def MIDNIGHT MIN)
+(def MAX (create 23 59 59 999999999))
+(def NOON (create 12 0 0 0))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L397
-(s/def ::of-nano-of-day-args (args ::j/long))
-(defn of-nano-of-day [nano-of-day]
+(def-constructor of-nano-of-day ::local-time
+  [nano-of-day ::j/long]
   (chrono-field/check-valid-value chrono-field/NANO_OF_DAY nano-of-day)
   (let [hours (int (/ nano-of-day NANOS_PER_HOUR))
         nanos (- nano-of-day (* hours NANOS_PER_HOUR))
@@ -48,7 +49,6 @@
         seconds (int (/ nanos NANOS_PER_SECOND))
         nanos (- nanos (* seconds NANOS_PER_SECOND))]
     (create hours minutes seconds nanos)))
-(s/fdef of-nano-of-day :args ::of-nano-of-day-args :ret ::local-time)
 
 (def-constructor of ::local-time
   ([hour ::j/hour-of-day

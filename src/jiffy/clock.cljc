@@ -120,9 +120,8 @@
   (create-system-clock (zone-id/system-default)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L202
-(s/def ::system-args (s/tuple ::ZoneId/zone-id))
-(defn system [zone] (wip ::system))
-(s/fdef system :args ::system-args :ret ::clock)
+(defn system [zone]
+  (create-system-clock zone))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Clock.java#L231
 (s/def ::tick-millis-args (s/tuple ::ZoneId/zone-id))

@@ -1,9 +1,8 @@
 (ns jiffy.local-time
-  (:refer-clojure :exclude [format range])
+  (:refer-clojure :exclude [format range get])
   (:require [clojure.spec.alpha :as s]
             #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
-            [jiffy.asserts :refer [require-non-nil]]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.exception :refer [ex JavaNullPointerException UnsupportedTemporalTypeException]]
             [jiffy.clock :as clock-impl]
@@ -36,20 +35,15 @@
             [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
             [jiffy.local-time-impl-impl :as impl-impl]
             [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
-            [jiffy.temporal.temporal-queries :as temporal-queries])
+            [jiffy.temporal.temporal-queries :as temporal-queries]
+            [jiffy.asserts :as asserts]
+            [jiffy.protocols.zone.zone-rules :as zone-rules])
   #?(:clj (:import [jiffy.local_time_impl LocalTime])))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L132
-(def MIN ::MIN--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L137
-(def MAX ::MAX--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L141
+(def MIN impl/MIN)
+(def MAX impl/MAX)
 (def MIDNIGHT impl/MIDNIGHT)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L145
-(def NOON ::NOON--not-implemented)
+(def NOON impl/NOON)
 
 (def HOURS_PER_DAY impl/HOURS_PER_DAY)
 (def MINUTES_PER_HOUR impl/MINUTES_PER_HOUR)
@@ -144,9 +138,9 @@
       (create (:hour this) (:minute this) (:second this) nano-of-second))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L397
-(s/def ::of-nano-of-day-args ::impl/of-nano-of-day-args)
-(def of-nano-of-day #'impl/of-nano-of-day)
-(s/fdef of-nano-of-day :args ::of-nano-of-day-args :ret ::local-time)
+(def-constructor of-nano-of-day ::local-time
+  [nano-of-day ::j/long]
+  (impl/of-nano-of-day nano-of-day))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L971
 (def-method truncated-to ::local-time
@@ -261,7 +255,7 @@
 (def-method format string?
   [this ::local-time
    formatter ::date-time-formatter/date-time-formatter]
-  (require-non-nil formatter "formatter")
+  (asserts/require-non-nil formatter "formatter")
   (date-time-formatter/format formatter this))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1448
@@ -281,8 +275,8 @@
   [this ::local-time
    date ::local-date/local-date
    offset ::zone-offset/zone-offset]
-  (require-non-nil date "date")
-  (require-non-nil offset "offset")
+  (asserts/require-non-nil date "date")
+  (asserts/require-non-nil offset "offset")
   (-> (chrono-local-date/to-epoch-day date)
       (math/multiply-exact 86400)
       (math/add-exact (to-second-of-day this))
@@ -558,7 +552,15 @@
 (def-constructor of-instant ::local-time
   [instant ::instant/instant
    zone ::zone-id/zone-id]
-  (wip ::of-instant))
+  (asserts/require-non-nil instant "instant")
+  (asserts/require-non-nil zone "zone")
+  (of-nano-of-day (-> (instant/get-epoch-second instant)
+                      (math/add-exact (-> (zone-id/get-rules zone)
+                                          (zone-rules/get-offset instant)
+                                          zone-offset/get-total-seconds))
+                      (math/floor-mod SECONDS_PER_DAY)
+                      (math/multiply-exact NANOS_PER_SECOND)
+                      (math/add-exact (instant/get-nano instant)))))
 
 (def-constructor now ::local-time
   ([]
@@ -568,10 +570,10 @@
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L263
   ([clock-or-zone-id (s/or :clock ::clock/clock
                            :zone-id ::zone-id/zone-id)]
-   (case (type clock-or-zone-id)
-     ZoneId (now (clock-impl/system clock-or-zone-id))
-     Clock (of-instant (clock/instant clock-or-zone-id)
-                       (clock/get-zone clock-or-zone-id)))))
+   (condp satisfies? clock-or-zone-id
+     zone-id/IZoneId (now (clock-impl/system clock-or-zone-id))
+     clock/IClock (of-instant (clock/instant clock-or-zone-id)
+                              (clock/get-zone clock-or-zone-id)))))
 
 (def-constructor of ::local-time
   ([hour ::j/hour-of-day
@@ -592,7 +594,12 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L379
 (def-constructor of-second-of-day ::local-time
   [second-of-day ::j/long]
-  (wip ::of-second-of-day))
+  (chrono-field/check-valid-value chrono-field/SECOND_OF_DAY second-of-day)
+  (let [hours (long (/ second-of-day SECONDS_PER_HOUR))
+        second-of-day (- second-of-day (math/multiply-exact-int hours SECONDS_PER_HOUR))
+        minutes (long (/ second-of-day SECONDS_PER_MINUTE))
+        second-of-day (- second-of-day (math/multiply-exact-int minutes SECONDS_PER_MINUTE))]
+    (impl/create hours minutes second-of-day 0)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L426
 (def-constructor from ::local-time

@@ -8,6 +8,8 @@
             [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
             [jiffy.specs :as j]))
 
+;; TODO: remove this ns and protocol. Only used indirectly to support Dates for other chronologies
+
 (defrecord ChronoPeriodImpl [])
 
 (s/def ::create-args ::j/wip)

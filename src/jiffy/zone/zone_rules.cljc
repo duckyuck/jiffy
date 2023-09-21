@@ -167,13 +167,18 @@
 (def-method get-valid-offsets ::j/wip
   [this ::zone-rules
    local-date-time ::local-date-time/local-date-time]
-  (wip ::-get-valid-offsets))
+  (let [info (get-offset-info this local-date-time)]
+    (if (satisfies? transition/IZoneOffsetTransition info)
+      (transition/get-valid-offsets info)
+      [info])))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRules.java#L628
 (def-method get-transition ::zone-offset-transition/zone-offset-transition
   [this ::zone-rules
    local-date-time ::local-date-time/local-date-time]
-  (wip ::-get-transition))
+  (let [info (get-offset-info this local-date-time)]
+    (when (satisfies? transition/IZoneOffsetTransition info)
+      info)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRules.java#L749
 (def-method get-standard-offset ::zone-offset/zone-offset
@@ -197,7 +202,8 @@
 (def-method is-valid-offset ::j/boolean
   [this ::zone-rules
    local-date-time ::local-date-time/local-date-time
-   offset ::zone-offset/zone-offset])
+   offset ::zone-offset/zone-offset]
+  (some #{offset} (get-valid-offsets this local-date-time)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRules.java#L835
 (def-method next-transition ::zone-offset-transition/zone-offset-transition
