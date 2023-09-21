@@ -2,12 +2,12 @@
   (:require #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
-            [jiffy.local-time-impl :refer [NANOS_PER_SECOND]]
+            [jiffy.local-time-impl :as local-time-impl]
             [jiffy.math :as math]
-            [jiffy.specs :as j]
             [jiffy.precision :as precision]
             [jiffy.protocols.instant :as instant]
             [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
+            [jiffy.specs :as j]
             [jiffy.temporal.chrono-field :as chrono-field]))
 
 (def-record Instant ::instant [seconds ::j/second nanos ::j/nano])
@@ -49,10 +49,9 @@
 
   ([epoch-second nano-adjustment]
    (create
-    (math/add-exact epoch-second (math/floor-div nano-adjustment NANOS_PER_SECOND))
-    (math/floor-mod nano-adjustment NANOS_PER_SECOND))))
+    (math/add-exact epoch-second (math/floor-div nano-adjustment local-time-impl/NANOS_PER_SECOND))
+    (math/floor-mod nano-adjustment local-time-impl/NANOS_PER_SECOND))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Instant.java#L367
 (def-constructor from ::instant
   [temporal ::temporal-accessor/temporal-accessor]
   (if (satisfies? instant/IInstant temporal)

@@ -36,4 +36,4 @@
 (test-static-fn jiffy.instant/of-epoch-second)
 (test-static-fn jiffy.instant/of-epoch-milli)
 (test-static-fn jiffy.instant/from)
-;; (test-static-fn jiffy.instant/parse)
+;; (test-static-fn! jiffy.instant/parse)
