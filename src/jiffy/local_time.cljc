@@ -61,7 +61,6 @@
 
 (s/def ::local-time ::impl/local-time)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L673
 (def-method to-nano-of-day ::j/long
   [this ::local-time]
   (+ (* (:hour this) NANOS_PER_HOUR)
@@ -69,7 +68,6 @@
      (* (:second this) NANOS_PER_SECOND)
      (:nano this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L692
 (def-method to-second-of-day ::j/int
   [this ::local-time]
   (math/add-exact
@@ -77,27 +75,22 @@
                    (math/multiply-exact (:minute this) SECONDS_PER_MINUTE))
    (:second this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L710
 (def-method get-hour ::j/int
   [this ::local-time]
   (:hour this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L719
 (def-method get-minute ::j/int
   [this ::local-time]
   (:minute this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L728
 (def-method get-second ::j/int
   [this ::local-time]
   (:second this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L737
 (def-method get-nano ::j/int
   [this ::local-time]
   (:nano this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L891
 (def-method with-hour ::local-time
   [this ::local-time
    hour ::j/hour-of-day]
@@ -107,7 +100,6 @@
       (chrono-field/check-valid-value chrono-field/HOUR_OF_DAY hour)
       (create hour (:minute this) (:second this) (:nano this)))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L908
 (def-method with-minute ::local-time
   [this ::local-time
    minute ::j/minute-of-hour]
@@ -117,7 +109,6 @@
       (chrono-field/check-valid-value chrono-field/MINUTE_OF_HOUR minute)
       (create (:hour this) minute (:second this) (:nano this)))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L925
 (def-method with-second ::local-time
   [this ::local-time
    second ::j/second-of-minute]
@@ -127,7 +118,6 @@
       (chrono-field/check-valid-value chrono-field/SECOND_OF_MINUTE second)
       (create (:hour this) (:minute this) second (:nano this)))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L942
 (def-method with-nano ::local-time
   [this ::local-time
    nano-of-second ::j/nano-of-second]
@@ -137,12 +127,10 @@
       (chrono-field/check-valid-value chrono-field/NANO_OF_SECOND nano-of-second)
       (create (:hour this) (:minute this) (:second this) nano-of-second))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L397
 (def-constructor of-nano-of-day ::local-time
   [nano-of-day ::j/long]
   (impl/of-nano-of-day nano-of-day))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L971
 (def-method truncated-to ::local-time
   [this ::local-time
    unit ::temporal-unit/temporal-unit]
@@ -156,7 +144,6 @@
           (throw (ex UnsupportedTemporalTypeException "Unit must divide into a standard day without remainder" {:local-time this :unit unit})))
         (of-nano-of-day (* dur (long (/ (to-nano-of-day this) dur))))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1094
 (def-method plus-hours ::local-time
   [this ::local-time
    hours-to-add ::j/long]
@@ -170,7 +157,6 @@
             (:second this)
             (:nano this))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1113
 (def-method plus-minutes ::local-time
   [this ::local-time
    minutes-to-add ::j/long]
@@ -189,7 +175,6 @@
                 (:second this)
                 (:nano this))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1138
 (def-method plus-seconds ::local-time
   [this ::local-time
    seconds-to-add ::j/long]
@@ -209,7 +194,6 @@
                 (mod new-sofd SECONDS_PER_MINUTE)
                 (:nano this))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1165
 (def-method plus-nanos ::local-time
   [this ::local-time
    nanos-to-add ::j/long]
@@ -227,50 +211,42 @@
                 (mod (int (/ new-nofd NANOS_PER_SECOND)) SECONDS_PER_MINUTE)
                 (mod new-nofd NANOS_PER_SECOND))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1243
 (def-method minus-hours ::local-time
   [this ::local-time
    hours-to-subtract ::j/long]
   (plus-hours this (- (mod hours-to-subtract HOURS_PER_DAY))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1258
 (def-method minus-minutes ::local-time
   [this ::local-time
    minutes-to-subtract ::j/long]
   (plus-minutes this (- (mod minutes-to-subtract MINUTES_PER_DAY))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1273
 (def-method minus-seconds ::local-time
   [this ::local-time
    seconds-to-subtract ::j/long]
   (plus-seconds this (- (mod seconds-to-subtract SECONDS_PER_DAY))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1288
 (def-method minus-nanos ::local-time
   [this ::local-time
    nanos-to-subtract ::j/long]
   (plus-nanos this (- (mod nanos-to-subtract NANOS_PER_DAY))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1433
 (def-method format string?
   [this ::local-time
    formatter ::date-time-formatter/date-time-formatter]
   (asserts/require-non-nil formatter "formatter")
   (date-time-formatter/format formatter this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1448
 (def-method at-date ::local-date-time/local-date-time
   [this ::local-time
    date ::local-date/local-date]
   (local-date-time-impl/of date this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1461
 (def-method at-offset ::offset-time/offset-time
   [this ::local-time
    offset ::zone-offset/zone-offset]
   (offset-time-impl/of this offset))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1508
 (def-method to-epoch-second ::j/long
   [this ::local-time
    date ::local-date/local-date
@@ -282,13 +258,11 @@
       (math/add-exact (to-second-of-day this))
       (math/subtract-exact (zone-offset/get-total-seconds offset))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1550
 (def-method is-after ::j/boolean
   [this ::local-time
    other ::local-time]
   (> (time-comparable/compare-to this other) 0))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1562
 (def-method is-before ::j/boolean
   [this ::local-time
    other ::local-time]
@@ -322,7 +296,6 @@
   (is-after [this other] (is-after this other))
   (is-before [this other] (is-before this other)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1528
 (def-method compare-to ::j/int
   [this ::local-time
    other ::local-time]
@@ -338,14 +311,12 @@
          -plus-hours)
 
 (def-method with ::local-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L764
   ([this ::local-time
     adjuster ::temporal-adjuster/temporal-adjuster]
    (if (instance? LocalTime adjuster)
      adjuster
      (temporal-adjuster/adjust-into adjuster this)))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L855
   ([this ::local-time
     field ::temporal-field/temporal-field
     new-value ::j/long]
@@ -371,12 +342,10 @@
      (temporal-field/adjust-into field this new-value))))
 
 (def-method plus ::local-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1009
   ([this ::local-time
     amount-to-add ::temporal-amount/temporal-amount]
    (temporal-amount/add-to amount-to-add this))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1066
   ([this ::local-time
     amount-to-add ::j/long
     unit ::temporal-unit/temporal-unit]
@@ -394,12 +363,10 @@
                   {:this this :unit unit :amount-to-add amount-to-add}))))))
 
 (def-method minus ::local-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1203
   ([this ::local-time
     amount-to-subtract ::temporal-amount/temporal-amount]
    (temporal-amount/subtract-from amount-to-subtract this))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1227
   ([this ::local-time
     amount-to-subtract ::j/long
     unit ::temporal-unit/temporal-unit]
@@ -409,7 +376,6 @@
          (plus 1 unit))
      (plus this (- amount-to-subtract) unit))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1406
 (def-method until ::j/long
   [this ::local-time
    end-exclusive ::temporal/temporal
@@ -442,8 +408,6 @@
     ([this amount-to-subtract unit] (minus this amount-to-subtract unit)))
   (until [this end-exclusive unit] (until this end-exclusive unit)))
 
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L539
 (def-method is-supported ::j/boolean
   [this ::local-time
    field-or-unit (s/or ::temporal-field/temporal-field
@@ -462,7 +426,6 @@
     :else
     (throw (ex-info "Unsupported field or unit" {:instant this :field-or-unit field-or-unit}))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L607
 (def-method range ::value-range/value-range
   [this ::local-time
    field ::temporal-field/temporal-field]
@@ -490,7 +453,6 @@
     chrono-field/AMPM_OF_DAY (long (/ hour 12))
     (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field)))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L639
 (def-method get ::j/int
   [this ::local-time
    field ::temporal-field/temporal-field]
@@ -498,7 +460,6 @@
     (--get0 this field)
     (temporal-accessor-defaults/-get this field)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L670
 (def-method get-long ::j/long
   [this ::local-time
    field ::temporal-field/temporal-field]
@@ -509,7 +470,6 @@
       chrono-field/MICRO_OF_DAY (long (/ (to-nano-of-day this) 1000))
       (--get0 this field))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1313
 (def-method query ::j/wip
   [this ::local-time
    query ::temporal-query/temporal-query]
@@ -538,7 +498,6 @@
   (get-long [this field] (get-long this field))
   (query [this q] (query this q)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L1354
 (def-method adjust-into ::temporal/temporal
   [this ::local-time
    temporal ::temporal/temporal]
@@ -548,7 +507,6 @@
   temporal-adjuster/ITemporalAdjuster
   (adjust-into [this temporal] (adjust-into this temporal)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L359
 (def-constructor of-instant ::local-time
   [instant ::instant/instant
    zone ::zone-id/zone-id]
@@ -566,8 +524,6 @@
   ([]
    (now (clock-impl/system-default-zone)))
 
-  ;; NB! This method is overloaded!
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L263
   ([clock-or-zone-id (s/or :clock ::clock/clock
                            :zone-id ::zone-id/zone-id)]
    (condp satisfies? clock-or-zone-id
@@ -591,7 +547,6 @@
     nano-of-second ::j/nano-of-second]
    (impl/of hour minute second nano-of-second)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L379
 (def-constructor of-second-of-day ::local-time
   [second-of-day ::j/long]
   (chrono-field/check-valid-value chrono-field/SECOND_OF_DAY second-of-day)
@@ -601,17 +556,14 @@
         second-of-day (- second-of-day (math/multiply-exact-int minutes SECONDS_PER_MINUTE))]
     (impl/create hours minutes second-of-day 0)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L426
 (def-constructor from ::local-time
   [temporal ::temporal-accessor/temporal-accessor]
   (impl-impl/from temporal))
 
 (def-constructor parse ::local-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L447
   ([text ::j/char-sequence]
    (wip ::parse))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L461
   ([text ::j/char-sequence
     formatter ::date-time-formatter/date-time-formatter]
    (wip ::parse)))

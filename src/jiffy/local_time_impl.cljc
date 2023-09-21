@@ -38,7 +38,6 @@
 (def MAX (create 23 59 59 999999999))
 (def NOON (create 12 0 0 0))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L397
 (def-constructor of-nano-of-day ::local-time
   [nano-of-day ::j/long]
   (chrono-field/check-valid-value chrono-field/NANO_OF_DAY nano-of-day)
