@@ -10,6 +10,7 @@
             [jiffy.local-date-time-impl :as local-date-time-impl]
             [jiffy.local-time-impl :as local-time-impl]
             [jiffy.month :as month]
+            [jiffy.month-day :as month-day-impl]
             [jiffy.offset-time-impl :as offset-time-impl]
             [jiffy.period :as period-impl]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
@@ -78,6 +79,7 @@
 (s/def ::ZoneOffsetTransition/zone-offset-transition ::zone-offset-transition/zone-offset-transition)
 (s/def ::ZoneOffsetTransitionRule/zone-offset-transition-rule ::transition-rule/zone-offset-transition-rule)
 (s/def ::zone-rules/zone-rules (set (vals @zone-rules-store/zone-id->rules)))
+(s/def ::month-day/month-day ::month-day-impl/month-day)
 
 (s/def ::clock/clock
   (s/with-gen #(satisfies? clock/IClock %)

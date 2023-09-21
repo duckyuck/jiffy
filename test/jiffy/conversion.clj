@@ -10,6 +10,7 @@
             [jiffy.local-date-time-impl]
             [jiffy.local-time-impl]
             [jiffy.month]
+            [jiffy.month-day]
             [jiffy.offset-date-time-impl]
             [jiffy.offset-time-impl]
             [jiffy.period]
@@ -33,6 +34,7 @@
            (jiffy.local_date_time_impl LocalDateTime)
            (jiffy.local_time_impl LocalTime)
            (jiffy.month Month)
+           (jiffy.month_day MonthDay)
            (jiffy.offset_date_time_impl OffsetDateTime)
            (jiffy.offset_time_impl OffsetTime)
            (jiffy.period Period)
@@ -181,6 +183,9 @@
 
 (defmethod jiffy->java* Month [arg]
   (jiffy->month arg))
+
+(defmethod jiffy->java* MonthDay [{:keys [month day]}]
+  (java.time.MonthDay/of month day))
 
 (defmethod jiffy->java* Period [{:keys [years months days]}]
   (java.time.Period/of years months days))

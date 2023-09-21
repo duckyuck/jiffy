@@ -1,178 +1,272 @@
 (ns jiffy.month-day
-  (:refer-clojure :exclude [format ])
+  (:refer-clojure :exclude [format range get])
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
+            [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.clock :as clock]
             [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
             [jiffy.protocols.local-date :as local-date]
-            [jiffy.month :as month]
             [jiffy.protocols.month-day :as month-day]
             [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
             [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
             [jiffy.protocols.temporal.temporal :as temporal]
             [jiffy.protocols.temporal.temporal-field :as temporal-field]
-            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.temporal.value-range :as value-range-impl]
             [jiffy.protocols.time-comparable :as time-comparable]
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal-query :as temporal-query]))
+            [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.month :as month]
+            [jiffy.asserts :as asserts]
+            [jiffy.temporal.chrono-field :as chrono-field]
+            [jiffy.year :as year]
+            [jiffy.local-date-impl-impl :as local-date-impl-impl]
+            [jiffy.local-date :as local-date-impl]
+            [jiffy.math :as math]
+            [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.temporal.temporal-queries :as temporal-queries]
+            [jiffy.chrono.iso-chronology :as iso-chronology]
+            [jiffy.chrono.chronology :as chronology]
+            [jiffy.clock :as clock-impl]))
 
-(defrecord MonthDay [])
+(def-record MonthDay ::month-day-record
+  [month ::j/month-of-year
+   day ::j/day-of-month])
 
-(s/def ::create-args ::j/wip)
-(defn create [])
-(s/def ::month-day (j/constructor-spec MonthDay create ::create-args))
-(s/fdef create :args ::create-args :ret ::month-day)
+(defn valid? [{:keys [month day]}]
+  (asserts/require-non-nil month "month")
+  (chrono-field/check-valid-value chrono-field/DAY_OF_MONTH day)
+  (<= day (month/max-length (month/of month))))
 
-(defmacro args [& x] `(s/tuple ::month-day ~@x))
+(s/def ::month-day (s/and ::month-day-record valid?))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L384
-(s/def ::get-month-args (args))
-(defn -get-month [this] (wip ::-get-month))
-(s/fdef -get-month :args ::get-month-args :ret ::month/month)
+(def-method get-month ::month/month
+  [this ::month-day]
+  (month/of (:month this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L467
-(s/def ::get-month-value-args (args))
-(defn -get-month-value [this] (wip ::-get-month-value))
-(s/fdef -get-month-value :args ::get-month-value-args :ret ::j/int)
+(def-method get-month-value ::j/int
+  [this ::month-day]
+  (:month this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L493
-(s/def ::get-day-of-month-args (args))
-(defn -get-day-of-month [this] (wip ::-get-day-of-month))
-(s/fdef -get-day-of-month :args ::get-day-of-month-args :ret ::j/int)
+(def-method get-day-of-month ::j/int
+  [this ::month-day]
+  (:day this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L508
-(s/def ::is-valid-year-args (args ::j/int))
-(defn -is-valid-year [this year] (wip ::-is-valid-year))
-(s/fdef -is-valid-year :args ::is-valid-year-args :ret ::j/boolean)
+(def-method is-valid-year ::j/boolean
+  [this ::month-day
+   year ::j/int]
+  (not
+   (and
+    (= (:day this) 29)
+    (= (:month this) 2)
+    (not (year/is-leap year)))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L526
-(s/def ::with-month-args (args ::j/int))
-(defn -with-month [this month] (wip ::-with-month))
-(s/fdef -with-month :args ::with-month-args :ret ::month-day)
+(def-method with ::month-day
+  [this ::month-day
+   month ::month/month]
+  (asserts/require-non-nil month "month")
+  (if (= (month/get-value month) (:month this))
+    this
+    (->MonthDay (month/get-value month)
+                (min (:day this) (month/max-length month)))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L542
-(s/def ::with-args (args ::month/month))
-(defn -with [this month] (wip ::-with))
-(s/fdef -with :args ::with-args :ret ::month-day)
+(def-method with-month ::month-day
+  [this ::month-day
+   month ::j/int]
+  (with this (month/of month)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L564
-(s/def ::with-day-of-month-args (args ::j/int))
-(defn -with-day-of-month [this day-of-month] (wip ::-with-day-of-month))
-(s/fdef -with-day-of-month :args ::with-day-of-month-args :ret ::month-day)
+(declare of)
+(def-method with-day-of-month ::month-day
+  [this ::month-day
+   day-of-month ::j/int]
+  (if (= day-of-month (:day this))
+    this
+    (of (:month this) day-of-month)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L644
-(s/def ::format-args (args ::date-time-formatter/date-time-formatter))
-(defn -format [this formatter] (wip ::-format))
-(s/fdef -format :args ::format-args :ret string?)
+(def-method format string?
+  [this ::month-day
+   formatter ::date-time-formatter/date-time-formatter]
+  (wip ::format))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L664
-(s/def ::at-year-args (args ::j/int))
-(defn -at-year [this year] (wip ::-at-year))
-(s/fdef -at-year :args ::at-year-args :ret ::local-date/local-date)
+(def-method at-year ::local-date/local-date
+  [this ::month-day
+   year ::j/int]
+  (local-date-impl/of
+   year
+   (:month this)
+   (if (is-valid-year this year)
+     (:day this)
+     28)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L693
-(s/def ::is-after-args (args ::month-day))
-(defn -is-after [this other] (wip ::-is-after))
-(s/fdef -is-after :args ::is-after-args :ret ::j/boolean)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L703
-(s/def ::is-before-args (args ::month-day))
-(defn -is-before [this other] (wip ::-is-before))
-(s/fdef -is-before :args ::is-before-args :ret ::j/boolean)
-
-(extend-type MonthDay
-  month-day/IMonthDay
-  (get-month [this] (-get-month this))
-  (get-month-value [this] (-get-month-value this))
-  (get-day-of-month [this] (-get-day-of-month this))
-  (is-valid-year [this year] (-is-valid-year this year))
-  (with-month [this month] (-with-month this month))
-  (with [this month] (-with this month))
-  (with-day-of-month [this day-of-month] (-with-day-of-month this day-of-month))
-  (format [this formatter] (-format this formatter))
-  (at-year [this year] (-at-year this year))
-  (is-after [this other] (-is-after this other))
-  (is-before [this other] (-is-before this other)))
-
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L679
-(s/def ::compare-to-args (args ::month-day))
-(defn -compare-to [this compare-to--overloaded-param] (wip ::-compare-to))
-(s/fdef -compare-to :args ::compare-to-args :ret ::j/int)
+(def-method compare-to ::j/int
+  [this ::month-day
+   other ::month-day]
+  (let [cmp (math/subtract-exact (:month this) (:month other))]
+    (if (zero? cmp)
+      (math/subtract-exact (:day this) (:day other))
+      cmp)))
 
 (extend-type MonthDay
   time-comparable/ITimeComparable
-  (compare-to [this compare-to--overloaded-param] (-compare-to this compare-to--overloaded-param)))
+  (compare-to [this other] (compare-to this other)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L349
-(s/def ::is-supported-args (args ::temporal-field/temporal-field))
-(defn -is-supported [this field] (wip ::-is-supported))
-(s/fdef -is-supported :args ::is-supported-args :ret ::j/boolean)
+(def-method is-after ::j/boolean
+  [this ::month-day
+   other ::month-day]
+  (pos? (compare-to this other)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L380
-(s/def ::range-args (args ::temporal-field/temporal-field))
-(defn -range [this field] (wip ::-range))
-(s/fdef -range :args ::range-args :ret ::value-range/value-range)
+(def-method is-before ::j/boolean
+  [this ::month-day
+   other ::month-day]
+  (neg? (compare-to this other)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L416
-(s/def ::get-args (args ::temporal-field/temporal-field))
-(defn -get [this field] (wip ::-get))
-(s/fdef -get :args ::get-args :ret ::j/int)
+(extend-type MonthDay
+  month-day/IMonthDay
+  (get-month [this] (get-month this))
+  (get-month-value [this] (get-month-value this))
+  (get-day-of-month [this] (get-day-of-month this))
+  (is-valid-year [this year] (is-valid-year this year))
+  (with-month [this month] (with-month this month))
+  (with [this month] (with this month))
+  (with-day-of-month [this day-of-month] (with-day-of-month this day-of-month))
+  (format [this formatter] (format this formatter))
+  (at-year [this year] (at-year this year))
+  (is-after [this other] (is-after this other))
+  (is-before [this other] (is-before this other)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L444
-(s/def ::get-long-args (args ::temporal-field/temporal-field))
-(defn -get-long [this field] (wip ::-get-long))
-(s/fdef -get-long :args ::get-long-args :ret ::j/long)
+(def-method is-supported ::j/boolean
+  [this ::month-day
+   field ::temporal-field/temporal-field]
+  (if (chrono-field/chrono-field? field)
+    (or (= field chrono-field/MONTH_OF_YEAR)
+        (= field chrono-field/DAY_OF_MONTH))
+    (and field (temporal-field/is-supported-by field this))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L592
-(s/def ::query-args (args ::temporal-query/temporal-query))
-(defn -query [this query] (wip ::-query))
-(s/fdef -query :args ::query-args :ret ::j/wip)
+(def-method range ::value-range/value-range
+  [this ::month-day
+   field ::temporal-field/temporal-field]
+  (condp = field
+    chrono-field/MONTH_OF_YEAR
+    (temporal-field/range field)
+
+    chrono-field/DAY_OF_MONTH
+    (value-range-impl/of 1
+                         (month/min-length (get-month this))
+                         (month/max-length (get-month this)))
+
+    (temporal-accessor-defaults/-range this field)))
+
+(def-method get-long ::j/long
+  [this ::month-day
+   field ::temporal-field/temporal-field]
+  (if-not (chrono-field/chrono-field? field)
+    (temporal-field/get-from field this)
+    (condp = field
+      chrono-field/DAY_OF_MONTH
+      (:day this)
+
+      chrono-field/MONTH_OF_YEAR
+      (:month this)
+
+      (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field)
+                 {:this this :field field})))))
+
+(def-method get ::j/int
+  [this ::month-day
+   field ::temporal-field/temporal-field]
+  (-> this
+      (range field)
+      (value-range/check-valid-int-value (get-long this field) field)))
+
+(def-method query ::j/wip
+  [this ::month-day
+   query ::temporal-query/temporal-query]
+  (if (= query (temporal-queries/chronology))
+    iso-chronology/INSTANCE
+    (temporal-accessor-defaults/-query this query)))
 
 (extend-type MonthDay
   temporal-accessor/ITemporalAccessor
-  (is-supported [this field] (-is-supported this field))
-  (range [this field] (-range this field))
-  (get [this field] (-get this field))
-  (get-long [this field] (-get-long this field))
-  (query [this query] (-query this query)))
+  (is-supported [this field] (is-supported this field))
+  (range [this field] (range this field))
+  (get [this field] (get this field))
+  (get-long [this field] (get-long this field))
+  (query [this q] (query this q)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L627
-(s/def ::adjust-into-args (args ::temporal/temporal))
-(defn -adjust-into [this temporal] (wip ::-adjust-into))
-(s/fdef -adjust-into :args ::adjust-into-args :ret ::temporal/temporal)
+(def-method adjust-into ::temporal/temporal
+  [this ::month-day
+   temporal ::temporal/temporal]
+  (if-not (= (chronology/from temporal) iso-chronology/INSTANCE)
+    (throw (ex DateTimeException "Adjustment only supported on ISO date-time"
+               {:this this :temporal temporal}))
+    (let [temporal (temporal/with temporal chrono-field/MONTH_OF_YEAR (:month this))]
+      (temporal/with temporal
+                     chrono-field/DAY_OF_MONTH
+                     (min (-> temporal
+                              (temporal-accessor/range chrono-field/DAY_OF_MONTH)
+                              (value-range/get-maximum))
+                          (:day this))))))
 
 (extend-type MonthDay
   temporal-adjuster/ITemporalAdjuster
-  (adjust-into [this temporal] (-adjust-into this temporal)))
+  (adjust-into [this temporal] (adjust-into this temporal)))
 
-(s/def ::now-args (args ::j/wip))
-(defn now
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L165
-  ([] (wip ::now))
+(def-constructor now ::month-day
+  ([]
+   (now (clock-impl/system-default-zone)))
 
-  ;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L181
-  ([now--overloaded-param] (wip ::now)))
-(s/fdef now :args ::now-args :ret ::month-day)
+  ([clock-or-zone-id (s/or :clock ::clock/clock
+                           :zone-id ::zone-id/zone-id)]
+   (condp satisfies? clock-or-zone-id
+     zone-id/IZoneId (now (clock-impl/system clock-or-zone-id))
+     clock/IClock
+     (let [local-date (local-date-impl/now clock-or-zone-id)]
+       (of (local-date/get-month local-date)
+           (local-date/get-day-of-month local-date))))))
 
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L217
-(s/def ::of-args (args ::j/int ::j/int))
-(defn of [of--overloaded-param-1 of--overloaded-param-2] (wip ::of))
-(s/fdef of :args ::of-args :ret ::month-day)
+(def-constructor of ::month-day
+  [month (s/or ::month
+               ::j/int)
+   day-of-month ::j/int]
+  (if (number? month)
+    (of (month/of month) day-of-month)
+    (do
+      (asserts/require-non-nil month "month")
+      (chrono-field/check-valid-value chrono-field/DAY_OF_MONTH day-of-month)
+      (let [month-day (->MonthDay (month/get-value month) day-of-month)]
+        (if (valid? month-day)
+          month-day
+          (throw (ex DateTimeException (str "Illegal value for DayOfMonth field, value "
+                                            day-of-month " is not valid for month "
+                                            (:enum-name month)))))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L267
-(s/def ::from-args (args ::temporal-accessor/temporal-accessor))
-(defn from [temporal] (wip ::from))
-(s/fdef from :args ::from-args :ret ::month-day)
+(def-constructor from ::month-day
+  [temporal ::temporal-accessor/temporal-accessor]
+  (if (satisfies? month-day/IMonthDay temporal)
+    temporal
+    (try*
+     (let [temporal (if-not (= iso-chronology/INSTANCE
+                               (chronology/from temporal))
+                      (local-date-impl/from temporal)
+                      temporal)]
+       (of (temporal-accessor/get temporal chrono-field/MONTH_OF_YEAR)
+           (temporal-accessor/get temporal chrono-field/DAY_OF_MONTH)))
+     (catch DateTimeException e
+       (throw (ex DateTimeException
+                  (str "Unable to obtain MonthDay from TemporalAccessor: "
+                       temporal " of type " (pr-str temporal))
+                  {:temporal temporal}
+                  e))))))
 
-(s/def ::parse-args (args ::j/wip))
-(defn parse
+(def-constructor parse ::month-day
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L293
-  ([text] (wip ::parse))
+  ([text ::j/char-sequence]
+   (wip ::parse))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L307
-  ([text formatter] (wip ::parse)))
-(s/fdef parse :args ::parse-args :ret ::month-day)
+  ([text ::j/char-sequence
+    formatter ::date-time-formatter/date-time-formatter]
+   (wip ::parse)))

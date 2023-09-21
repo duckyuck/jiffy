@@ -1,6 +1,8 @@
 (ns jiffy.year
   (:refer-clojure :exclude [format ])
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.clock :as clock]
             [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
@@ -236,9 +238,11 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L315
 ;; TODO: figure out how to handle this (Java static) function. Replaces function in IYear protocol
-(s/def ::is-leap-args (args ::j/long))
-(defn is-leap [year] (wip ::is-leap))
-(s/fdef is-leap :args ::is-leap-args :ret ::j/boolean)
+(def-constructor is-leap ::j/boolean
+  [year ::j/long]
+  (and (zero? (bit-and year 3))
+       (or (not= (mod year 100) 0)
+           (zero? (mod year 400)))))
 
 (def MIN_VALUE impl/MIN_VALUE)
 (def MAX_VALUE impl/MAX_VALUE)

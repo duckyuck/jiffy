@@ -1,6 +1,9 @@
 (ns jiffy.chrono.chronology
-  (:refer-clojure :exclude [range ])
-  (:require [clojure.spec.alpha :as s]
+  (:refer-clojure :exclude [range])
+  (:require #?(:clj [clojure.spec.alpha :as s])
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [cljs.spec.alpha :as s])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
             [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
@@ -18,25 +21,30 @@
             [jiffy.protocols.time-comparable :as time-comparable]
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.protocols.zone-offset :as zone-offset]
-            [jiffy.specs :as j]))
+            [jiffy.specs :as j]
+            [jiffy.asserts :as asserts]
+            [jiffy.temporal.temporal-queries :as temporal-queries]
+            [jiffy.chrono.iso-chronology :as iso-chronology]))
 
 (s/def ::chronology ::chronology/chronology)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Chronology.java#L182
-(s/def ::from-args ::j/wip)
-(defn from [temporal] (wip ::from))
-(s/fdef from :args ::from-args :ret ::chronology)
+(def-constructor from ::chronology
+  [temporal ::temporal-accessor/temporal-accessor]
+  (asserts/require-non-nil temporal "temporal")
+  (or (temporal-accessor/query temporal (temporal-queries/chronology))
+      iso-chronology/INSTANCE))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Chronology.java#L229
-(s/def ::of-locale-args ::j/wip)
-(defn of-locale [locale] (wip ::of-locale))
-(s/fdef of-locale :args ::of-locale-args :ret ::chronology)
+(def-constructor of-locale ::chronology
+  [locale ::j/locale]
+  (wip ::of-locale))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Chronology.java#L254
-(s/def ::of-args ::j/wip)
-(defn of [id] (wip ::of))
-(s/fdef of :args ::of-args :ret ::chronology)
+(def-constructor of ::chronology
+  [id string?]
+  (wip ::of))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Chronology.java#L268
-(defn get-available-chronologies [] (wip ::get-available-chronologies))
-(s/fdef get-available-chronologies :ret ::j/wip)
+(def-constructor get-available-chronologies (s/coll-of ::chronology)
+  []
+  (wip ::get-available-chronologies))
