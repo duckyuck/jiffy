@@ -25,7 +25,8 @@
             [jiffy.protocols.temporal.value-range :as value-range]
             [jiffy.math :as math]
             [jiffy.temporal.temporal-queries :as temporal-queries]
-            [jiffy.temporal.chrono-unit :as chrono-unit]))
+            [jiffy.temporal.chrono-unit :as chrono-unit]
+            [jiffy.instant-impl :as instant-impl]))
 
 (s/def ::chrono-zoned-date-time ::chrono-zoned-date-time/chrono-zoned-date-time)
 
@@ -146,28 +147,78 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L537
 (def-method to-instant ::instant/instant
   [this ::chrono-zoned-date-time]
-  (wip ::to-instant))
+  (instant-impl/of-epoch-second
+   (chrono-zoned-date-time/to-epoch-second this)
+   (-> this chrono-zoned-date-time/to-local-time local-time/get-nano)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L576
 (def-method compare-to ::j/int
   [this ::chrono-zoned-date-time
    other ::chrono-zoned-date-time]
-  (wip ::compare-to))
+  (let [cmp (math/compare (chrono-zoned-date-time/to-epoch-second this)
+                          (chrono-zoned-date-time/to-epoch-second other))]
+    (if-not (zero? cmp)
+      cmp
+      (let [cmp (math/subtract-exact (-> this
+                                         chrono-zoned-date-time/to-local-time
+                                         local-time/get-nano)
+                                     (-> other
+                                         chrono-zoned-date-time/to-local-time
+                                         local-time/get-nano))]
+        (if-not (zero? cmp)
+          cmp
+          (let [cmp (-> this
+                        chrono-zoned-date-time/to-local-date-time
+                        (time-comparable/compare-to
+                         (chrono-zoned-date-time/to-local-date-time other)))]
+            (if-not (zero? cmp)
+              cmp
+              (let [cmp (-> this
+                            chrono-zoned-date-time/get-zone
+                            (time-comparable/compare-to
+                             (chrono-zoned-date-time/get-zone other)))]
+                (if-not (zero? cmp)
+                  cmp
+                  (-> this
+                      chrono-zoned-date-time/get-chronology
+                      (time-comparable/compare-to
+                       (chrono-zoned-date-time/get-chronology other))))))))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L606
 (def-method is-before ::j/boolean
   [this ::chrono-zoned-date-time
    other ::chrono-zoned-date-time]
-  (wip ::is-before))
+  (let [this-epoch-sec (chrono-zoned-date-time/to-epoch-second this)
+        other-epoch-sec (chrono-zoned-date-time/to-epoch-second other)]
+    (or (< this-epoch-sec other-epoch-sec)
+        (and (= this-epoch-sec other-epoch-sec)
+             (< (-> this
+                    chrono-zoned-date-time/to-local-time
+                    local-time/get-nano)
+                (-> other
+                    chrono-zoned-date-time/to-local-time
+                    local-time/get-nano))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L626
 (def-method is-after ::j/boolean
   [this ::chrono-zoned-date-time
    other ::chrono-zoned-date-time]
-  (wip ::is-after))
+  (let [this-epoch-sec (chrono-zoned-date-time/to-epoch-second this)
+        other-epoch-sec (chrono-zoned-date-time/to-epoch-second other)]
+    (or (> this-epoch-sec other-epoch-sec)
+        (and (= this-epoch-sec other-epoch-sec)
+             (> (-> this
+                    chrono-zoned-date-time/to-local-time
+                    local-time/get-nano)
+                (-> other
+                    chrono-zoned-date-time/to-local-time
+                    local-time/get-nano))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L646
 (def-method is-equal ::j/boolean
   [this ::chrono-zoned-date-time
    other ::chrono-zoned-date-time]
-  (wip ::is-equal))
+  (and (= (chrono-zoned-date-time/to-epoch-second this)
+          (chrono-zoned-date-time/to-epoch-second other))
+       (= (-> this
+              chrono-zoned-date-time/to-local-time
+              local-time/get-nano)
+          (-> other
+              chrono-zoned-date-time/to-local-time
+              local-time/get-nano))))

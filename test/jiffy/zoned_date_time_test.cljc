@@ -40,16 +40,23 @@
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.zoned-date-time/minus-nanos)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.zoned-date-time/to-offset-date-time)
 
+(test-proto-fn jiffy.zoned-date-time jiffy.protocols.time-comparable/compare-to)
+
+(test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/to-epoch-second)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/get-offset)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/with-earlier-offset-at-overlap)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/get-zone)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/with-later-offset-at-overlap)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/with-zone-same-local)
-
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/with-zone-same-instant)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/to-local-date-time)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/to-local-date)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/to-local-time)
+(test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/is-before)
+(test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/is-after)
+(test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/is-equal)
+(test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/get-chronology)
+(test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/to-instant)
 ;; (test-proto-fn! jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/format)
 
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.temporal.temporal/with)
