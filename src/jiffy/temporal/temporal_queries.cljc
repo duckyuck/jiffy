@@ -17,7 +17,7 @@
 
 (def ZONE_ID
   (temporal-query/->TemporalQuery
-   "ZoneId"
+   "ZoneId" :zone-id
    (fn [temporal] (temporal-accessor/query temporal ZONE_ID))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalQueries.java#L359
@@ -26,7 +26,7 @@
 
 (def CHRONO
   (temporal-query/->TemporalQuery
-   "Chronology"
+   "Chronology" :chronology
    (fn [temporal] (temporal-accessor/query temporal CHRONO))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalQueries.java#L375
@@ -35,7 +35,7 @@
 
 (def PRECISION
   (temporal-query/->TemporalQuery
-   "Precision"
+   "Precision" :precision
    (fn [temporal] (temporal-accessor/query temporal PRECISION))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalQueries.java#L391
@@ -45,7 +45,7 @@
 
 (def OFFSET
   (temporal-query/->TemporalQuery
-   "ZoneOffset"
+   "ZoneOffset" :zone-offset
    (fn [temporal]
      (when (temporal-accessor/is-supported
             temporal
@@ -62,7 +62,7 @@
 
 (def ZONE
   (temporal-query/->TemporalQuery
-   "Zone"
+   "Zone" :zone
    (fn [temporal]
      (or
       (temporal-accessor/query temporal ZONE_ID)
@@ -75,7 +75,7 @@
 
 (def LOCAL_DATE
   (temporal-query/->TemporalQuery
-   "LocalDate"
+   "LocalDate" :local-date
    (fn [temporal]
      (when (temporal-accessor/is-supported
             temporal
@@ -90,7 +90,7 @@
 
 (def LOCAL_TIME
   (temporal-query/->TemporalQuery
-   "LocalTime"
+   "LocalTime" :local-time
    (fn [temporal]
      (when (temporal-accessor/is-supported
             temporal
@@ -110,6 +110,17 @@
             "ZoneId" ZONE_ID}
            name)
       (throw (ex-info (str "Unknown TemporalQuery with name: '" name "'") {:name name}))))
+
+(defn id->query [id]
+  (or (get {:chronology CHRONO
+            :precision PRECISION
+            :zone-offset OFFSET
+            :zone ZONE
+            :local-date LOCAL_DATE
+            :local-time LOCAL_TIME
+            :zone-id ZONE_ID}
+           id)
+      (throw (ex-info (str "Unknown TemporalQuery with id: '" id "'") {:id id}))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/TemporalQueries.java#L167
 (defn zone-id [] ZONE_ID)

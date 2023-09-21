@@ -28,7 +28,3 @@
    (catch :default e
      (when check-available
        (throw e)))))
-
-(defn of-id* [zone-id]
-  (of-id zone-id true))
-

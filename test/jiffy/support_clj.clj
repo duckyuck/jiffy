@@ -152,7 +152,8 @@
 (def default-num-tests 500)
 
 (def ns->class-anomalies
-  {"jiffy.protocols.time-comparable" "java.lang.Comparable"})
+  {"jiffy.protocols.time-comparable" "java.lang.Comparable"
+   "jiffy.protocols.string" "java.lang.Object"})
 
 (defn jiffy-ns->java-class [jiffy-ns-str]
   (or (ns->class-anomalies jiffy-ns-str)

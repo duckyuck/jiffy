@@ -3,7 +3,7 @@
   (:require [clojure.spec.alpha :as s]
             #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
-            [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
+            [jiffy.exception :refer [DateTimeParseException DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.offset-time-impl :refer [#?@(:cljs [OffsetTime])] :as impl]
             [jiffy.protocols.clock :as clock]
@@ -37,7 +37,8 @@
             [jiffy.local-time-impl-impl :as local-time-impl-impl]
             [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
             [jiffy.clock :as clock-impl]
-            [jiffy.protocols.zone.zone-rules :as zone-rules])
+            [jiffy.protocols.zone.zone-rules :as zone-rules]
+            [jiffy.protocols.string :as string])
   #?(:clj (:import [jiffy.offset_time_impl OffsetTime])))
 
 (s/def ::offset-time ::impl/offset-time)
@@ -545,9 +546,13 @@
                                          e)))))))
 
 (def-constructor parse ::offset-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L311
   ([text ::j/char-sequence]
-   (wip ::parse))
+   (if-let [[date-time offset]
+            (some->> (re-matches #"([:\d\.]*)(\+[\d:]*)" text)
+                     rest)]
+     (of (local-time-impl/parse date-time)
+         (zone-offset-impl/of offset))
+     (throw (ex DateTimeParseException (str "Failed to parse OffsetTime: '" text "'")))))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L325
   ([text ::j/char-sequence
@@ -559,3 +564,12 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L136
 (def MAX ::MAX--not-implemented)
+
+(def-method to-string string?
+  [{:keys [time offset]} ::offset-time]
+  (str (string/to-string time)
+       (string/to-string offset)))
+
+(extend-type OffsetTime
+  string/IString
+  (to-string [this] (to-string this)))

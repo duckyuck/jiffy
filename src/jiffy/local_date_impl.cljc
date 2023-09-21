@@ -1,7 +1,8 @@
 (ns jiffy.local-date-impl
   (:require #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
-            [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
+            [jiffy.dev.wip :refer [wip]]
+            [jiffy.exception :refer [DateTimeParseException DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.specs :as j]
             [jiffy.temporal.chrono-field :as chrono-field]
             [clojure.spec.alpha :as s]
@@ -9,7 +10,9 @@
             [jiffy.asserts :as asserts]
             [jiffy.protocols.chrono.chronology :as chronology]
             [jiffy.chrono.iso-chronology :as iso-chronology-2]
-            [jiffy.year-impl :as year-impl]))
+            [jiffy.year-impl :as year-impl]
+            [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
+            [jiffy.math :as math]))
 
 (def-record LocalDate ::local-date-record
   [year ::j/year
@@ -93,6 +96,20 @@
   (if (satisfies? month/IMonth month)
     (create year (month/get-value month) day-of-month)
     (create year month day-of-month)))
+
+(def-constructor parse ::local-date
+  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L412
+  ([text ::j/char-sequence]
+   (if-let [[year month day] (some->> (re-matches #"([\+-]?\d{4})-(\d{2})-(\d{2})*" text)
+                                      rest
+                                      (map math/parse-long))]
+     (of year month day)
+     (throw (ex DateTimeParseException (str "Failed to parse LocalDate: '" text "'")))))
+
+  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L426
+  ([text ::j/char-sequence
+    formatter ::date-time-formatter/date-time-formatter]
+   (wip ::parse)))
 
 (def MIN (of year-impl/MIN_VALUE 1 1))
 (def MAX (of year-impl/MAX_VALUE 12 31))

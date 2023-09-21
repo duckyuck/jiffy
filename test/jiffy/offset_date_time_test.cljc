@@ -48,27 +48,23 @@
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.offset-date-time/at-zone-same-instant)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.offset-date-time/at-zone-similar-local)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.offset-date-time/to-offset-time)
-
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.offset-date-time/to-zoned-date-time)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.offset-date-time/to-instant)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.offset-date-time/is-after)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.offset-date-time/is-before)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.offset-date-time/is-equal)
-
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.time-comparable/compare-to)
-
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.temporal.temporal/with)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.temporal.temporal/plus)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.temporal.temporal/minus)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.temporal.temporal/until)
-
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.temporal.temporal-accessor/is-supported)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.temporal.temporal-accessor/range)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.temporal.temporal-accessor/get)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.temporal.temporal-accessor/get-long)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.temporal.temporal-accessor/query)
-
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.temporal.temporal-adjuster/adjust-into)
+(test-proto-fn jiffy.offset-date-time jiffy.protocols.string/to-string)
 
 ;; (test-static-fn! jiffy.offset-date-time/now)
 (test-static-fn jiffy.offset-date-time/of)

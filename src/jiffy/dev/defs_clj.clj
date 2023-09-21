@@ -1,6 +1,7 @@
 (ns jiffy.dev.defs-clj
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
+            [jiffy.protocols.string :as string]
             [jiffy.protocols.time-comparable :as time-comparable]
             [orchestra.core :refer [defn-spec]]
             ;; [orchestra.spec.test :refer [instrument unstrument]]
@@ -21,7 +22,12 @@
            (if (satisfies? time-comparable/ITimeComparable this#)
              (time-comparable/compare-to this# other#)
              (throw (ex-info (str "Object does not implement ITimeComparable: " this#)
-                             {:this this# :other other#})))))
+                             {:this this# :other other#}))))
+         java.lang.Object
+         (toString [this#]
+           (if (satisfies? string/IString this#)
+             (string/to-string this#)
+             (pr-str this#))))
        (letfn [(constructor# [~@field-names]
                  ~(if (seq args)
                    `(do ~@args)

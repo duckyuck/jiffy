@@ -6,7 +6,7 @@
             [jiffy.asserts :as asserts]
             [jiffy.day-of-week :as day-of-week]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.exception :refer [UnsupportedTemporalTypeException DateTimeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
+            [jiffy.exception :refer [DateTimeParseException UnsupportedTemporalTypeException DateTimeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.format.date-time-formatter :as date-time-formatter-impl]
             [jiffy.clock :as clock-impl]
             [jiffy.instant-impl :as instant-impl]
@@ -50,7 +50,8 @@
             [jiffy.zoned-date-time-impl :refer [#?@(:cljs [ZonedDateTime])] :as impl]
             [jiffy.zone-id :as zone-id-impl]
             [jiffy.zone-offset :as zone-offset-impl]
-            [jiffy.protocols.chrono.chronology :as chronology])
+            [jiffy.protocols.chrono.chronology :as chronology]
+            [jiffy.protocols.string :as string])
   #?(:clj (:import [jiffy.zoned_date_time_impl ZonedDateTime])))
 
 (s/def ::zoned-date-time ::impl/zoned-date-time)
@@ -662,9 +663,29 @@
 (def-constructor parse ::zoned-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L582
   ([text ::j/char-sequence]
-   (wip ::parse))
+   (if-let [[date-time offset zone]
+            (some->> (re-matches #"([:\d-.T]*)(\+[\d:]*)?\[(.*)\]" text)
+                     rest)]
+     (if offset
+       (of-strict (local-date-time-impl/parse date-time)
+                  (zone-id-impl/of offset)
+                  (zone-id-impl/of zone))
+       (of (local-date-time-impl/parse date-time)
+           (zone-id-impl/of zone)))
+     (throw (ex DateTimeParseException (str "Failed to parse ZonedDateTime: '" text "'")))))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L596
   ([text ::j/char-sequence
     formatter ::date-time-formatter/date-time-formatter]
    (wip ::parse)))
+
+(def-method to-string string?
+  [{:keys [date-time offset zone]} ::zoned-date-time]
+  (cond-> (str (string/to-string date-time)
+               (string/to-string offset))
+    (not= offset zone)
+    (str "[" (string/to-string zone) "]")))
+
+(extend-type ZonedDateTime
+  string/IString
+  (to-string [this] (to-string this)))

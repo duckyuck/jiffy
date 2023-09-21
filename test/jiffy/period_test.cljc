@@ -27,6 +27,7 @@
 (test-proto-fn jiffy.period jiffy.protocols.temporal.temporal-amount/get-units)
 (test-proto-fn jiffy.period jiffy.protocols.temporal.temporal-amount/add-to)
 (test-proto-fn jiffy.period jiffy.protocols.temporal.temporal-amount/subtract-from)
+(test-proto-fn jiffy.period jiffy.protocols.string/to-string)
 
 (test-static-fn jiffy.period/from)
 (test-static-fn jiffy.period/of-years)

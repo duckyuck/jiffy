@@ -56,7 +56,9 @@
 (test-proto-fn jiffy.local-date jiffy.protocols.temporal.temporal-accessor/get)
 (test-proto-fn jiffy.local-date jiffy.protocols.temporal.temporal-accessor/get-long)
 (test-proto-fn jiffy.local-date jiffy.protocols.temporal.temporal-accessor/query)
-(test-proto-fn! jiffy.local-date jiffy.protocols.temporal.temporal-adjuster/adjust-into)
+(test-proto-fn jiffy.local-date jiffy.protocols.temporal.temporal-adjuster/adjust-into)
+
+(test-proto-fn jiffy.local-date jiffy.protocols.string/to-string)
 
 ;; (test-static-fn! jiffy.local-date/now)
 (test-static-fn jiffy.local-date/of)

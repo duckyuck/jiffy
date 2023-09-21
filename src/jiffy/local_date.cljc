@@ -20,6 +20,7 @@
             [jiffy.offset-date-time-impl :as offset-date-time-impl]
             [jiffy.period :as period-impl]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.protocols.string :as string]
             [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
             [jiffy.protocols.chrono.chronology :as chronology]
             [jiffy.protocols.chrono.chrono-period :as chrono-period]
@@ -54,7 +55,8 @@
             [jiffy.temporal.temporal-query :as temporal-query]
             [jiffy.temporal.value-range :as value-range-impl]
             [jiffy.year-impl :as year-impl]
-            [jiffy.zoned-date-time-impl :as zoned-date-time-impl])
+            [jiffy.zoned-date-time-impl :as zoned-date-time-impl]
+            [clojure.string :as str])
   #?(:clj (:import [jiffy.local_date_impl LocalDate])))
 
 (s/def ::local-date ::impl/local-date)
@@ -846,11 +848,36 @@
   (impl-impl/from temporal))
 
 (def-constructor parse ::local-date
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L412
   ([text ::j/char-sequence]
-   (wip ::parse))
+   (impl/parse text))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L426
   ([text ::j/char-sequence
     formatter ::date-time-formatter/date-time-formatter]
-   (wip ::parse)))
+   (impl/parse text)))
+
+(def-method to-string string?
+  [{:keys [year month day]} ::local-date]
+  (let [abs-year (Math/abs year)]
+    (cond-> ""
+      (< abs-year 1000)
+      (cond->
+          (neg? year) (-> (str (- year 10000))
+                          (string/delete-char-at 1))
+          (not (neg? year)) (-> (str (+ year 10000))
+                                (string/delete-char-at 0)))
+
+      (not (< abs-year 1000))
+      (cond->
+          (> year 9999) (str "+")
+          true (str year))
+
+      (< month 10) (str "-0")
+      (not (< month 10)) (str "-")
+      true (str month)
+      (< day 10) (str "-0")
+      (not (< day 10)) (str "-")
+      true (str day))))
+
+(extend-type LocalDate
+  string/IString
+  (to-string [this] (to-string this)))

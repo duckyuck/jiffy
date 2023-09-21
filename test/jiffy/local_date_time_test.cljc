@@ -38,9 +38,7 @@
 (test-proto-fn jiffy.local-date-time jiffy.protocols.local-date-time/minus-seconds)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.local-date-time/minus-nanos)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.local-date-time/at-offset)
-
 (test-proto-fn jiffy.local-date-time jiffy.protocols.time-comparable/compare-to)
-
 (test-proto-fn jiffy.local-date-time jiffy.protocols.chrono.chrono-local-date-time/to-local-date)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.chrono.chrono-local-date-time/to-local-time)
 ;; (test-proto-fn! jiffy.local-date-time jiffy.protocols.chrono.chrono-local-date-time/format)
@@ -50,19 +48,17 @@
 (test-proto-fn jiffy.local-date-time jiffy.protocols.chrono.chrono-local-date-time/is-equal)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.chrono.chrono-local-date-time/to-epoch-second)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.chrono.chrono-local-date-time/to-instant)
-
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal/with)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal/plus)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal/minus)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal/until)
-
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal-accessor/is-supported)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal-accessor/range)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal-accessor/get)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal-accessor/get-long)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal-accessor/query)
-
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal-adjuster/adjust-into)
+(test-proto-fn jiffy.local-date-time jiffy.protocols.string/to-string)
 
 ;; (test-static-fn! jiffy.local-date-time/now)
 (test-static-fn jiffy.local-date-time/of)

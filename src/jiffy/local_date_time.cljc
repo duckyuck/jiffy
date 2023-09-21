@@ -46,7 +46,8 @@
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.protocols.zone.zone-rules :as zone-rules]
             [jiffy.clock :as clock-impl]
-            [jiffy.offset-date-time-impl :as offset-date-time-impl])
+            [jiffy.offset-date-time-impl :as offset-date-time-impl]
+            [jiffy.protocols.string :as string])
   #?(:clj (:import [jiffy.local_date_time_impl LocalDateTime])))
 
 (s/def ::local-date-time ::impl/local-date-time)
@@ -682,14 +683,20 @@
                   e))))))
 
 (def-constructor parse ::local-date-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L476
   ([text ::j/char-sequence]
-   (wip ::parse))
+   (impl/parse text))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L490
   ([text ::j/char-sequence
     formatter ::date-time-formatter/date-time-formatter]
-   (wip ::parse)))
+   (impl/parse text formatter)))
 
 (def MIN (impl/of local-date-impl/MIN local-time-impl/MIN))
 (def MAX (impl/of local-date-impl/MAX local-time-impl/MAX))
+
+(def-method to-string string?
+  [{:keys [date time]} ::local-date-time]
+  (str (string/to-string date) "T" (string/to-string time)))
+
+(extend-type LocalDateTime
+  string/IString
+  (to-string [this] (to-string this)))

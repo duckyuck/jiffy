@@ -1,6 +1,9 @@
 (ns jiffy.duration
+  (:refer-clojure :exclude [abs])
   (:require [clojure.spec.alpha :as s]
-            [clojure.test.check.generators]
+            [clojure.test.check.generators :as gen]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.asserts :refer [require-non-nil]]
             [jiffy.math.big-decimal :as big-decimal]
             [jiffy.dev.wip :refer [wip]]
@@ -17,54 +20,49 @@
             [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
             [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
             [jiffy.protocols.time-comparable :as time-comparable]
-            [jiffy.protocols.duration :as duration])
+            [jiffy.protocols.duration :as duration]
+            [jiffy.protocols.string :as string]
+            [jiffy.local-time-impl :as local-time])
   #?(:clj (:import [jiffy.duration_impl Duration])))
 
 (def ZERO impl/ZERO)
 
 (s/def ::duration ::impl/duration)
 
-(defmacro args [& x] `(s/tuple ::duration ~@x))
+(def-method get-seconds ::j/long
+  [this ::duration]
+  (:seconds this))
 
-(s/def ::get-seconds-args (args))
-(defn -get-seconds [this] (:seconds this))
-(s/fdef -get-seconds :ret ::j/long)
+(def-method get-nano ::j/int
+  [this ::duration]
+  (:nanos this))
 
-(s/def ::get-nano-args (args))
-(defn -get-nano [this] (:nanos this))
-(s/fdef -get-nano :ret ::j/int)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L592
-(s/def ::is-zero-args (args))
-(defn -is-zero [this]
+(def-method is-zero ::j/boolean
+  [this ::duration]
   (zero? (bit-or (:seconds this) (:nanos this))))
-(s/fdef -is-zero :ret ::j/boolean)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L605
-(s/def ::is-negative-args (args))
-(defn -is-negative [this]
+(def-method is-negative ::j/boolean
+  [this ::duration]
   (neg? (:seconds this)))
-(s/fdef -is-negative :ret ::j/boolean)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L658
-(s/def ::with-seconds-args (args ::j/long))
-(defn -with-seconds [this seconds]
+(def-method with-seconds ::duration
+  [this ::duration
+   seconds ::j/long]
   (create seconds (:nanos this)))
-(s/fdef -with-seconds :args ::with-seconds-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L674
-(s/def ::with-nanos-args (args ::j/nano-of-second))
-(defn -with-nanos [this nano-of-second]
+(def-method with-nanos ::duration
+  [this ::duration
+   nano-of-second ::j/nano-of-second]
   (chrono-field/check-valid-int-value NANO_OF_SECOND nano-of-second)
   (create (:seconds this) nano-of-second))
-(s/fdef -with-nanos :args ::with-nanos-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L223
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L246
+(def-method of-seconds ::duration
+  ([seconds ::j/long]
+   (impl/of-seconds seconds))
 
-(s/def ::of-seconds-args ::impl/of-seconds-args)
-(defn of-seconds [& args] (apply impl/of-seconds args))
-(s/fdef of-seconds :args ::of-seconds-args :ret ::duration)
+  ([seconds ::j/long
+    nano-adjustment ::j/long]
+   (impl/of-seconds seconds nano-adjustment)))
 
 (declare -plus
          -plus-nanos
@@ -79,7 +77,6 @@
          -to-nanos
          -get-seconds)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L825
 (defn- --plus [this seconds-to-add nanos-to-add]
   (if (zero? (bit-or seconds-to-add nanos-to-add))
     this
@@ -91,15 +88,14 @@
                                 (+ (:nanos this)))]
         (of-seconds epoch-sec nano-adjustment)))))
 
-(s/def ::plus-args (s/or :arity-2 (args ::duration)
-                         :arity-3 (args ::j/long ::temporal-unit/temporal-unit)))
-(defn -plus
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L689
-  ([this duration]
+(def-method plus ::duration
+  ([this ::duration
+    duration ::duration]
    (--plus this (:seconds duration) (:nanos duration)))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L709
-  ([this amount-to-add unit]
+  ([this ::duration
+    amount-to-add ::j/long
+    unit ::temporal-unit/temporal-unit]
    (cond
      (= unit DAYS)
      (--plus this (math/multiply-exact amount-to-add SECONDS_PER_DAY) 0)
@@ -125,130 +121,117 @@
        (-> this
            (duration/plus-seconds (:seconds duration))
            (duration/plus-nanos (:nanos duration)))))))
-(s/fdef -plus :args ::plus-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L746
-(s/def ::plus-days-args (args ::j/long))
-(defn -plus-days [this days-to-add]
+(def-method plus-days ::duration
+  [this ::duration
+   days-to-add ::j/long]
   (--plus this (math/multiply-exact days-to-add SECONDS_PER_DAY) 0))
-(s/fdef -plus-days :args ::plus-days-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L759
-(s/def ::plus-hours-args (args ::j/long))
-(defn -plus-hours [this hours-to-add]
+(def-method plus-hours ::duration
+  [this ::duration
+   hours-to-add ::j/long]
+
   (--plus this (math/multiply-exact hours-to-add SECONDS_PER_HOUR) 0))
-(s/fdef -plus-hours :args ::plus-hours-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L772
-(s/def ::plus-minutes-args (args ::j/long))
-(defn -plus-minutes [this minutes-to-add]
+(def-method plus-minutes ::duration
+  [this ::duration
+   minutes-to-add ::j/long]
   (--plus this (math/multiply-exact minutes-to-add SECONDS_PER_MINUTE) 0))
-(s/fdef -plus-minutes :args ::plus-minutes-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L785
-(s/def ::plus-seconds-args (args ::j/long))
-(defn -plus-seconds [this seconds-to-add]
+(def-method plus-seconds ::duration
+  [this ::duration
+   seconds-to-add ::j/long]
   (--plus this seconds-to-add 0))
-(s/fdef -plus-seconds :args ::plus-seconds-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L798
-(s/def ::plus-millis-args (args ::j/long))
-(defn -plus-millis [this millis-to-add]
+(def-method plus-millis ::duration
+  [this ::duration
+   millis-to-add ::j/long]
   (--plus this (long (/ millis-to-add 1000)) (* (rem millis-to-add 1000) 1000000)))
-(s/fdef -plus-millis :args ::plus-millis-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L811
-(s/def ::plus-nanos-args (args ::j/long))
-(defn -plus-nanos [this nanos-to-add]
+(def-method plus-nanos ::duration
+  [this ::duration
+   nanos-to-add ::j/long]
   (--plus this 0 nanos-to-add))
-(s/fdef -plus-nanos :args ::plus-nanos-args :ret ::duration)
 
-(s/def ::minus-args (s/or :arity-2 (args ::duration)
-                          :arity-3 (args ::j/long ::temporal-unit/temporal-unit)))
-(defn -minus
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L846
-  ([this duration]
+(def-method minus ::duration
+  ([this ::duration
+    duration ::duration]
    (if (= (:seconds duration) math/long-min-value)
      (-> this
          (--plus math/long-max-value (- (:nanos duration)))
          (--plus 1 0))
      (--plus this (- (:seconds duration)) (- (:nanos duration)))))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L870
-  ([this amount-to-subtract unit]
+  ([this ::duration
+    amount-to-subtract ::j/long
+    unit ::temporal-unit/temporal-unit]
    (if (= amount-to-subtract math/long-min-value)
      (-> this
-         (-plus math/long-max-value unit)
-         (-plus 1 unit))
-     (-plus this (- amount-to-subtract) unit))))
-(s/fdef -minus :args ::minus-args :ret ::duration)
+         (plus math/long-max-value unit)
+         (plus 1 unit))
+     (plus this (- amount-to-subtract) unit))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L887
-(s/def ::minus-days-args (args ::j/long))
-(defn -minus-days [this days-to-subtract]
+(def-method minus-days ::duration
+  [this ::duration
+   days-to-subtract ::j/long]
   (if (= days-to-subtract math/long-min-value)
     (-> this
         (duration/plus-days math/long-max-value)
         (duration/plus-days 1))
     (duration/plus-days this (- days-to-subtract))))
-(s/fdef -minus-days :args ::minus-days-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L902
-(s/def ::minus-hours-args (args ::j/long))
-(defn -minus-hours [this hours-to-subtract]
+(def-method minus-hours ::duration
+  [this ::duration
+   hours-to-subtract ::j/long]
   (if (= hours-to-subtract math/long-min-value)
     (-> this
-        (-plus-hours math/long-max-value)
-        (-plus-hours 1))
-    (-plus-hours this (- hours-to-subtract))))
-(s/fdef -minus-hours :args ::minus-hours-args :ret ::duration)
+        (plus-hours math/long-max-value)
+        (plus-hours 1))
+    (plus-hours this (- hours-to-subtract))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L917
-(s/def ::minus-minutes-args (args ::j/long))
-(defn -minus-minutes [this minutes-to-subtract]
+(def-method minus-minutes ::duration
+  [this ::duration
+   minutes-to-subtract ::j/long]
   (if (= minutes-to-subtract math/long-min-value)
     (-> this
-        (-plus-minutes math/long-max-value)
-        (-plus-minutes 1))
-    (-plus-minutes this (- minutes-to-subtract))))
-(s/fdef -minus-minutes :args ::minus-minutes-args :ret ::duration)
+        (plus-minutes math/long-max-value)
+        (plus-minutes 1))
+    (plus-minutes this (- minutes-to-subtract))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L930
-(s/def ::minus-seconds-args (args ::j/long))
-(defn -minus-seconds [this seconds-to-subtract]
+(def-method minus-seconds ::duration
+  [this ::duration
+   seconds-to-subtract ::j/long]
   (if (= seconds-to-subtract math/long-min-value)
     (-> this
-        (-plus-seconds math/long-max-value)
-        (-plus-seconds 1))
-    (-plus-seconds this (- seconds-to-subtract))))
-(s/fdef -minus-seconds :args ::minus-seconds-args :ret ::duration)
+        (plus-seconds math/long-max-value)
+        (plus-seconds 1))
+    (plus-seconds this (- seconds-to-subtract))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L943
-(s/def ::minus-millis-args (args ::j/long))
-(defn -minus-millis [this millis-to-subtract]
+(def-method minus-millis ::duration
+  [this ::duration
+   millis-to-subtract ::j/long]
+
   (if (= millis-to-subtract math/long-min-value)
     (-> this
-        (-plus-millis math/long-max-value)
-        (-plus-millis 1))
-    (-plus-millis this (- millis-to-subtract))))
-(s/fdef -minus-millis :args ::minus-millis-args :ret ::duration)
+        (plus-millis math/long-max-value)
+        (plus-millis 1))
+    (plus-millis this (- millis-to-subtract))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L956
-(s/def ::minus-nanos-args (args ::j/long))
-(defn -minus-nanos [this nanos-to-subtract]
+(def-method minus-nanos ::duration
+  [this ::duration
+   nanos-to-subtract ::j/long]
   (if (= nanos-to-subtract math/long-min-value)
     (-> this
-        (-plus-nanos math/long-max-value)
-        (-plus-nanos 1))
-    (-plus-nanos this (- nanos-to-subtract))))
-(s/fdef -minus-nanos :args ::minus-nanos-args :ret ::duration)
+        (plus-nanos math/long-max-value)
+        (plus-nanos 1))
+    (plus-nanos this (- nanos-to-subtract))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L970
-(s/def ::multiplied-by-args ::impl/multiplied-by-args)
-(def -multiplied-by #'impl/-multiplied-by)
-(s/fdef -multiplied-by :args ::multiplied-by-args :ret ::duration)
+(def-method multiplied-by ::duration
+  [this ::duration
+   multiplicand ::j/long]
+  (impl/multiplied-by this multiplicand))
 
-(defn --divided-by-long [this divisor]
+(defn -divided-by-long [this divisor]
   (condp = divisor
     0 (throw (ex JavaArithmeticException "Cannot divide by zero" {:duration this :divisor divisor}))
     1 this
@@ -256,61 +239,47 @@
              (big-decimal/divide (impl/to-big-decimal-seconds this) (big-decimal/value-of divisor) :rounding.mode/down)
              9))))
 
-(defn --divided-by-duration [this duration]
+(defn -divided-by-duration [this duration]
   (-> (impl/to-big-decimal-seconds this)
       (big-decimal/divide-to-integral-value (impl/to-big-decimal-seconds duration))
       big-decimal/long-value-exact))
 
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L989
-(s/def ::divided-by-args (s/or :long (args ::j/long)
-                               :duration (args ::duration)))
-(defn -divided-by [this divisor]
+(def-method divided-by ::duration
+  [this ::duration
+   divisor (s/or :long ::j/long
+                 :duration ::duration)]
   (if (satisfies? duration/IDuration divisor)
-    (--divided-by-duration this divisor)
-    (--divided-by-long this divisor)))
-(s/fdef -divided-by :args ::divided-by-args :ret (s/or :long (args ::j/long) :duration (args ::duration)))
+    (-divided-by-duration this divisor)
+    (-divided-by-long this divisor)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1055
-(s/def ::negated-args ::impl/negated-args)
-(def -negated #'impl/-negated)
-(s/fdef -negated :args ::negated-args :ret ::duration)
+(def-method negated ::duration
+  [this ::duration]
+  (impl/negated this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1070
-(s/def ::abs-args (args))
-(defn -abs [this]
-  (if (-is-negative this)
-    (-negated this)
+(def-method abs ::duration
+  [this ::duration]
+  (if (is-negative this)
+    (negated this)
     this))
-(s/fdef -abs :args ::abs-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1157
-(s/def ::to-days-args (args))
-(defn -to-days [this]
+(def-method to-days ::j/long
+  [this ::duration]
   (-> this :seconds (/ SECONDS_PER_DAY) long))
-(s/fdef -to-days :args ::to-days-args :ret ::j/long)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1171
-(s/def ::to-hours-args (args))
-(defn -to-hours [this]
+(def-method to-hours ::j/long
+  [this ::duration]
   (-> this :seconds (/ SECONDS_PER_HOUR) long))
-(s/fdef -to-hours :args ::to-hours-args :ret ::j/long)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1185
-(s/def ::to-minutes-args (args))
-(defn -to-minutes [this]
+(def-method to-minutes ::j/long
+  [this ::duration]
   (-> this :seconds (/ SECONDS_PER_MINUTE) long))
-(s/fdef -to-minutes :args ::to-minutes-args :ret ::j/long)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1199
-(s/def ::to-seconds-args (args))
-(defn -to-seconds [this]
+(def-method to-seconds ::j/long
+  [this ::duration]
   (:seconds this))
-(s/fdef -to-seconds :args ::to-seconds-args :ret ::j/long)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1216
-(s/def ::to-millis-args (args))
-(defn -to-millis [this]
+(def-method to-millis ::j/long
+  [this ::duration]
   (let [[seconds nanos] (if (neg? (:seconds this))
                           ;; change the seconds and nano value to
                           ;; handle Long.MIN_VALUE case
@@ -321,11 +290,9 @@
     (-> seconds
         (math/multiply-exact 1000)
         (math/add-exact (long (/ nanos NANOS_PER_MILLI))))))
-(s/fdef -to-millis :arg ::to-millis-args :ret ::j/long)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1239
-(s/def ::to-nanos-args (args))
-(defn -to-nanos [this]
+(def-method to-nanos ::j/long
+  [this ::duration]
   (let [[seconds nanos] (if (neg? (:seconds this))
                           ;; change the seconds and nano value to
                           ;; handle Long.MIN_VALUE case
@@ -336,49 +303,36 @@
     (-> seconds
         (math/multiply-exact NANOS_PER_SECOND)
         (math/add-exact (long nanos)))))
-(s/fdef -to-nanos :args ::to-nanos-args :ret ::j/long)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1265
-(s/def ::to-days-part-args (args))
-(defn -to-days-part [this]
+(def-method to-days-part ::j/long
+  [this ::duration]
   (-> this :seconds (/ SECONDS_PER_DAY) long))
-(s/fdef -to-days-part :args ::to-days-part-args :ret ::j/long)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1281
-(s/def ::to-hours-part-args (args))
-(defn -to-hours-part [this]
-  (int (rem (-to-hours this) 24)))
-(s/fdef -to-hours-part :args ::to-hours-part-args :ret ::j/int)
+(def-method to-hours-part ::j/int
+  [this ::duration]
+  (int (rem (to-hours this) 24)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1297
-(s/def ::to-minutes-part-args (args))
-(defn -to-minutes-part [this]
-  (int (rem (-to-minutes this) MINUTES_PER_HOUR)))
-(s/fdef -to-minutes-part :args ::to-minutes-part-args :ret ::j/int)
+(def-method to-minutes-part ::j/int
+  [this ::duration]
+  (int (rem (to-minutes this) MINUTES_PER_HOUR)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1313
-(s/def ::to-seconds-part-args (args))
-(defn -to-seconds-part [this]
+(def-method to-seconds-part ::j/int
+  [this ::duration]
   (int (rem (:seconds this) SECONDS_PER_MINUTE)))
-(s/fdef -to-seconds-part :args ::to-seconds-part-args :ret ::j/int)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1331
-(s/def ::to-millis-part-args (args))
-(defn -to-millis-part [this]
+(def-method to-millis-part ::j/int
+  [this ::duration]
   (-> this :nanos (/ 1000000) long))
-(s/fdef -to-millis-part :args ::to-millis-part-args :ret ::j/int)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1348
-(s/def ::to-nanos-part-args (args))
-(defn -to-nanos-part [this]
+(def-method to-nanos-part ::j/int
+  [this ::duration]
   (:nanos this))
-(s/fdef -to-nanos-part :args ::to-nanos-part-args :ret ::j/int)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1377
-(s/def ::truncated-to-args (args ::temporal-unit/temporal-unit))
-(defn -truncated-to [this unit]
+(def-method truncated-to ::duration
+  [this ::duration
+   unit ::temporal-unit/temporal-unit]
   (let [unit-dur (temporal-unit/get-duration unit)
-        dur (delay (-to-nanos unit-dur))]
+        dur (delay (to-nanos unit-dur))]
     (cond
       (and (= unit chrono-unit/SECONDS)
            (or (>= (:seconds this) 0)
@@ -388,7 +342,7 @@
       (= unit chrono-unit/NANOS)
       this
 
-      (> (-get-seconds unit-dur) SECONDS_PER_DAY)
+      (> (get-seconds unit-dur) SECONDS_PER_DAY)
       (throw (ex UnsupportedTemporalTypeException "Unit is too large to be used for truncation" {:duration this :unit unit}))
 
       (-> NANOS_PER_DAY (rem @dur) zero? not)
@@ -403,191 +357,143 @@
                         (/ @dur)
                         long
                         (* @dur))]
-        (-plus-nanos this (- result nod))))))
-(s/fdef -truncated-to :args ::truncated-to-args :ret ::duration)
+        (plus-nanos this (- result nod))))))
 
 (extend-type Duration
   duration/IDuration
-  (is-zero [this] (-is-zero this))
-  (is-negative [this] (-is-negative this))
-  (get-seconds [this] (-get-seconds this))
-  (get-nano [this] (-get-nano this))
-  (with-seconds [this seconds] (-with-seconds this seconds))
-  (with-nanos [this nano-of-second] (-with-nanos this nano-of-second))
+  (is-zero [this] (is-zero this))
+  (is-negative [this] (is-negative this))
+  (get-seconds [this] (get-seconds this))
+  (get-nano [this] (get-nano this))
+  (with-seconds [this seconds] (with-seconds this seconds))
+  (with-nanos [this nano-of-second] (with-nanos this nano-of-second))
   (plus
-    ([this duration] (-plus this duration))
-    ([this amount-to-add unit] (-plus this amount-to-add unit)))
-  (plus-days [this days-to-add] (-plus-days this days-to-add))
-  (plus-hours [this hours-to-add] (-plus-hours this hours-to-add))
-  (plus-minutes [this minutes-to-add] (-plus-minutes this minutes-to-add))
-  (plus-seconds [this seconds-to-add] (-plus-seconds this seconds-to-add))
-  (plus-millis [this millis-to-add] (-plus-millis this millis-to-add))
-  (plus-nanos [this nanos-to-add] (-plus-nanos this nanos-to-add))
+    ([this duration] (plus this duration))
+    ([this amount-to-add unit] (plus this amount-to-add unit)))
+  (plus-days [this days-to-add] (plus-days this days-to-add))
+  (plus-hours [this hours-to-add] (plus-hours this hours-to-add))
+  (plus-minutes [this minutes-to-add] (plus-minutes this minutes-to-add))
+  (plus-seconds [this seconds-to-add] (plus-seconds this seconds-to-add))
+  (plus-millis [this millis-to-add] (plus-millis this millis-to-add))
+  (plus-nanos [this nanos-to-add] (plus-nanos this nanos-to-add))
   (minus
-    ([this duration] (-minus this duration))
-    ([this amount-to-subtract unit] (-minus this amount-to-subtract unit)))
-  (minus-days [this days-to-subtract] (-minus-days this days-to-subtract))
-  (minus-hours [this hours-to-subtract] (-minus-hours this hours-to-subtract))
-  (minus-minutes [this minutes-to-subtract] (-minus-minutes this minutes-to-subtract))
-  (minus-seconds [this seconds-to-subtract] (-minus-seconds this seconds-to-subtract))
-  (minus-millis [this millis-to-subtract] (-minus-millis this millis-to-subtract))
-  (minus-nanos [this nanos-to-subtract] (-minus-nanos this nanos-to-subtract))
-  (multiplied-by [this multiplicand] (-multiplied-by this multiplicand))
-  (divided-by [this divisor] (-divided-by this divisor))
-  (negated [this] (-negated this))
-  (abs [this] (-abs this))
-  (to-days [this] (-to-days this))
-  (to-hours [this] (-to-hours this))
-  (to-minutes [this] (-to-minutes this))
-  (to-seconds [this] (-to-seconds this))
-  (to-millis [this] (-to-millis this))
-  (to-nanos [this] (-to-nanos this))
-  (to-days-part [this] (-to-days-part this))
-  (to-hours-part [this] (-to-hours-part this))
-  (to-minutes-part [this] (-to-minutes-part this))
-  (to-seconds-part [this] (-to-seconds-part this))
-  (to-millis-part [this] (-to-millis-part this))
-  (to-nanos-part [this] (-to-nanos-part this))
-  (truncated-to [this unit] (-truncated-to this unit)))
+    ([this duration] (minus this duration))
+    ([this amount-to-subtract unit] (minus this amount-to-subtract unit)))
+  (minus-days [this days-to-subtract] (minus-days this days-to-subtract))
+  (minus-hours [this hours-to-subtract] (minus-hours this hours-to-subtract))
+  (minus-minutes [this minutes-to-subtract] (minus-minutes this minutes-to-subtract))
+  (minus-seconds [this seconds-to-subtract] (minus-seconds this seconds-to-subtract))
+  (minus-millis [this millis-to-subtract] (minus-millis this millis-to-subtract))
+  (minus-nanos [this nanos-to-subtract] (minus-nanos this nanos-to-subtract))
+  (multiplied-by [this multiplicand] (multiplied-by this multiplicand))
+  (divided-by [this divisor] (divided-by this divisor))
+  (negated [this] (negated this))
+  (abs [this] (abs this))
+  (to-days [this] (to-days this))
+  (to-hours [this] (to-hours this))
+  (to-minutes [this] (to-minutes this))
+  (to-seconds [this] (to-seconds this))
+  (to-millis [this] (to-millis this))
+  (to-nanos [this] (to-nanos this))
+  (to-days-part [this] (to-days-part this))
+  (to-hours-part [this] (to-hours-part this))
+  (to-minutes-part [this] (to-minutes-part this))
+  (to-seconds-part [this] (to-seconds-part this))
+  (to-millis-part [this] (to-millis-part this))
+  (to-nanos-part [this] (to-nanos-part this))
+  (truncated-to [this unit] (truncated-to this unit)))
 
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1408
-(s/def ::compare-to-args (args ::duration))
-(defn -compare-to [this other-duration]
-  (let [cmp (compare (:seconds this) (:seconds other-duration))]
+(def-method compare-to ::j/int
+  [this ::duration
+   other ::duration]
+  (let [cmp (compare (:seconds this) (:seconds other))]
     (if-not (zero? cmp)
       cmp
-      (- (:nanos this) (:nanos other-duration)))))
-(s/fdef -compare-to :args ::compare-to-args :ret ::j/int)
+      (- (:nanos this) (:nanos other)))))
 
 (extend-type Duration
   time-comparable/ITimeComparable
-  (compare-to [this other-duration] (-compare-to this other-duration)))
+  (compare-to [this other] (compare-to this other)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L546
-(s/def ::get-args (args ::temporal-unit/temporal-unit))
-(defn -get [this unit]
+(def-method get ::j/long
+  [this ::duration
+   unit ::temporal-unit/temporal-unit]
   (condp = unit
     SECONDS (:seconds this)
     NANOS (:nanos this)
     (throw (ex UnsupportedTemporalTypeException (str "Unsupported unit: " unit) {:duration this :unit unit}))))
-(s/fdef -get :args ::get-args :ret ::j/long)
 
 (def UNITS (delay [SECONDS NANOS]))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L569
-(s/def ::get-units-args (args))
-(defn -get-units [this]
+(def-method get-units (s/coll-of ::temporal-unit/temporal-unit)
+  [this ::duration]
   @UNITS)
-(s/fdef -get-units :args ::get-units-args :ret (s/coll-of #(satisfies? temporal-unit/ITemporalUnit %)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1100
-(s/def ::add-to-args (args ::temporal/temporal))
-(defn -add-to [this temporal]
+(def-method add-to ::duration
+  [this ::duration
+   temporal ::temporal/temporal]
+
   (cond-> temporal
     (not (zero? (:seconds this)))
     (temporal/plus (:seconds this) SECONDS)
 
     (not (zero? (:nanos this)))
     (temporal/plus (:nanos this) NANOS)))
-(s/fdef -add-to :args ::add-to-args :ret ::temporal/temporal)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1135
-(s/def ::subtract-from-args (args ::temporal/temporal))
-(defn -subtract-from [this temporal]
+(def-method subtract-from ::duration
+  [this ::duration
+   temporal ::temporal/temporal]
   (cond-> temporal
     (not (zero? (:seconds this)))
     (temporal/minus (:seconds this) SECONDS)
 
     (not (zero? (:nanos this)))
     (temporal/minus (:nanos this) NANOS)))
-(s/fdef -subtract-from :args ::subtract-from-args :ret ::temporal/temporal)
 
 (extend-type Duration
   temporal-amount/ITemporalAmount
-  (get [this unit] (-get this unit))
-  (get-units [this] (-get-units this))
-  (add-to [this temporal] (-add-to this temporal))
-  (subtract-from [this temporal] (-subtract-from this temporal)))
+  (get [this unit] (get this unit))
+  (get-units [this] (get-units this))
+  (add-to [this temporal] (add-to this temporal))
+  (subtract-from [this temporal] (subtract-from this temporal)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L180
-(s/def ::of-days-args (s/tuple ::j/long))
-(defn of-days [days]
+(def-constructor of-days ::duration
+  [days ::j/long]
   (create (math/multiply-exact days SECONDS_PER_DAY) 0))
-(s/fdef of-days :args ::of-days-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L195
-(s/def ::of-hours-args (s/tuple ::j/long))
-(defn of-hours [hours]
+(def-constructor of-hours ::duration
+  [hours ::j/long]
   (create (math/multiply-exact hours SECONDS_PER_HOUR) 0))
-(s/fdef of-hours :args ::of-hours-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L210
-(s/def ::of-minutes-args (s/tuple ::j/long))
-(defn of-minutes [minutes]
+(def-constructor of-minutes ::duration
+  [minutes ::j/long]
   (create (math/multiply-exact minutes SECONDS_PER_MINUTE) 0))
-(s/fdef of-minutes :args ::of-minutes-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L261
-(s/def ::of-millis-args (s/tuple ::j/long))
-(defn of-millis [millis]
+(def-constructor of-millis ::duration
+  [millis ::j/long]
   (let [mos (int (rem millis 1000))
         secs (cond-> (long (/ millis 1000)) (neg? mos) dec)
         mos (cond-> mos (neg? mos) (+ 1000))]
     (create secs (* mos 1000000))))
-(s/fdef of-millis :args ::of-millis-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L280
-(s/def ::of-nanos-args (s/tuple ::j/long))
-(defn of-nanos [& args] (apply impl/of-nanos args))
-(s/fdef of-nanos :args ::of-nanos-args :ret ::duration)
+(def-constructor of-nanos ::duration
+  [nanos ::j/long]
+  (impl/of-nanos nanos))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L309
-(s/def ::of-args (s/tuple ::j/long ::temporal-unit/temporal-unit))
-(defn of [amount unit]
-  (-plus ZERO amount unit))
-(s/fdef of :args ::of-args :ret ::duration)
+(def-constructor of ::duration
+  [amount ::j/long
+   unit ::temporal-unit/temporal-unit]
+  (plus ZERO amount unit))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L334
-(s/def ::from-args (s/tuple ::temporal-amount/temporal-amount))
-(defn from [amount]
-  (reduce #(-plus %1 (temporal-amount/get amount %2) %2)
+(def-constructor from ::duration
+  [amount ::temporal-amount/temporal-amount]
+  (reduce #(plus %1 (temporal-amount/get amount %2) %2)
           ZERO
           (temporal-amount/get-units amount)))
-(s/fdef from :args ::from-args :ret ::duration)
-
-(def PATTERN (delay (re-pattern (str "(?i)([-+]?)P(?:([-+]?[0-9]+)D)?(T(?:([-+]?[0-9]+)H)?(?:([-+]?[0-9]+)M)?(?:([-+]?[0-9]+)(?:[.,]([0-9]{0,9}))?S)?)?"))))
 
 (defn- duration-part [[[sign] n] & [suffix]]
   (when (and n (not (zero? n)))
     (str (str sign n) suffix)))
-
-(s/def ::iso8601-duration
-  #?(:cljs (s/and string? #(re-find @PATTERN %))
-     :clj (s/with-gen (s/and string? #(re-find @PATTERN %))
-            (fn []
-              (let [sign #{"" "-" "+"}
-                    signed-long (s/nilable (s/tuple (s/? sign) ::j/pos-long))
-                    ->str (fn [[[sign] n]] (str sign n))]
-                (clojure.test.check.generators/let
-                    [prefix (s/gen sign)
-                     days (s/gen signed-long)
-                     hours (s/gen signed-long)
-                     minutes (s/gen signed-long)
-                     seconds (s/gen signed-long)
-                     second-fraction (s/gen (s/nilable ::j/pos-int))]
-                  (str prefix
-                       "P"
-                       (duration-part days "D")
-                       (when (some #(some-> % ->str) [hours minutes seconds])
-                         "T")
-                       (duration-part hours "H")
-                       (duration-part minutes "M")
-                       (when (ffirst seconds)
-                         (str (duration-part seconds)
-                              (when second-fraction
-                                (str "." second-fraction))
-                              "S")))))))))
 
 (defn num-digits [n]
   (count (str (Math/abs n))))
@@ -611,9 +517,37 @@
    (catch :default e
      (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text s :multiplier multiplier})))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L388
-(s/def ::parse-args (s/tuple ::iso8601-duration))
-(defn parse [text]
+(def PATTERN (delay (re-pattern (str "(?i)([-+]?)P(?:([-+]?[0-9]+)D)?(T(?:([-+]?[0-9]+)H)?(?:([-+]?[0-9]+)M)?(?:([-+]?[0-9]+)(?:[.,]([0-9]{0,9}))?S)?)?"))))
+
+(s/def ::iso8601-duration
+  #?(:cljs (s/and string? #(re-find @PATTERN %))
+     :clj (s/with-gen (s/and string? #(re-find @PATTERN %))
+            (fn []
+              (let [sign #{"" "-" "+"}
+                    signed-long (s/nilable (s/tuple (s/? sign) ::j/pos-long))
+                    ->str (fn [[[sign] n]] (str sign n))]
+                (gen/let
+                    [prefix (s/gen sign)
+                     days (s/gen signed-long)
+                     hours (s/gen signed-long)
+                     minutes (s/gen signed-long)
+                     seconds (s/gen signed-long)
+                     second-fraction (s/gen (s/nilable ::j/pos-int))]
+                    (str prefix
+                         "P"
+                         (duration-part days "D")
+                         (when (some #(some-> % ->str) [hours minutes seconds])
+                           "T")
+                         (duration-part hours "H")
+                         (duration-part minutes "M")
+                         (when (ffirst seconds)
+                           (str (duration-part seconds)
+                                (when second-fraction
+                                  (str "." second-fraction))
+                                "S")))))))))
+
+(def-constructor parse ::duration
+  [text ::iso8601-duration]
   (let [matches (re-matches @PATTERN text)]
     (if-not matches
       (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text text}))
@@ -630,11 +564,10 @@
                   (= d h m s f 0))
           (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text text :error-index 0})))
         (create (neg? factor) d h m s (if (neg? s) (- f) f))))))
-(s/fdef parse :args ::parse-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L486
-(s/def ::between-args (s/tuple ::temporal/temporal ::temporal/temporal))
-(defn between [start-inclusive end-exclusive]
+(def-constructor between ::duration
+  [start-inclusive ::temporal/temporal
+   end-exclusive ::temporal/temporal]
   (try*
    (-> start-inclusive (temporal/until end-exclusive NANOS) of-nanos)
    (catch :default e
@@ -650,4 +583,54 @@
                            [s n])
                          (catch :default e [secs 0]))]
        (of-seconds secs nanos)))))
-(s/fdef between :args ::between-args :ret ::duration)
+
+(defn set-char-at [s ch idx]
+  (let [[a b] (split-at idx s)]
+    (str (apply str a)
+         ch
+         (apply str (rest b)))))
+
+(def-method to-string string?
+  [{:keys [seconds nanos] :as this} ::duration]
+  (if (= this ZERO)
+    "PT0S"
+    (let [effective-total-seconds (if (and (neg? seconds) (pos? nanos))
+                                    (inc seconds)
+                                    seconds)
+          hours (long (/ effective-total-seconds local-time/SECONDS_PER_HOUR))
+          minutes (long (/ (rem effective-total-seconds local-time/SECONDS_PER_HOUR)
+                           local-time/SECONDS_PER_MINUTE))
+          secs (rem effective-total-seconds local-time/SECONDS_PER_MINUTE)
+          s (str "PT"
+                 (when (not (zero? hours)) (str hours "H"))
+                 (when (not (zero? minutes)) (str minutes "M")))]
+      (if (and (zero? secs) (zero? nanos) (> (count s) 2))
+        s
+        (let [s (str s
+                     (if (and (neg? seconds)
+                              (pos? nanos)
+                              (zero? secs))
+                       "-0"
+                       secs))]
+          (str (if-not (pos? nanos)
+                 s
+                 (let [pos (count s)
+                       s (str s
+                              (if (neg? seconds)
+                                (-> 2
+                                    (* local-time/NANOS_PER_SECOND)
+                                    (- nanos))
+                                (+ nanos local-time/NANOS_PER_SECOND)))]
+                   (set-char-at
+                    (->> s
+                         reverse
+                         (drop-while #(= % \0))
+                         reverse
+                         (apply str))
+                    "."
+                                pos)))
+               "S"))))))
+
+(extend-type Duration
+  string/IString
+  (to-string [this] (to-string this)))

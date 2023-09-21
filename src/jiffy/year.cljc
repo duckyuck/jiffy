@@ -36,7 +36,8 @@
             [jiffy.chrono.chronology :as chronology]
             [jiffy.temporal.value-range :as value-range-impl]
             [jiffy.year-impl :as year-impl]
-            [jiffy.clock :as clock-impl]))
+            [jiffy.clock :as clock-impl]
+            [jiffy.protocols.string :as string]))
 
 (def-record Year ::year-record
   [year ::j/int])
@@ -380,9 +381,17 @@
 (def-constructor parse ::year
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L276
   ([text ::j/char-sequence]
-   (wip ::parse))
+   (of (math/parse-long text)))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L290
   ([text ::j/char-sequence
     formatter ::date-time-formatter/date-time-formatter]
    (wip ::parse)))
+
+(def-method to-string string?
+  [{:keys [year]} ::year]
+  (str year))
+
+(extend-type Year
+  string/IString
+  (to-string [this] (to-string this)))

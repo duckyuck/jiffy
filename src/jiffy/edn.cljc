@@ -6,11 +6,16 @@
             [jiffy.duration-impl #?@(:cljs [:refer [Duration]])]
             [jiffy.instant-impl #?@(:cljs [:refer [Instant]])]
             [jiffy.local-date-impl #?@(:cljs [:refer [LocalDate]])]
+            [jiffy.local-date]
             [jiffy.local-time-impl #?@(:cljs [:refer [LocalTime]])]
+            [jiffy.local-time]
             [jiffy.local-date-time-impl #?@(:cljs [:refer [LocalDateTime]])]
+            [jiffy.local-date-time]
             [jiffy.zoned-date-time-impl #?@(:cljs [:refer [ZonedDateTime]])]
             [jiffy.offset-date-time-impl #?@(:cljs [:refer [OffsetDateTime]])]
+            [jiffy.offset-date-time]
             [jiffy.offset-time-impl #?@(:cljs [:refer [OffsetTime]])]
+            [jiffy.offset-time]
             [jiffy.zone-region-impl #?@(:cljs [:refer [ZonedRegion]])]
             [jiffy.month #?@(:cljs [:refer [Month]])]
             [jiffy.year-month #?@(:cljs [:refer [YearMonth]])]
@@ -22,10 +27,12 @@
             [jiffy.temporal.chrono-field #?@(:cljs [:refer [ChronoField]])]
             [jiffy.temporal.chrono-unit #?@(:cljs [:refer [ChronoUnit]])]
             [jiffy.zone-offset]
+            [jiffy.zone-id]
             [jiffy.zone-offset-impl #?@(:cljs [:refer [ZoneOffset]])]
             [jiffy.zone.zone-offset-transition-rule #?@(:cljs [:refer [ZoneOffsetTransitionRule]])]
             [jiffy.zone.zone-rules-impl #?@(:cljs [:refer [ZoneRules]])]
-            )
+            [jiffy.protocols.string]
+            [clojure.string :as str])
   #?(:clj (:import [java.io Writer]
                    [jiffy.clock FixedClock]
                    [jiffy.day_of_week DayOfWeek]
@@ -56,115 +63,133 @@
 
 (defn ->map [x] (into {} x))
 
-(def tags
-  `{:instant
-    {:record Instant
+(defn write-value-range [{:keys [min-smallest min-largest max-smallest max-largest]}]
+  [min-smallest min-largest max-smallest max-largest])
+
+(defn read-value-range [args]
+  (apply jiffy.temporal.value-range/->ValueRange args))
+
+(defn write-enum [enum]
+  (-> enum :enum-name str/lower-case (str/replace #"_" "-") keyword))
+
+(defn read-enum [value-fn kw]
+  (-> kw name str/upper-case (str/replace #"-" "_") value-fn))
+
+(def read-chrono-unit (partial read-enum jiffy.temporal.chrono-unit/value-of))
+(def read-day-of-week (partial read-enum jiffy.day-of-week/value-of))
+(def read-month (partial read-enum jiffy.month/value-of))
+(def read-chrono-field (partial read-enum jiffy.temporal.chrono-field/valueOf))
+
+(def
+  tags
+  `[{:tag :instant
+     :record Instant
      :read-fn 'jiffy.instant-impl/map->Instant
      :write-fn '->map}
 
-    :duration
-    {:record Duration
-     :read-fn 'jiffy.duration-impl/map->Duration
-     :write-fn '->map}
+    {:tag :duration
+     :record Duration
+     :read-fn 'jiffy.duration/parse
+     :write-fn 'jiffy.protocols.string/to-string}
 
-    :query
-    {:record TemporalQuery
-     :read-fn 'jiffy.temporal.temporal-queries/name->query
-     :write-fn :name}
-
-    :field
-    {:record ChronoField
-     :read-fn 'jiffy.temporal.chrono-field/valueOf
-     :write-fn :enum-name}
-
-    :unit
-    {:record ChronoUnit
-     :read-fn 'jiffy.temporal.chrono-unit/value-of
-     :write-fn :enum-name}
-
-    :value-range
-    {:record ValueRange
-     :read-fn 'jiffy.temporal.value-range/map->ValueRange
-     :write-fn '->map}
-
-    :period
-    {:record Period
-     :read-fn 'jiffy.period/map->Period
-     :write-fn '->map}
-
-    :day-of-week
-    {:record DayOfWeek
-     :read-fn 'jiffy.day-of-week/value-of
-     :write-fn :enum-name}
-
-    :local-date
-    {:record LocalDate
-     :read-fn 'jiffy.local-date-impl/map->LocalDate
-     :write-fn '->map}
-
-    :local-time
-    {:record LocalTime
-     :read-fn 'jiffy.local-time-impl/map->LocalTime
-     :write-fn '->map}
-
-    :local-date-time
-    {:record LocalDateTime
-     :read-fn 'jiffy.local-date-time-impl/map->LocalDateTime
-     :write-fn '->map}
-
-    :month
-    {:record Month
-     :read-fn 'jiffy.month/value-of
-     :write-fn :enum-name}
-
-    :year-month
-    {:record YearMonth
-     :read-fn 'jiffy.year-month/map->YearMonth
-     :write-fn '->map}
-
-    :year
-    {:record Year
-     :read-fn 'jiffy.year/map->Year
-     :write-fn '->map}
-
-    :zone-offset
-    {:record ZoneOffset
-     :read-fn 'jiffy.zone-offset/of
+    {:tag :query
+     :record TemporalQuery
+     :read-fn 'jiffy.temporal.temporal-queries/id->query
      :write-fn :id}
 
-    :fixed-clock
-    {:record FixedClock
+    {:tag :field
+     :record ChronoField
+     :read-fn 'read-chrono-field
+     :write-fn 'write-enum}
+
+    {:tag :unit
+     :record ChronoUnit
+     :read-fn 'read-chrono-unit
+     :write-fn 'write-enum}
+
+    {:tag :range
+     :record ValueRange
+     :read-fn 'read-value-range
+     :write-fn 'write-value-range}
+
+    {:tag :period
+     :record Period
+     :read-fn 'jiffy.period/parse
+     :write-fn 'jiffy.protocols.string/to-string}
+
+    {:tag :day
+     :record DayOfWeek
+     :read-fn 'read-day-of-week
+     :write-fn 'write-enum}
+
+    {:tag :ld
+     :record LocalDate
+     :read-fn 'jiffy.local-date/parse
+     :write-fn 'jiffy.protocols.string/to-string}
+
+    {:tag :lt
+     :record LocalTime
+     :read-fn 'jiffy.local-time/parse
+     :write-fn 'jiffy.protocols.string/to-string}
+
+    {:tag :ldt
+     :record LocalDateTime
+     :read-fn 'jiffy.local-date-time/parse
+     :write-fn 'jiffy.protocols.string/to-string}
+
+    {:tag :month
+     :record Month
+     :read-fn 'read-month
+     :write-fn 'write-enum}
+
+    {:tag :year-month
+     :record YearMonth
+     :read-fn 'jiffy.year-month/parse
+     :write-fn 'jiffy.protocols.string/to-string}
+
+    {:tag :year
+     :record Year
+     :read-fn 'jiffy.year/parse
+     :write-fn 'jiffy.protocols.string/to-string}
+
+    {:tag :zone
+     :record ZoneOffset
+     :read-fn 'jiffy.zone-id/of
+     :write-fn 'jiffy.protocols.string/to-string}
+
+    {:tag :fixed-clock
+     :record FixedClock
      :read-fn 'jiffy.clock/map->FixedClock
      :write-fn '->map}
 
-    :zone-offset-transition-rule
-    {:record ZoneOffsetTransitionRule
+    {:tag :zone-rule
+     :record ZoneOffsetTransitionRule
      :read-fn 'jiffy.zone.zone-offset-transition-rule/map->ZoneOffsetTransitionRule
      :write-fn '->map}
 
-    :zone-rules
-    {:record ZoneRules
+    {:tag :zone-rules
+     :record ZoneRules
      :read-fn 'jiffy.zone.zone-rules-impl/map->ZoneRules
      :write-fn '->map}
 
-    :zone-region
-    {:record ZoneRegion
-     :read-fn 'jiffy.zone-region-impl/of-id*
+    {:tag :zone
+     :record ZoneRegion
+     :read-fn 'jiffy.zone-id/of
      :write-fn :id}
 
-    :zoned-date-time
-    {:record ZonedDateTime
-     :read-fn 'jiffy.zoned-date-time-impl/map->ZonedDateTime
-     :write-fn '->map}
+    {:tag :zdt
+     :record ZonedDateTime
+     :read-fn 'jiffy.zoned-date-time/parse
+     :write-fn 'jiffy.protocols.string/to-string}
 
-    :offset-date-time
-    {:record OffsetDateTime
-     :read-fn 'jiffy.offset-date-time-impl/map->OffsetDateTime
-     :write-fn '->map}
+    {:tag :odt
+     :record OffsetDateTime
+     :read-fn 'jiffy.offset-date-time/parse
+     :write-fn 'jiffy.protocols.string/to-string}
 
-    :offset-time
-    {:record OffsetTime
-     :read-fn 'jiffy.offset-time-impl/map->OffsetTime
-     :write-fn '->map}
+    {:tag :ot
+     :record OffsetTime
+     :read-fn 'jiffy.offset-time/parse
+     :write-fn 'jiffy.protocols.string/to-string}
 
-    })
+    ])

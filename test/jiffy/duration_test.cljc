@@ -44,9 +44,10 @@
 (test-proto-fn jiffy.duration jiffy.protocols.temporal.temporal-amount/get-units)
 (test-proto-fn jiffy.duration jiffy.protocols.temporal.temporal-amount/add-to)
 (test-proto-fn jiffy.duration jiffy.protocols.temporal.temporal-amount/subtract-from)
+(test-proto-fn jiffy.duration jiffy.protocols.string/to-string)
 
 (test-static-fn jiffy.duration/between)
-#_(test-static-fn jiffy.duration/parse)
+;; (test-static-fn! jiffy.duration/parse)
 (test-static-fn jiffy.duration/from)
 (test-static-fn jiffy.duration/of)
 (test-static-fn jiffy.duration/of-nanos)

@@ -39,9 +39,7 @@
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.zoned-date-time/minus-seconds)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.zoned-date-time/minus-nanos)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.zoned-date-time/to-offset-date-time)
-
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.time-comparable/compare-to)
-
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/to-epoch-second)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/get-offset)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/with-earlier-offset-at-overlap)
@@ -58,20 +56,19 @@
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/get-chronology)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/to-instant)
 ;; (test-proto-fn! jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/format)
-
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.temporal.temporal/with)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.temporal.temporal/plus)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.temporal.temporal/minus)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.temporal.temporal/until)
-
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.temporal.temporal-accessor/is-supported)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.temporal.temporal-accessor/range)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.temporal.temporal-accessor/get)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.temporal.temporal-accessor/get-long)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.temporal.temporal-accessor/query)
+(test-proto-fn jiffy.zoned-date-time jiffy.protocols.string/to-string)
 
 ;; (test-static-fn! jiffy.zoned-date-time/now)
-(test-static-fn jiffy.zoned-date-time/of)
+(test-static-fn! jiffy.zoned-date-time/of)
 (test-static-fn jiffy.zoned-date-time/of-local)
 (test-static-fn jiffy.zoned-date-time/of-instant)
 (test-static-fn jiffy.zoned-date-time/of-strict)

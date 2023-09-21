@@ -21,7 +21,8 @@
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [clojure.string :as str]
             [jiffy.local-time-impl :as local-time]
-            [jiffy.dev.wip :refer [wip]])
+            [jiffy.dev.wip :refer [wip]]
+            [jiffy.protocols.string :as string])
   #?(:clj (:import [jiffy.zone_offset_impl ZoneOffset])))
 
 ;; TODO: implement caching via ID_CACHE (see java.time source code)
@@ -218,3 +219,11 @@
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L159
 (def MAX (of-total-seconds MAX_SECONDS))
+
+(def-method to-string string?
+  [this ::zone-offset]
+  (:id this))
+
+(extend-type ZoneOffset
+  string/IString
+  (to-string [this] (to-string this)))

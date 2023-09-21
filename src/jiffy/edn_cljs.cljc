@@ -2,7 +2,7 @@
   (:require [cljs.reader :as reader]
             [jiffy.edn :as edn :include-macros true]))
 
-(defn gen-tag-writer [[tag {:keys [record write-fn]}]]
+(defn gen-tag-writer [{:keys [tag record write-fn]}]
   (let [t (str (name tag))
         fn (if (seq? write-fn)
              (second write-fn)
@@ -11,7 +11,7 @@
       (~'-pr-writer [~'x ~'w ~'_]
        (~'-write ~'w (edn/to-string ~t ~fn ~'x))))))
 
-(defn gen-tag-parser [[tag {:keys [read-fn]}]]
+(defn gen-tag-parser [{:keys [tag read-fn]}]
   (let [fn (if (seq? read-fn)
              (second read-fn)
              read-fn)]

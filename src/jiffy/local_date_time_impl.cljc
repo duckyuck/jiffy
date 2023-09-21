@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
+            [jiffy.exception :refer [DateTimeParseException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.specs :as j]
             [jiffy.protocols.local-date :as local-date]
@@ -12,7 +13,8 @@
             [jiffy.math :as math]
             [jiffy.asserts :as asserts]
             [jiffy.temporal.chrono-field :as chrono-field]
-            [jiffy.month :as month]))
+            [jiffy.month :as month]
+            [jiffy.protocols.format.date-time-formatter :as date-time-formatter]))
 
 (def-record LocalDateTime ::local-date-time
   [date ::local-date/local-date
@@ -71,3 +73,17 @@
     nano-of-second ::j/nano-of-second]
    (of (local-date-impl/of year month day-of-month)
        (local-time-impl/of hour minute second nano-of-second))))
+
+(def-constructor parse ::local-date-time
+  ([text ::j/char-sequence]
+   (if-let [[date time]
+            (some->> (re-matches #"([\d-]*)T([:\d-.]*)" text)
+                     rest)]
+     (of (local-date-impl/parse date)
+         (local-time-impl/parse time))
+     (throw (ex DateTimeParseException (str "Failed to parse LocalDateTime: '" text "'")))))
+
+  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L490
+  ([text ::j/char-sequence
+    formatter ::date-time-formatter/date-time-formatter]
+   (wip ::parse)))

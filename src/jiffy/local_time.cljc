@@ -37,7 +37,8 @@
             [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.asserts :as asserts]
-            [jiffy.protocols.zone.zone-rules :as zone-rules])
+            [jiffy.protocols.zone.zone-rules :as zone-rules]
+            [jiffy.protocols.string :as string])
   #?(:clj (:import [jiffy.local_time_impl LocalTime])))
 
 (def MIN impl/MIN)
@@ -561,8 +562,40 @@
 
 (def-constructor parse ::local-time
   ([text ::j/char-sequence]
-   (wip ::parse))
+   (impl/parse text))
 
   ([text ::j/char-sequence
     formatter ::date-time-formatter/date-time-formatter]
-   (wip ::parse)))
+   (impl/parse text formatter)))
+
+(def-method to-string string?
+  [{:keys [hour minute second nano]} ::local-time]
+  (cond-> ""
+    (< hour 10) (str "0")
+    true (str hour)
+    (< minute 10) (str ":0")
+    (not (< minute 10)) (str ":")
+    true (str minute)
+    (or (pos? second) (pos? nano))
+    (cond->
+        (< second 10) (str ":0")
+        (not (< second 10)) (str ":")
+        true (str second)
+        (pos? nano)
+        (cond->
+            true (str ".")
+
+            (zero? (mod nano 1000000))
+            (-> (str (string/substring (str (long (+ (/ nano 1000000) 1000))) 1)))
+
+            (and (not (zero? (mod nano 1000000)))
+                 (zero? (mod nano 1000)))
+            (-> (str (string/substring (str (long (+ (/ nano 1000) 1000000))) 1)))
+
+            (and (not (zero? (mod nano 1000000)))
+                 (not (zero? (mod nano 1000))))
+            (-> (str (string/substring (str (long (+ nano 1000000000))) 1)))))))
+
+(extend-type LocalTime
+  string/IString
+  (to-string [this] (to-string this)))

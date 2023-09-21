@@ -22,7 +22,8 @@
             [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
             [jiffy.specs :as j]
             [jiffy.temporal.chrono-unit :as chrono-unit]
-            [jiffy.temporal.temporal-queries :as temporal-queries]))
+            [jiffy.temporal.temporal-queries :as temporal-queries]
+            [jiffy.protocols.string :as string]))
 
 (def-record Period ::period
   [years ::j/year
@@ -362,3 +363,21 @@
   [start-date-inclusive ::local-date/local-date
    end-date-exclusive ::local-date/local-date]
   (chrono-local-date/until start-date-inclusive end-date-exclusive))
+
+(def-method to-string string?
+  [period ::period]
+  (if (= period ZERO)
+    "P0D"
+    (cond-> "P"
+      (-> period :years zero? not)
+      (str (:years period) "Y")
+
+      (-> period :months zero? not)
+      (str (:months period) "M")
+
+      (-> period :days zero? not)
+      (str (:days period) "D"))))
+
+(extend-type Period
+  string/IString
+  (to-string [this] (to-string this)))

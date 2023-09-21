@@ -3,7 +3,7 @@
   (:require [clojure.spec.alpha :as s]
             #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
-            [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
+            [jiffy.exception :refer [DateTimeParseException DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.clock :as clock]
             [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
@@ -33,7 +33,8 @@
             [jiffy.temporal.value-range :as value-range-impl]
             [jiffy.asserts :as asserts]
             [jiffy.chrono.chronology :as chronology]
-            [jiffy.year-impl :as year-impl]))
+            [jiffy.year-impl :as year-impl]
+            [jiffy.protocols.string :as string]))
 
 (def-record YearMonth ::year-month-record
   [year ::j/int
@@ -455,9 +456,37 @@
 (def-constructor parse ::year-month
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L279
   ([text ::j/char-sequence]
-   (wip ::parse))
+   (if-let [[year month]
+            (some->> (re-matches #"([\+-]?\d{4})-(\d{2})" text)
+                     rest
+                     (map math/parse-long))]
+     (of year month)
+     (throw (ex DateTimeParseException (str "Failed to parse YearMonth: '" text "'")))))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/YearMonth.java#L293
   ([text ::j/char-sequence
     formatter ::date-time-formatter/date-time-formatter]
    (wip ::parse)))
+
+(def-method to-string string?
+  [{:keys [year month]} ::year-month]
+  (let [abs-year (math/abs year)]
+    (cond-> ""
+      (< abs-year 1000)
+      (cond->
+          (neg? year)
+        (str (string/delete-char-at (str (- year 10000)) 1))
+
+        (not (neg? year))
+        (str (string/delete-char-at (str (+ year 10000)) 0)))
+
+      (not (< abs-year 1000))
+      (-> (str (str year)))
+
+      true
+      (-> (str (if (< month 10) "-0" "-"))
+          (str month)))))
+
+(extend-type YearMonth
+  string/IString
+  (to-string [this] (to-string this)))

@@ -1,5 +1,7 @@
 (ns jiffy.duration-impl
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.math.big-decimal :as big-decimal]
             [jiffy.math.big-integer :as big-integer]
             [jiffy.dev.wip :refer [wip]]
@@ -8,14 +10,15 @@
             [jiffy.math :as math]
             [jiffy.specs :as j]))
 
-(defrecord Duration [seconds nanos])
+(def-record Duration ::duration
+  [seconds ::j/pos-long
+   nanos ::j/nano-of-second])
 
 (def ZERO (->Duration 0 0))
 (def BI_NANOS_PER_SECOND (big-integer/value-of NANOS_PER_SECOND))
 
-(declare of-seconds -negated)
+(declare of-seconds negated)
 
-(s/def ::create-args (s/tuple ::j/pos-long ::j/nano-of-second))
 (defn create
   ([big-decimal-seconds]
    (let [nanos (-> big-decimal-seconds
@@ -34,46 +37,36 @@
   ([negate days-as-secs hours-as-secs mins-as-secs secs nanos]
    (let [seconds (math/add-exact days-as-secs (math/add-exact hours-as-secs (math/add-exact mins-as-secs secs)))]
      (if negate
-       (-negated (of-seconds seconds nanos))
+       (negated (of-seconds seconds nanos))
        (of-seconds seconds nanos)))))
-(s/def ::duration (j/constructor-spec Duration create ::create-args))
-(s/fdef create :args ::create-args :ret ::duration)
-
-(defmacro args [& x] `(s/tuple ::duration ~@x))
 
 (defn to-big-decimal-seconds [this]
   (big-decimal/add (big-decimal/value-of (:seconds this))
                    (big-decimal/value-of (:nanos this) 9)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L970
-(s/def ::multiplied-by-args (args ::j/long))
-(defn -multiplied-by [this multiplicand]
+(def-method multiplied-by ::duration
+  [this ::duration
+   multiplicand ::j/long]
   (condp = multiplicand
     0 ZERO
     1 this
     (create (big-decimal/multiply (to-big-decimal-seconds this) (big-decimal/value-of multiplicand)))))
-(s/fdef -multiplied-by :args ::multiplied-by-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L1055
-(s/def ::negated-args (args))
-(defn -negated [this]
-  (-multiplied-by this -1))
-(s/fdef -negated :args ::negated-args  :ret ::duration)
+(def-method negated ::duration
+  [this ::duration]
+  (multiplied-by this -1))
 
-(s/def ::of-seconds-args (s/cat :seconds ::j/long :nano-adjustment (s/? ::j/long)))
-(defn of-seconds
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L223
-  ([seconds]
+(def-constructor of-seconds ::duration
+  ([seconds ::j/long]
    (create seconds 0))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L246
-  ([seconds nano-adjustment]
+  ([seconds ::j/long
+    nano-adjustment ::j/long]
    (create (math/add-exact seconds (math/floor-div nano-adjustment NANOS_PER_SECOND))
            (int (math/floor-mod nano-adjustment NANOS_PER_SECOND)))))
-(s/fdef of-seconds :args ::of-seconds-args :ret ::duration)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L280
-(defn of-nanos [nanos]
+(def-constructor of-nanos ::duration
+  [nanos ::j/long]
   (let [nos (int (rem nanos NANOS_PER_SECOND))
         secs (cond-> (long (/ nanos NANOS_PER_SECOND)) (neg? nos) dec)
         nos (cond-> nos (neg? nos) (+ NANOS_PER_SECOND))]
