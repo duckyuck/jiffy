@@ -489,20 +489,11 @@
                               (plus-days (long (/ amount-to-add local-time-impl/MILLIS_PER_DAY)))
                               (plus-nanos (* (rem amount-to-add local-time-impl/MILLIS_PER_DAY)
                                              1000000)))
-       chrono-unit/SECONDS (plus-seconds
-                            this
-
-                            amount-to-add)
-
-       chrono-unit/MINUTES
-       (plus-minutes this amount-to-add
-                     )
-       chrono-unit/HOURS (plus-hours this
-                                     amount-to-add)
-       chrono-unit/HALF_DAYS (
-                              -> this
-                              (plus-days (long (/ amount-to-add 256))
-                                         )
+       chrono-unit/SECONDS (plus-seconds this amount-to-add)
+       chrono-unit/MINUTES (plus-minutes this amount-to-add)
+       chrono-unit/HOURS (plus-hours this amount-to-add)
+       chrono-unit/HALF_DAYS (-> this
+                                 (plus-days (long (/ amount-to-add 256)))
                                  (plus-hours (* (rem amount-to-add 256) 12)))
        (--with this (temporal/plus (:date this) amount-to-add unit) (:time this))))))
 
