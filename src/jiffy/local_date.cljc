@@ -109,7 +109,7 @@
 (def-method get-day-of-year ::j/int
   [this ::local-date]
   (-> (get-month this)
-      (month/-first-day-of-year (is-leap-year this))
+      (month/first-day-of-year (is-leap-year this))
       (+ (:day this)
          (- 1))))
 
@@ -451,7 +451,7 @@
   [this ::local-date]
   (->> (:year this)
        (chronology/is-leap-year iso-chronology/INSTANCE)
-       (month/-length (month/of (:month this)))))
+       (month/length (month/of (:month this)))))
 
 (def-method length-of-year ::j/int
   [this ::local-date]
@@ -813,16 +813,16 @@
       (throw (ex DateTimeException (str "Invalid date 'DayOfYear 366' as '" year "' is not a leap year")
                  {:year year :day-of-year day-of-year})))
     (let [moy (month/of (inc (long (/ (dec day-of-year) 31))))
-          month-end (-> (month/-first-day-of-year moy leap?)
-                        (+ (month/-length moy leap?))
+          month-end (-> (month/first-day-of-year moy leap?)
+                        (+ (month/length moy leap?))
                         (- 1))
           moy (if (> day-of-year month-end)
-                (month/-plus moy 1)
+                (month/plus moy 1)
                 moy)
           dom (-> (- day-of-year
-                     (month/-first-day-of-year moy leap?))
+                     (month/first-day-of-year moy leap?))
                   (+ 1))]
-      (impl/create year (month/-get-value moy) dom))))
+      (impl/create year (month/get-value moy) dom))))
 
 (def-constructor of-instant ::local-date
   [instant ::instant/instant
