@@ -41,7 +41,7 @@
    day ::j/day-of-month]
   (if (valid? {:year year :month month :day day})
     (->LocalDate year month day)
-    (throw (ex DateTimeException (str "Invalid date. Month: '" month "', day: '" day "'")))))
+    (throw (ex DateTimeException (str "Invalid date. Month: '" (pr-str month) "', day: '" day "'")))))
 
 (def DAYS_PER_CYCLE 146097)
 (def DAYS_0000_TO_1970 (- (* DAYS_PER_CYCLE 5) ( + (* 30 365) 7)))
@@ -82,7 +82,7 @@
 
 (def-constructor of ::local-date
   [year ::j/year
-   month (s/or :number ::j/month-of-yearh
+   month (s/or :number ::j/month-of-year
                :month ::month/month)
    day-of-month ::j/day-of-month]
   (chrono-field/check-valid-value chrono-field/YEAR year)

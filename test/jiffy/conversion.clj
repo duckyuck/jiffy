@@ -1,5 +1,7 @@
 (ns jiffy.conversion
-  (:require [jiffy.clock]
+  (:require [jiffy.chrono.iso-chronology]
+            [jiffy.chrono.iso-era]
+            [jiffy.clock]
             [jiffy.day-of-week]
             [jiffy.duration-impl]
             [jiffy.exception :as exception]
@@ -19,6 +21,8 @@
             [jiffy.zone.zone-offset-transition-rule]
             [jiffy.zone.zone-rules])
   (:import java.lang.reflect.Constructor
+           (jiffy.chrono.iso_chronology IsoChronology)
+           (jiffy.chrono.iso_era IsoEra)
            (jiffy.clock FixedClock SystemClock)
            (jiffy.day_of_week DayOfWeek)
            (jiffy.duration_impl Duration)
@@ -37,27 +41,51 @@
            (jiffy.zone.zone_offset_transition_rule ZoneOffsetTransitionRule)
            (jiffy.zone.zone_rules_impl ZoneRules)))
 
-(defmulti jiffy->java type)
+(defmulti jiffy->java* type)
 
-(defmethod jiffy->java :default
+(defn jiffy->java [jiffy-object]
+  (jiffy->java* jiffy-object))
+
+(defmethod jiffy->java* :default
   [object]
   (when-not (nil? object)
     (throw (ex-info (str "Shit! We're missing implementation of multimethod 'jiffy.conversion/jiffy->java' for type "
                          (type object) ". Please do some more programming!") {:object object}))))
 
-(defmulti same? (fn [jiffy-object java-object] (type jiffy-object)))
+(defmulti same?* (fn [jiffy-object java-object] (type jiffy-object)))
 
-(defmethod same? :default
-  [jiffy-object java-object]
-  (= (jiffy->java jiffy-object)
-     java-object))
+(defn same? [jiffy-object java-object]
+  (same?* jiffy-object java-object))
+
+(defn stream-seq [java-stream]
+  (-> java-stream .iterator iterator-seq))
+
+(defn to-seq [java-object]
+  (if (instance? java.util.stream.BaseStream java-object)
+    (stream-seq java-object)
+    java-object))
+
+(def max-coll-result-size 10)
 
 (defn same-coll? [jiffy-coll java-coll]
-  (every? true? (map same? jiffy-coll java-coll)))
+  (->> (map same?
+            (take max-coll-result-size jiffy-coll)
+            (take max-coll-result-size (to-seq java-coll)))
+       (every? true?)))
 
-(defmethod same? clojure.lang.PersistentVector [& args] (apply same-coll? args))
-(defmethod same? clojure.lang.ArraySeq [& args] (apply same-coll? args))
-(defmethod same? (Class/forName "[Ljava.math.BigInteger;") [& args] (apply same-coll? args))
+(defmethod same?* :default
+  [jiffy-object java-object]
+  (cond
+    (instance? java.util.stream.BaseStream java-object)
+    (same-coll? jiffy-object (to-seq java-object))
+
+    :else
+    (= (jiffy->java jiffy-object)
+       java-object)))
+
+(defmethod same?* clojure.lang.PersistentVector [& args] (apply same-coll? args))
+(defmethod same?* clojure.lang.ArraySeq [& args] (apply same-coll? args))
+(defmethod same?* (Class/forName "[Ljava.math.BigInteger;") [& args] (apply same-coll? args))
 
 (let [kind->class {exception/JavaException java.lang.Exception
                    exception/JavaRuntimeException java.lang.RuntimeException
@@ -74,7 +102,7 @@
                    exception/JavaIndexOutOfBoundsException java.lang.IndexOutOfBoundsException
                    exception/JavaThrowable java.lang.Throwable}]
   ;; TODO: include exception message in check. needs polishing of exception error messages
-  (defmethod same? clojure.lang.ExceptionInfo
+  (defmethod same?* clojure.lang.ExceptionInfo
     [ex java-object]
     (= (kind->class (::exception/kind (ex-data ex)))
        (type java-object))))
@@ -85,20 +113,20 @@
                java.lang.String
                java.math.BigInteger
                java.math.BigDecimal]]
-  (defmethod jiffy->java class [x] x))
+  (defmethod jiffy->java* class [x] x))
 
 (doseq [class [clojure.lang.ArraySeq
                clojure.lang.PersistentVector
                clojure.lang.LazySeq]]
-  (defmethod jiffy->java class [coll] (mapv jiffy->java coll)))
+  (defmethod jiffy->java* class [coll] (mapv jiffy->java coll)))
 
-(defmethod jiffy->java Instant [{:keys [seconds nanos]}]
+(defmethod jiffy->java* Instant [{:keys [seconds nanos]}]
   (.plusNanos (java.time.Instant/ofEpochSecond seconds) nanos))
 
-(defmethod jiffy->java ChronoField [chrono-field]
+(defmethod jiffy->java* ChronoField [chrono-field]
   (java.time.temporal.ChronoField/valueOf (:enum-name chrono-field)))
 
-(defmethod jiffy->java TemporalQuery [{:keys [name]}]
+(defmethod jiffy->java* TemporalQuery [{:keys [name]}]
   (case name
     "ZoneId" (java.time.temporal.TemporalQueries/zoneId)
     "Chronology" (java.time.temporal.TemporalQueries/chronology)
@@ -108,13 +136,13 @@
     "LocalDate" (java.time.temporal.TemporalQueries/localDate)
     "LocalTime" (java.time.temporal.TemporalQueries/localTime)))
 
-(defmethod jiffy->java ChronoUnit [{:keys [enum-name]}]
+(defmethod jiffy->java* ChronoUnit [{:keys [enum-name]}]
   (java.time.temporal.ChronoUnit/valueOf enum-name))
 
-(defmethod jiffy->java ValueRange [{:keys [min-smallest min-largest max-smallest max-largest]}]
+(defmethod jiffy->java* ValueRange [{:keys [min-smallest min-largest max-smallest max-largest]}]
   (java.time.temporal.ValueRange/of min-smallest min-largest max-smallest max-largest))
 
-(defmethod same? ValueRange [jiffy-object java-object]
+(defmethod same?* ValueRange [jiffy-object java-object]
   (and (or (= (:min-smallest jiffy-object) (.getMinimum java-object))
            (and (= (:min-smallest jiffy-object) precision/min-safe-integer)
                 (> (:min-smallest jiffy-object) (.getMinimum java-object))))
@@ -128,53 +156,53 @@
            (and (= (:max-largest jiffy-object) precision/max-safe-integer)
                 (< (:max-largest jiffy-object) (.getMaximum java-object))))))
 
-(defmethod jiffy->java Duration [{:keys [seconds nanos]}]
+(defmethod jiffy->java* Duration [{:keys [seconds nanos]}]
   (.withNanos (java.time.Duration/ofSeconds seconds) nanos))
 
-(defmethod same? Duration [jiffy-object java-object]
+(defmethod same?* Duration [jiffy-object java-object]
   (and (or (= (:seconds jiffy-object) (.getSeconds java-object))
            (and (= (:seconds jiffy-object) precision/min-safe-integer)
                 (> (:seconds jiffy-object) (.getSeconds java-object)))
            (and (= (:seconds jiffy-object) precision/max-safe-integer)
                 (< (:seconds jiffy-object) (.getSeconds java-object))))))
 
-(defmethod jiffy->java DayOfWeek [{:keys [enum-name]}]
+(defmethod jiffy->java* DayOfWeek [{:keys [enum-name]}]
   (java.time.DayOfWeek/valueOf enum-name))
 
-(defmethod jiffy->java ZoneOffset [{:keys [total-seconds]}]
+(defmethod jiffy->java* ZoneOffset [{:keys [total-seconds]}]
   (java.time.ZoneOffset/ofTotalSeconds total-seconds))
 
 (defn jiffy->month [{:keys [enum-name]}]
   (java.time.Month/valueOf enum-name))
 
-(defmethod jiffy->java Month [arg]
+(defmethod jiffy->java* Month [arg]
   (jiffy->month arg))
 
-(defmethod jiffy->java Period [{:keys [years months days]}]
+(defmethod jiffy->java* Period [{:keys [years months days]}]
   (java.time.Period/of years months days))
 
-(defmethod jiffy->java LocalTime [{:keys [hour minute second nano]}]
+(defmethod jiffy->java* LocalTime [{:keys [hour minute second nano]}]
   (java.time.LocalTime/of hour minute second nano))
 
-(defmethod jiffy->java LocalDate [{:keys [year month day]}]
+(defmethod jiffy->java* LocalDate [{:keys [year month day]}]
   (java.time.LocalDate/of year month day))
 
-(defmethod jiffy->java LocalDateTime [{:keys [date time]}]
+(defmethod jiffy->java* LocalDateTime [{:keys [date time]}]
   (java.time.LocalDateTime/of (jiffy->java date)
                               (jiffy->java time)))
 
-(defmethod jiffy->java ZonedDateTime [{:keys [date-time zone offset]}]
+(defmethod jiffy->java* ZonedDateTime [{:keys [date-time zone offset]}]
   (java.time.ZonedDateTime/ofLocal (jiffy->java date-time)
                                    (jiffy->java zone)
                                    (jiffy->java offset)))
 
-(defmethod jiffy->java ValueRange [{:keys [min-smallest min-largest max-smallest max-largest]}]
+(defmethod jiffy->java* ValueRange [{:keys [min-smallest min-largest max-smallest max-largest]}]
   (java.time.temporal.ValueRange/of min-smallest min-largest max-smallest max-largest))
 
-(defmethod jiffy->java SystemClock [{:keys [zone]}]
+(defmethod jiffy->java* SystemClock [{:keys [zone]}]
   (java.time.Clock/system (jiffy->java zone)))
 
-(defmethod jiffy->java FixedClock [{:keys [instant zone]}]
+(defmethod jiffy->java* FixedClock [{:keys [instant zone]}]
   (java.time.Clock/fixed (jiffy->java instant) (jiffy->java zone)))
 
 (defn set-private-property [obj property-name new-value]
@@ -205,7 +233,7 @@
       wall-offsets (set-private-property "wallOffsets" (into-array java.time.ZoneOffset (jiffy->java wall-offsets)))
       last-rules (set-private-property "lastRules" (into-array java.time.zone.ZoneOffsetTransitionRule (jiffy->java last-rules))))))
 
-(defmethod jiffy->java ZoneRules [arg]
+(defmethod jiffy->java* ZoneRules [arg]
   (jiffy->zone-rules arg))
 
 (defn jiffy->zone-offset-transition-rule [{:keys [time-definition
@@ -228,5 +256,11 @@
    (jiffy->java offset-after)
    (jiffy->java offset-before)))
 
-(defmethod jiffy->java ZoneOffsetTransitionRule [arg]
+(defmethod jiffy->java* ZoneOffsetTransitionRule [arg]
   (jiffy->zone-offset-transition-rule arg))
+
+(defmethod jiffy->java* IsoChronology [iso-chronology]
+  java.time.chrono.IsoChronology/INSTANCE)
+
+(defmethod jiffy->java* IsoEra [{:keys [enum-name]}]
+  (java.time.chrono.IsoEra/valueOf enum-name))

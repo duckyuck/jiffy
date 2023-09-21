@@ -365,7 +365,8 @@
 ;; TODO: clean up dispatch via multimethods
 (def-method is-supported ::j/boolean
   [this ::impl/instant
-   field-or-unit ::temporal-unit/temporal-unit]
+   field-or-unit (s/or ::temporal-unit/temporal-unit
+                       ::temporal-field/temporal-field)]
   (cond
     (satisfies? temporal-field/ITemporalField field-or-unit)
     (--is-supported-field this field-or-unit)

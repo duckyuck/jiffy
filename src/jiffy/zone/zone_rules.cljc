@@ -71,7 +71,7 @@
   [{:keys [savings-instant-transitions standard-offsets last-rules wall-offsets] :as this}
    instant]
   (if (empty? savings-instant-transitions)
-    (first (first standard-offsets))
+    (first standard-offsets)
     (let [epoch-sec (instant/get-epoch-second instant)]
       (if (and (seq last-rules)
                (> epoch-sec (last savings-instant-transitions)))

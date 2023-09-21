@@ -11,6 +11,7 @@
             [jiffy.local-time-impl :as local-time-impl]
             [jiffy.month :as month]
             [jiffy.period :as period-impl]
+            [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
             [jiffy.protocols.chrono.chrono-local-date-time-impl
              :as chrono-local-date-time-impl]
             [jiffy.protocols.chrono.chrono-period-impl :as chrono-period-impl]
@@ -117,9 +118,17 @@
                                    ;; ::period-impl/period
                                    ])))))
 
+(s/def ::chrono-local-date/chrono-local-date
+  (s/with-gen #(satisfies? chrono-local-date/IChronoLocalDate %)
+    (fn [] (gen/one-of (map s/gen [;; :jiffy.chrono.hijrah-date/hijrah-date
+                                   ;; :jiffy.chrono.japanese-date/japanese-date
+                                   ;; :jiffy.chrono.minguo-date/minguo-date
+                                   ;; :jiffy.chrono.thai-buddhist-date/thai-buddhist-date
+                                   :jiffy.local-date/local-date])))))
+
 (s/def ::temporal/temporal
   (s/with-gen #(satisfies? temporal/ITemporal %)
-    (fn [] (gen/one-of (map s/gen [;; :jiffy.chrono.chrono-local-date-impl/chrono-local-date-impl
+    (fn [] (gen/one-of (map s/gen [ ;; :jiffy.chrono.chrono-local-date-impl/chrono-local-date-impl
                                    ;; :jiffy.chrono.chrono-local-date-time-impl/chrono-local-date-time-impl
                                    ;; :jiffy.chrono.chrono-zoned-date-time-impl/chrono-zoned-date-time-impl
                                    ;; :jiffy.chrono.hijrah-date/hijrah-date

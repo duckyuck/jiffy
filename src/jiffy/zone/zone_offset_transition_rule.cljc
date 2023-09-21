@@ -122,11 +122,11 @@
    year ::j/int]
   (let [leap-year? (chronology/is-leap-year iso-chronology/INSTANCE year)
         date (if (neg? day-of-month-indicator)
-               (let [date (local-date-impl/create year month (+ 1 (month/length month leap-year?) day-of-month-indicator))]
+               (let [date (local-date-impl/of year month (+ 1 (month/length month leap-year?) day-of-month-indicator))]
                  (if day-of-week
                    (temporal/with date (temporal-adjusters/previous-or-same day-of-week))
                    date))
-               (let [date (local-date-impl/create year month day-of-month-indicator)]
+               (let [date (local-date-impl/of year month day-of-month-indicator)]
                  (if day-of-week
                    (temporal/with date (temporal-adjusters/next-or-same day-of-week))
                    date)))

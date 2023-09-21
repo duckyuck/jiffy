@@ -490,11 +490,7 @@
     minute ::j/minute-of-hour
     second ::j/second-of-minute
     nano-of-second ::j/nano-of-second]
-   (chrono-field/check-valid-value chrono-field/HOUR_OF_DAY hour)
-   (chrono-field/check-valid-value chrono-field/MINUTE_OF_HOUR minute)
-   (chrono-field/check-valid-value chrono-field/SECOND_OF_MINUTE second)
-   (chrono-field/check-valid-value chrono-field/NANO_OF_SECOND nano-of-second)
-   (impl/create hour minute second nano-of-second)))
+   (impl/of hour minute second nano-of-second)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalTime.java#L379
 (s/def ::of-second-of-day-args (args ::j/long))

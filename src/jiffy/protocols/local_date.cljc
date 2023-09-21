@@ -22,8 +22,14 @@
   (minus-weeks [this weeks-to-subtract])
   (minus-days [this days-to-subtract])
   (days-until [this end])
-  (dates-until [this end-exclusive] [this end-exclusive step])
-  (at-time [this hour minute] [this hour minute second] [this hour minute second nano-of-second])
+  (dates-until
+    [this end-exclusive]
+    [this end-exclusive step])
+  (at-time
+    [this offset-time]
+    [this hour minute]
+    [this hour minute second]
+    [this hour minute second nano-of-second])
   (at-start-of-day [this] [this zone])
   (to-epoch-second [this time offset])
   (compare-to0 [this other-date]))

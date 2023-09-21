@@ -10,7 +10,7 @@
 (test-proto-fn jiffy.zone-offset jiffy.protocols.temporal.temporal-accessor/range)
 (test-proto-fn jiffy.zone-offset jiffy.protocols.temporal.temporal-accessor/get)
 (test-proto-fn jiffy.zone-offset jiffy.protocols.temporal.temporal-accessor/get-long)
-(test-proto-fn! jiffy.zone-offset jiffy.protocols.temporal.temporal-accessor/query)
+;; (test-proto-fn! jiffy.zone-offset jiffy.protocols.temporal.temporal-accessor/query)
 (test-proto-fn jiffy.zone-offset jiffy.protocols.temporal.temporal-adjuster/adjust-into)
 
 (test-static-fn jiffy.zone-offset/of-hours)

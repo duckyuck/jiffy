@@ -1,5 +1,7 @@
 (ns jiffy.zoned-date-time
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.asserts :as asserts]
             [jiffy.day-of-week :as day-of-week]
             [jiffy.dev.wip :refer [wip]]
@@ -51,75 +53,62 @@
 
 (s/def ::zoned-date-time ::impl/zoned-date-time)
 
-(defmacro args [& x] `(s/tuple ::zoned-date-time ~@x))
-
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1013
-(s/def ::with-fixed-offset-zone-args (args))
-(defn -with-fixed-offset-zone [this]
+(def-method -with-fixed-offset-zone ::zoned-date-time
+  [this ::zoned-date-time]
   (if (= (:zone this) (:offset this))
     this
     (impl/create (:date-time this) (:offset this) (:offset this))))
-(s/fdef -with-fixed-offset-zone :args ::with-fixed-offset-zone-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1055
-(s/def ::get-year-args (args))
-(defn -get-year [this]
+(def-method -get-year ::j/int
+  [this ::zoned-date-time]
   (-> this :date-time local-date-time/get-year))
-(s/fdef -get-year :args ::get-year-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1069
-(s/def ::get-month-value-args (args))
-(defn -get-month-value [this]
+(def-method -get-month-value ::j/int
+  [this ::zoned-date-time]
   (-> this :date-time local-date-time/get-month-value))
-(s/fdef -get-month-value :args ::get-month-value-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1084
-(s/def ::get-month-args (args))
-(defn -get-month [this]
+(def-method -get-month ::month/month
+  [this ::zoned-date-time]
   (-> this :date-time local-date-time/get-month))
-(s/fdef -get-month :args ::get-month-args :ret ::month/month)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1095
-(s/def ::get-day-of-month-args (args))
-(defn -get-day-of-month [this]
+(def-method -get-day-of-month ::j/int
+  [this ::zoned-date-time]
   (-> this :date-time local-date-time/get-day-of-month))
-(s/fdef -get-day-of-month :args ::get-day-of-month-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1106
-(s/def ::get-day-of-year-args (args))
-(defn -get-day-of-year [this]
+(def-method -get-day-of-year ::j/int
+  [this ::zoned-date-time]
   (-> this :date-time local-date-time/get-day-of-year))
-(s/fdef -get-day-of-year :args ::get-day-of-year-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1123
-(s/def ::get-day-of-week-args (args))
-(defn -get-day-of-week [this]
+(def-method -get-day-of-week ::day-of-week/day-of-week
+  [this ::zoned-date-time]
   (-> this :date-time local-date-time/get-day-of-week))
-(s/fdef -get-day-of-week :args ::get-day-of-week-args :ret ::day-of-week/day-of-week)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1146
-(s/def ::get-hour-args (args))
-(defn -get-hour [this]
+(def-method -get-hour ::j/int
+  [this ::zoned-date-time]
   (-> this :date-time local-date-time/get-hour))
-(s/fdef -get-hour :args ::get-hour-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1155
-(s/def ::get-minute-args (args))
-(defn -get-minute [this]
+(def-method -get-minute ::j/int
+  [this ::zoned-date-time]
   (-> this :date-time local-date-time/get-minute))
-(s/fdef -get-minute :args ::get-minute-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1164
-(s/def ::get-second-args (args))
-(defn -get-second [this]
+(def-method -get-second ::j/int
+  [this ::zoned-date-time]
   (-> this :date-time local-date-time/get-second))
-(s/fdef -get-second :args ::get-second-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1173
-(s/def ::get-nano-args (args))
-(defn -get-nano [this]
+(def-method -get-nano ::j/int
+  [this ::zoned-date-time]
   (-> this :date-time local-date-time/get-nano))
-(s/fdef -get-nano :args ::get-nano-args :ret ::j/int)
 
 (declare of-local)
 (declare of-instant)
@@ -131,160 +120,159 @@
   (of-instant date-time (:offset this) (:zone this)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1336
-(s/def ::with-year-args (args ::j/int))
-(defn -with-year [this year]
+(def-method -with-year ::zoned-date-time
+  [this ::zoned-date-time
+   year ::j/int]
   (resolve-local this (local-date-time/with-year (:date-time this) year)))
-(s/fdef -with-year :args ::with-year-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1358
-(s/def ::with-month-args (args ::j/int))
-(defn -with-month [this month]
+(def-method -with-month ::zoned-date-time
+  [this ::zoned-date-time
+   month ::j/int]
   (resolve-local this (local-date-time/with-month (:date-time this) month)))
-(s/fdef -with-month :args ::with-month-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1381
-(s/def ::with-day-of-month-args (args ::j/int))
-(defn -with-day-of-month [this day-of-month]
+(def-method -with-day-of-month ::zoned-date-time
+  [this ::zoned-date-time
+   day-of-month ::j/int]
   (resolve-local this (local-date-time/with-day-of-month (:date-time this) day-of-month)))
-(s/fdef -with-day-of-month :args ::with-day-of-month-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1404
-(s/def ::with-day-of-year-args (args ::j/int))
-(defn -with-day-of-year [this day-of-year]
+(def-method -with-day-of-year ::zoned-date-time
+  [this ::zoned-date-time
+   day-of-year ::j/int]
   (resolve-local this (local-date-time/with-day-of-year (:date-time this) day-of-year)))
-(s/fdef -with-day-of-year :args ::with-day-of-year-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1427
-(s/def ::with-hour-args (args ::j/int))
-(defn -with-hour [this hour]
+(def-method -with-hour ::zoned-date-time
+  [this ::zoned-date-time
+   hour ::j/int]
   (resolve-local this (local-date-time/with-hour (:date-time this) hour)))
-(s/fdef -with-hour :args ::with-hour-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1449
-(s/def ::with-minute-args (args ::j/int))
-(defn -with-minute [this minute]
+(def-method -with-minute ::zoned-date-time
+  [this ::zoned-date-time
+   minute ::j/int]
   (resolve-local this (local-date-time/with-minute (:date-time this) minute)))
-(s/fdef -with-minute :args ::with-minute-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1471
-(s/def ::with-second-args (args ::j/int))
-(defn -with-second [this second]
+(def-method -with-second ::zoned-date-time
+  [this ::zoned-date-time
+   second ::j/int]
   (resolve-local this (local-date-time/with-second (:date-time this) second)))
-(s/fdef -with-second :args ::with-second-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1493
-(s/def ::with-nano-args (args ::j/int))
-(defn -with-nano [this nano-of-second]
+(def-method -with-nano ::zoned-date-time
+  [this ::zoned-date-time
+   nano-of-second ::j/int]
   (resolve-local this (local-date-time/with-nano (:date-time this) nano-of-second)))
-(s/fdef -with-nano :args ::with-nano-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1527
-(s/def ::truncated-to-args (args ::temporal-unit/temporal-unit))
-(defn -truncated-to [this unit]
+(def-method -truncated-to ::zoned-date-time
+  [this ::zoned-date-time
+   unit ::temporal-unit/temporal-unit]
   (resolve-local this (local-date-time/truncated-to (:date-time this) unit)))
-(s/fdef -truncated-to :args ::truncated-to-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1630
-(s/def ::plus-years-args (args ::j/long))
-(defn -plus-years [this years]
+(def-method -plus-years ::zoned-date-time
+  [this ::zoned-date-time
+   years ::j/long]
   (resolve-local this (local-date-time/plus-years (:date-time this) years)))
-(s/fdef -plus-years :args ::plus-years-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1652
-(s/def ::plus-months-args (args ::j/long))
-(defn -plus-months [this months]
+(def-method -plus-months ::zoned-date-time
+  [this ::zoned-date-time
+   months ::j/long]
   (resolve-local this (local-date-time/plus-months (:date-time this) months)))
-(s/fdef -plus-months :args ::plus-months-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1674
-(s/def ::plus-weeks-args (args ::j/long))
-(defn -plus-weeks [this weeks]
+(def-method -plus-weeks ::zoned-date-time
+  [this ::zoned-date-time
+   weeks ::j/long]
   (resolve-local this (local-date-time/plus-weeks (:date-time this) weeks)))
-(s/fdef -plus-weeks :args ::plus-weeks-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1696
-(s/def ::plus-days-args (args ::j/long))
-(defn -plus-days [this days]
+(def-method -plus-days ::zoned-date-time
+  [this ::zoned-date-time
+   days ::j/long]
   (resolve-local this (local-date-time/plus-days (:date-time this) days)))
-(s/fdef -plus-days :args ::plus-days-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1730
-(s/def ::plus-hours-args (args ::j/long))
-(defn -plus-hours [this hours]
+(def-method -plus-hours ::zoned-date-time
+  [this ::zoned-date-time
+   hours ::j/long]
   (resolve-local this (local-date-time/plus-hours (:date-time this) hours)))
-(s/fdef -plus-hours :args ::plus-hours-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1748
-(s/def ::plus-minutes-args (args ::j/long))
-(defn -plus-minutes [this minutes]
+(def-method -plus-minutes ::zoned-date-time
+  [this ::zoned-date-time
+   minutes ::j/long]
   (resolve-local this (local-date-time/plus-minutes (:date-time this) minutes)))
-(s/fdef -plus-minutes :args ::plus-minutes-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1766
-(s/def ::plus-seconds-args (args ::j/long))
-(defn -plus-seconds [this seconds]
+(def-method -plus-seconds ::zoned-date-time
+  [this ::zoned-date-time
+   seconds ::j/long]
   (resolve-local this (local-date-time/plus-seconds (:date-time this) seconds)))
-(s/fdef -plus-seconds :args ::plus-seconds-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1784
-(s/def ::plus-nanos-args (args ::j/long))
-(defn -plus-nanos [this nanos]
+(def-method -plus-nanos ::zoned-date-time
+  [this ::zoned-date-time
+   nanos ::j/long]
   (resolve-local this (local-date-time/plus-nanos (:date-time this) nanos)))
-(s/fdef -plus-nanos :args ::plus-nanos-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1876
-(s/def ::minus-years-args (args ::j/long))
-(defn -minus-years [this years]
+(def-method -minus-years ::zoned-date-time
+  [this ::zoned-date-time
+   years ::j/long]
   (resolve-local this (local-date-time/minus-years (:date-time this) years)))
-(s/fdef -minus-years :args ::minus-years-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1898
-(s/def ::minus-months-args (args ::j/long))
-(defn -minus-months [this months]
+(def-method -minus-months ::zoned-date-time
+  [this ::zoned-date-time
+   months ::j/long]
   (resolve-local this (local-date-time/minus-months (:date-time this) months)))
-(s/fdef -minus-months :args ::minus-months-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1920
-(s/def ::minus-weeks-args (args ::j/long))
-(defn -minus-weeks [this weeks]
+(def-method -minus-weeks ::zoned-date-time
+  [this ::zoned-date-time
+   weeks ::j/long]
   (resolve-local this (local-date-time/minus-weeks (:date-time this) weeks)))
-(s/fdef -minus-weeks :args ::minus-weeks-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1942
-(s/def ::minus-days-args (args ::j/long))
-(defn -minus-days [this days]
+(def-method -minus-days ::zoned-date-time
+  [this ::zoned-date-time
+   days ::j/long]
   (resolve-local this (local-date-time/minus-days (:date-time this) days)))
-(s/fdef -minus-days :args ::minus-days-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1976
-(s/def ::minus-hours-args (args ::j/long))
-(defn -minus-hours [this hours]
+(def-method -minus-hours ::zoned-date-time
+  [this ::zoned-date-time
+   hours ::j/long]
   (resolve-local this (local-date-time/minus-hours (:date-time this) hours)))
-(s/fdef -minus-hours :args ::minus-hours-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1994
-(s/def ::minus-minutes-args (args ::j/long))
-(defn -minus-minutes [this minutes]
+(def-method -minus-minutes ::zoned-date-time
+  [this ::zoned-date-time
+   minutes ::j/long]
   (resolve-local this (local-date-time/minus-minutes (:date-time this) minutes)))
-(s/fdef -minus-minutes :args ::minus-minutes-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L2012
-(s/def ::minus-seconds-args (args ::j/long))
-(defn -minus-seconds [this seconds]
+(def-method -minus-seconds ::zoned-date-time
+  [this ::zoned-date-time
+   seconds ::j/long]
   (resolve-local this (local-date-time/minus-seconds (:date-time this) seconds)))
-(s/fdef -minus-seconds :args ::minus-seconds-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L2030
-(s/def ::minus-nanos-args (args ::j/long))
-(defn -minus-nanos [this nanos]
+(def-method -minus-nanos ::zoned-date-time
+  [this ::zoned-date-time
+   nanos ::j/long]
   (resolve-local this (local-date-time/minus-nanos (:date-time this) nanos)))
-(s/fdef -minus-nanos :args ::minus-nanos-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L2136
-(s/def ::to-offset-date-time-args (args))
-(defn -to-offset-date-time [this]
+(def-method -to-offset-date-time ::offset-date-time/offset-date-time
+  [this ::zoned-date-time]
   (offset-date-time-impl/of (:date-time this) (:offset this)))
-(s/fdef -to-offset-date-time :args ::to-offset-date-time-args :ret ::offset-date-time/offset-date-time)
 
 (extend-type ZonedDateTime
   zoned-date-time/IZonedDateTime
@@ -329,14 +317,13 @@
 ;; FIXME: no implementation found from inherited class interface java.lang.Comparable
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L819
-(s/def ::get-offset-args (args))
-(defn -get-offset [this]
+(def-method -get-offset ::zone-offset/zone-offset
+  [this ::zoned-date-time]
   (:offset this))
-(s/fdef -get-offset :args ::get-offset-args :ret ::zone-offset/zone-offset)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L891
-(s/def ::with-earlier-offset-at-overlap-args (args))
-(defn -with-earlier-offset-at-overlap [this]
+(def-method -with-earlier-offset-at-overlap ::chrono-zoned-date-time/chrono-zoned-date-time
+  [this ::zoned-date-time]
   (let [trans (-> this :zone zone-id/get-rules (zone-rules/get-transition (:date-time this)))]
     (if (and (not (nil? trans)) (zone-offset-transition/is-overlap trans))
       (let [earlier-offset (zone-offset-transition/get-offset-before trans)]
@@ -344,17 +331,15 @@
           (impl/create (:date-time this) earlier-offset (:zone this))
           this))
       this)))
-(s/fdef -with-earlier-offset-at-overlap :args ::with-earlier-offset-at-overlap-args :ret ::chrono-zoned-date-time/chrono-zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L892
-(s/def ::get-zone-args (args))
-(defn -get-zone [this]
+(def-method -get-zone ::zone-id/zone-id
+  [this ::zoned-date-time]
   (:zone this))
-(s/fdef -get-zone :args ::get-zone-args :ret ::zone-id/zone-id)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L919
-(s/def ::with-later-offset-at-overlap-args (args))
-(defn -with-later-offset-at-overlap [this]
+(def-method -with-later-offset-at-overlap ::zoned-date-time
+  [this ::zoned-date-time]
   (let [trans (-> this :zone zone-id/get-rules (zone-rules/get-transition (:date-time this)))]
     (if (not (nil? trans))
       (let [later-offset (zone-offset-transition/get-offset-after trans)]
@@ -362,16 +347,15 @@
           (impl/create (:date-time this) later-offset (:zone this))
           this))
       this)))
-(s/fdef -with-later-offset-at-overlap :args ::with-later-offset-at-overlap-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L967
-(s/def ::with-zone-same-local-args (args ::zone-id/zone-id))
-(defn -with-zone-same-local [this zone]
+(def-method -with-zone-same-local ::zoned-date-time
+  [this ::zoned-date-time
+   zone ::zone-id/zone-id]
   (asserts/require-non-nil zone "zone")
   (if (= (:zone this) zone)
     this
     (of-local (:date-time this) zone (:offset this))))
-(s/fdef -with-zone-same-local :args ::with-zone-same-local-args :ret ::zoned-date-time)
 
 (defn- -create [epoch-second nano-of-second zone]
   (let [rules (zone-id/get-rules zone)
@@ -380,38 +364,35 @@
     (impl/create (local-date-time-impl/of-epoch-second epoch-second nano-of-second offset) offset zone)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L990
-(s/def ::with-zone-same-instant-args (args ::zone-id/zone-id))
-(defn -with-zone-same-instant [this zone]
+(def-method -with-zone-same-instant ::zoned-date-time
+  [this ::zoned-date-time
+   zone ::zone-id/zone-id]
   (asserts/require-non-nil zone "zone")
   (if (= (:zone this) zone)
     this
     (-create (chrono-local-date-time/to-epoch-second (:date-time this) (:offset this)) (local-date-time/get-nano (:date-time this)) zone)))
-(s/fdef -with-zone-same-instant :args ::with-zone-same-instant-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1027
-(s/def ::to-local-date-time-args (args))
-(defn -to-local-date-time [this]
+(def-method -to-local-date-time ::local-date-time/local-date-time
+  [this ::zoned-date-time]
   (:local-date this))
-(s/fdef -to-local-date-time :args ::to-local-date-time-args :ret ::local-date-time/local-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1041
-(s/def ::to-local-date-args (args))
-(defn -to-local-date [this]
+(def-method -to-local-date ::chrono-local-date/chrono-local-date
+  [this ::zoned-date-time]
   (-> this :local-date chrono-local-date-time/to-local-date))
-(s/fdef -to-local-date :args ::to-local-date-args :ret ::chrono-local-date/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1137
-(s/def ::to-local-time-args (args))
-(defn -to-local-time [this]
+(def-method -to-local-time ::local-time/local-time
+  [this ::zoned-date-time]
   (-> this :local-date chrono-local-date-time/to-local-time))
-(s/fdef -to-local-time :args ::to-local-time-args :ret ::local-time/local-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L2152
-(s/def ::format-args (args ::date-time-formatter/date-time-formatter))
-(defn -format [this formatter]
+(def-method -format string?
+  [this ::zoned-date-time
+   formatter ::date-time-formatter/date-time-formatter]
   (asserts/require-non-nil formatter "formatter")
   (date-time-formatter/format formatter this))
-(s/fdef -format :args ::format-args :ret string?)
 
 (extend-type ZonedDateTime
   chrono-zoned-date-time/IChronoZonedDateTime
@@ -432,10 +413,10 @@
     (ZonedDateTime. (:date-time this) offset (:zone this))
     this))
 
-(s/def ::with-args (args ::j/wip))
-(defn -with
+(def-method -with ::temporal/temporal
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1229
-  ([this adjuster]
+  ([this ::zoned-date-time
+    adjuster ::temporal-adjuster/temporal-adjuster]
    (cond
      (satisfies? local-date/ILocalDate adjuster)
      (resolve-local this (local-date-time-impl/of adjuster (chrono-local-date-time/to-local-time (:time this))))
@@ -458,7 +439,9 @@
      :default (temporal-adjuster/adjust-into adjuster this)))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1302
-  ([this field new-value]
+  ([this ::zoned-date-time
+    field ::temporal-field/temporal-field
+    new-value ::j/long]
    (if (chrono-field/chrono-field? field)
      (case field
        chrono-field/INSTANT_SECONDS
@@ -470,12 +453,11 @@
                                 zone-offset-impl/of-total-seconds))
 
        (resolve-local this (temporal/with (:date-time this) field new-value))))))
-(s/fdef -with :args ::with-args :ret ::temporal/temporal)
 
-(s/def ::plus-args (args ::j/wip))
-(defn -plus
+(def-method -plus ::zoned-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1553
-  ([this amount-to-add]
+  ([this ::zoned-date-time
+    amount-to-add ::temporal-amount/temporal-amount]
    (if (instance? period/IPeriod amount-to-add)
      (resolve-local this (temporal/plus (:date-time this) amount-to-add))
      (do
@@ -483,18 +465,19 @@
        (temporal-amount/add-to amount-to-add this))))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1600
-  ([this amount-to-add unit]
+  ([this :zoned-date-time
+    amount-to-add ::j/long
+    unit ::temporal-unit/temporal-unit]
    (if (chrono-unit/chrono-unit? unit)
      (if (temporal-unit/is-date-based unit)
        (resolve-local this (temporal/plus (:date-time this) amount-to-add unit))
        (resolve-instant this (temporal/plus (:date-time this) amount-to-add unit)))
      (temporal-unit/add-to unit this amount-to-add))))
-(s/fdef -plus :args ::plus-args :ret ::temporal/temporal)
 
-(s/def ::minus-args (args ::j/wip))
-(defn -minus
+(def-method -minus ::zoned-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1810
-  ([this amount-to-subtract]
+  ([this ::zoned-date-time
+    amount-to-subtract ::temporal-amount/temporal-amount]
    (if (instance? period/IPeriod amount-to-subtract)
      (resolve-local this (temporal/minus (:date-time this) amount-to-subtract))
      (do
@@ -502,19 +485,22 @@
        (temporal-amount/add-to amount-to-subtract this))))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L1853
-  ([this amount-to-subtract unit]
+  ([this ::zoned-date-time
+    amount-to-subtract ::j/long
+    unit ::temporal-unit/temporal-unit]
    (if (= math/long-min-value amount-to-subtract)
      (-> this
          (-plus math/long-max-value unit)
          (-plus 1 unit))
      (-plus this (- amount-to-subtract) unit))))
-(s/fdef -minus :args ::minus-args :ret ::temporal/temporal)
 
 (declare from -to-offset-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L2129
-(s/def ::until-args (args ::temporal/temporal ::temporal-unit/temporal-unit))
-(defn -until [this end-exclusive unit]
+(def-method -until ::j/long
+  [this ::zoned-date-time
+   end-exclusive ::temporal/temporal
+   unit ::temporal-unit/temporal-unit]
   (let [end (from end-exclusive)]
     (if (chrono-unit/chrono-unit? unit)
       (let [end (-with-zone-same-instant this (:zone this))]
@@ -522,7 +508,6 @@
           (temporal/until (:date-time this) (:date-time end) unit)
           (temporal/until (-to-offset-date-time this) (-to-offset-date-time end) unit)))
       (temporal-unit/between unit this end))))
-(s/fdef -until :args ::until-args :ret ::j/long)
 
 (extend-type ZonedDateTime
   temporal/ITemporal
@@ -538,8 +523,9 @@
   (until [this end-exclusive unit] (-until this end-exclusive unit)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L704
-(s/def ::is-supported-args (args ::temporal-field/temporal-field)) ;; TODO: temporal-field OR temporal-unit
-(defn -is-supported [this arg]
+(def-method -is-supported ::j/boolean
+  [this ::zoned-date-time
+   arg ::temporal-field/temporal-field]
   (cond
     (satisfies? temporal-field/ITemporalField arg)
     (or (chrono-field/chrono-field? arg)
@@ -548,22 +534,22 @@
     (satisfies? temporal-unit/ITemporalUnit arg)
     (do ;; ChronoZonedDateTime.super.isSupported(unit)
       )))
-(s/fdef -is-supported :args ::is-supported-args :ret ::j/boolean)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L774
-(s/def ::range-args (args ::temporal-field/temporal-field))
-(defn -range [this field]
+(def-method -range ::value-range/value-range
+  [this ::zoned-date-time
+   field ::temporal-field/temporal-field]
   (if (chrono-field/chrono-field? field)
     (if (or (= field chrono-field/INSTANT_SECONDS)
             (= field chrono-field/OFFSET_SECONDS))
       (temporal-field/range field)
       (temporal-accessor/range (:date-time this) field))
     (temporal-field/range-refined-by field this)))
-(s/fdef -range :args ::range-args :ret ::value-range/value-range)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L813
-(s/def ::get-args (args ::temporal-field/temporal-field))
-(defn -get [this field]
+(def-method -get ::j/int
+  [this ::zoned-date-time
+   field ::temporal-field/temporal-field]
   (if (chrono-field/chrono-field? field)
     (cond
       (= chrono-field/INSTANT_SECONDS field)
@@ -575,11 +561,11 @@
       :default (temporal-accessor/get (:date-time this) field))
     ;; TODO: ChronoZonedDateTime.super.get(field);
     ))
-(s/fdef -get :args ::get-args :ret ::j/int)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L850
-(s/def ::get-long-args (args ::temporal-field/temporal-field))
-(defn -get-long [this field]
+(def-method -get-long ::j/long
+  [this ::zoned-date-time
+   field ::temporal-field/temporal-field]
   (if (chrono-field/chrono-field? field)
     (cond
       (= chrono-field/INSTANT_SECONDS field)
@@ -590,16 +576,15 @@
 
       :default (temporal-accessor/get-long (:date-time this) field))
     (temporal-field/get-from field this)))
-(s/fdef -get-long :args ::get-long-args :ret ::j/long)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L2055
-(s/def ::query-args (args ::temporal-query/temporal-query))
-(defn -query [this query]
+(def-method -query ::j/wip
+  [this ::zoned-date-time
+   query ::temporal-query/temporal-query]
   (if (= query (temporal-queries/local-date))
     (-to-local-date this)
     ;; TODO: return ChronoZonedDateTime.super.query(query);
     ))
-(s/fdef -query :args ::query-args :ret ::j/wip)
 
 (extend-type ZonedDateTime
   temporal-accessor/ITemporalAccessor
@@ -609,14 +594,14 @@
   (get-long [this field] (-get-long this field))
   (query [this query] (-query this query)))
 
-(s/def ::now-args (args ::j/wip))
-(defn now
+(def-constructor now ::zoned-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L198
   ([]
    (now (clock-impl/system-default-zone)))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L215
-  ([arg]
+  ([arg (s/or ::clock/clock
+              ::zone-id/zone-id)]
    (cond
      (satisfies? zone-id/IZoneId arg)
      (clock-impl/system arg)
@@ -625,62 +610,49 @@
      (do
        (asserts/require-non-nil arg "clock")
        (of-instant (clock/instant arg) (clock/get-zone arg))))))
-(s/fdef now :args ::now-args :ret ::zoned-date-time)
 
-(s/def ::of-args (args ::j/wip))
-(defn of
+(def-constructor of ::zoned-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L292
-  ([local-date-time zone]
-   (of-local local-date-time zone nil))
+  ([local-date-time ::local-date-time/local-date-time
+    zone ::zone-id/zone-id]
+   (impl/of local-date-time zone))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L264
-  ([date time zone]
-   (of (local-date-time-impl/of date time) zone))
+  ([date ::local-date/local-date
+    time ::local-time/local-time
+    zone ::zone-id/zone-id]
+   (impl/of date time zone))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L336
-  ([year month day-of-month hour minute second nano-of-second zone]
-   (of-local (local-date-time-impl/of year month day-of-month hour minute second nano-of-second) zone nil)))
-
-(s/fdef of :args ::of-args :ret ::zoned-date-time)
+  ([year ::j/year
+    month ::j/month
+    day-of-month ::j/day
+    hour ::j/hour-of-day
+    minute ::j/minute-of-hour
+    second ::j/second-of-minute
+    nano-of-second ::j/nano-of-second
+    zone ::zone-id/zone-id]
+   (impl/of year month day-of-month hour minute second nano-of-second zone)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L366
-(s/def ::of-local-args (args ::local-date-time/local-date-time ::zone-id/zone-id ::zone-offset/zone-offset))
-(defn of-local [local-date-time zone preferred-offset]
-  (asserts/require-non-nil local-date-time "LocalDateTime")
-  (asserts/require-non-nil zone "zone")
-  (if (satisfies? zone-offset/IZoneOffset zone)
-    (impl/create local-date-time zone zone)
-    (let [rules (zone-id/get-rules zone)
-          valid-offsets (zone-rules/get-valid-offsets rules local-date-time)]
-      (cond
-        (= (count valid-offsets) 1)
-        (impl/create local-date-time (first valid-offsets) zone)
+(def-constructor of-local ::zoned-date-time
+  [local-date-time ::local-date-time/local-date-time
+   zone ::zone-id/zone-id
+   preferred-offset ::zone-offset/zone-offset]
+  (impl/of-local local-date-time zone preferred-offset))
 
-        (= (count valid-offsets) 0)
-        (let [trans (zone-rules/get-transition rules local-date-time)]
-          (impl/create
-           (local-date-time/plus-seconds local-date-time (-> trans zone-offset-transition/get-duration duration/get-seconds))
-           (zone-offset-transition/get-offset-after trans)
-           zone))
-
-        :default (if (and (not (nil? preferred-offset))
-                          ((set valid-offsets) preferred-offset))
-                   (impl/create local-date-time preferred-offset zone)
-                   (do
-                     (asserts/require-non-nil (first valid-offsets) "offset")
-                     (impl/create local-date-time (first valid-offsets) zone)))))))
-(s/fdef of-local :args ::of-local-args :ret ::zoned-date-time)
-
-(s/def ::of-instant-args (args ::j/wip))
-(defn of-instant
+(def-constructor of-instant ::zoned-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L406
-  ([instant zone]
+  ([instant ::instant/instant
+    zone ::zone-id/zone-id]
    (asserts/require-non-nil instant "instant")
    (asserts/require-non-nil zone "zone")
    (-create (instant/get-epoch-second instant) (instant/get-nano instant) zone))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L432
-  ([local-date-time offset zone]
+  ([local-date-time ::local-date-time/local-date-time
+    offset ::zone-offset/zone-offset
+    zone ::zone-id/zone-id]
    (asserts/require-non-nil local-date-time "LocalDateTime")
    (asserts/require-non-nil offset "offset")
    (asserts/require-non-nil zone "zone")
@@ -689,11 +661,12 @@
      (-create (chrono-local-date-time/to-epoch-second local-date-time offset)
               (local-date-time/get-nano local-date-time)
               zone))))
-(s/fdef of-instant :args ::of-instant-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L475
-(s/def ::of-strict-args (args ::local-date-time/local-date-time ::zone-offset/zone-offset ::zone-id/zone-id))
-(defn of-strict [local-date-time offset zone]
+(def-constructor of-strict ::zoned-date-time
+  [local-date-time ::local-date-time/local-date-time
+   offset ::zone-offset/zone-offset
+   zone ::zone-id/zone-id]
   (asserts/require-non-nil local-date-time "LocalDateTime")
   (asserts/require-non-nil offset "offset")
   (asserts/require-non-nil zone "zone")
@@ -708,11 +681,10 @@
                                       "' does not exist in zone '" zone
                                       "' due to a gap in the local time-line, typically caused by daylight savings")))
           (ZonedDateTime. local-date-time offset zone))))))
-(s/fdef of-strict :args ::of-strict-args :ret ::zoned-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L549
-(s/def ::from-args (args ::temporal-accessor/temporal-accessor))
-(defn from [temporal]
+(def-constructor from ::zoned-date-time
+  [temporal ::temporal-accessor/temporal-accessor]
   (if (instance? ZonedDateTime temporal)
     temporal
     (try*
@@ -727,16 +699,14 @@
                                           temporal " of type "
                                           (name (type temporal))
                                           e)))))))
-(s/fdef from :args ::from-args :ret ::zoned-date-time)
 
-(s/def ::parse-args (args ::j/wip))
-(defn parse
+(def-constructor parse ::zoned-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L582
-  ([text]
+  ([text ::j/char-sequence]
    (parse text date-time-formatter-impl/ISO_ZONED_DATE_TIME))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L596
-  ([text formatter]
+  ([text ::j/char-sequence
+    formatter ::date-time-formatter/date-time-formatter]
    (asserts/require-non-nil formatter "formatter")
    (date-time-formatter/parse text from)))
-(s/fdef parse :args ::parse-args :ret ::zoned-date-time)

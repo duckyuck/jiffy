@@ -66,17 +66,22 @@
                       [::result (.invoke method obj (into-array Object args))]
                       (catch java.lang.reflect.InvocationTargetException e
                         (if (and (.getMessage e) (str/starts-with? (.getMessage e) "java.lang.ClassCastException"))
-                          [::exception (.getCause e)]
-                          [::result (.getCause e)]))
+                          [::exception (or (.getCause e) e)]
+                          [::result (or (.getCause e) e)]))
                       (catch java.lang.IllegalArgumentException e
-                        (if (and (.getMessage e) (str/starts-with? (.getMessage e) "java.lang.ClassCastException"))
-                          [::exception (.getCause e)]
-                          [::result (.getCause e)]))
+                        (if (or (and (.getMessage e) (or (str/starts-with? (.getMessage e) "java.lang.ClassCastException")
+                                                         (str/starts-with? (.getMessage e) "argument type mismatch")))
+                                (nil? (.getMessage e)))
+                          [::exception (or (.getCause e) e)]
+                          [::result (or (.getCause e) e)]))
                       (catch IllegalAccessException e
                         [::exception (or (.getCause e) e)])
                       (catch Throwable e
                         [::result e])))]
-      (if-let [result (first (sort-by #(nil? (second %)) (filter #(-> % first (= ::result)) results)))]
+      (if-let [result (->> (filter #(-> % first (= ::result)) results)
+                           (sort-by #(or (nil? (second %))
+                                         (not (instance? Throwable %))))
+                           first)]
         (second result)
         (throw (ex-info (str "Unable to invoke java method " method-name)
                         {:f f
@@ -84,20 +89,6 @@
                          :methods methods
                          :args args
                          :results results}))))))
-
-(def ns->class-anomalies
-  {"jiffy.time-comparable" "java.lang.Comparable"
-   "jiffy.instant" "java.time.Instant"})
-
-(defn jiffy-ns->java-class [jiffy-ns-str]
-  (or (ns->class-anomalies jiffy-ns-str)
-      (let [idx (inc (str/last-index-of jiffy-ns-str "."))]
-        (str (-> jiffy-ns-str
-                 (subs 0 idx)
-                 (str/replace #"jiffy" "java.time"))
-             (-> jiffy-ns-str
-                 (subs idx (count jiffy-ns-str))
-                 camel-case)))))
 
 (defn gen-test-name [f]
   (symbol (str (str/replace (namespace f) #"\." "-")
@@ -120,20 +111,22 @@
 (defn invoke-jiffy [f args]
   (apply f args))
 
-(defn jiffy-fn->java-fn [s]
-  (let [[first-char & rest] (camel-case s)]
-    (str (str/lower-case (str first-char))
-         (apply str rest))))
-
 (defmacro store-results [jiffy-fn args jiffy-expr]
   `(spit "dev-resources/regression-corpus.edn"
          (str
           (pr-str {:fn '~jiffy-fn
                    :args ~args
                    :result (let [res# (trycatch ~jiffy-expr)]
-                             (if-let [ex# (ex-data res#)]
-                               {:jiffy.exception/kind (:jiffy.exception/kind ex#)
-                                :message (.getMessage res#)}
+                             (cond
+                               (ex-data res#)
+                               (let [ex# (ex-data res#)]
+                                 {:jiffy.exception/kind (:jiffy.exception/kind ex#)
+                                  :message (.getMessage res#)})
+
+                               (seq? res#)
+                               (take conversion/max-coll-result-size res#)
+
+                               :else
                                res#))})
           "\n")
          :append true))
@@ -158,24 +151,63 @@
 
 (def default-num-tests 500)
 
+(def ns->class-anomalies
+  {"jiffy.protocols.time-comparable" "java.lang.Comparable"})
+
+(defn jiffy-ns->java-class [jiffy-ns-str]
+  (or (ns->class-anomalies jiffy-ns-str)
+      (let [idx (inc (str/last-index-of jiffy-ns-str "."))]
+        (str (-> jiffy-ns-str
+                 (subs 0 idx)
+                 (str/replace #"jiffy.protocols" "java.time")
+                 (str/replace #"jiffy" "java.time"))
+             (-> jiffy-ns-str
+                 (subs idx (count jiffy-ns-str))
+                 camel-case)))))
+
+(defn jiffy-fn->java-method [s]
+  (let [[first-char & rest] (camel-case s)]
+    (str (str/lower-case (str first-char))
+         (apply str rest))))
+
+(defn symbol-ns [x]
+  (symbol (or (namespace x)
+              (name x))))
+
+(defn jiffy-fn-sym->java-fn-sym
+  ([jiffy-fn]
+   (symbol (jiffy-ns->java-class (namespace jiffy-fn))
+           (jiffy-fn->java-method (name jiffy-fn))))
+  ([impl-ns proto-fn]
+   (symbol (jiffy-ns->java-class (str impl-ns))
+           (jiffy-fn->java-method (name proto-fn)))))
+
+(defn resolve-impl-fn [impl-fn proto-fn]
+  (if (namespace impl-fn)
+    impl-fn
+    (symbol (str impl-fn)
+            (name proto-fn))))
+
 (defmacro test-proto-fn [impl-ns proto-fn & [num-tests]]
   `(do
-     (require '~(symbol (namespace proto-fn)))
-     (require '~(symbol impl-ns))
+     (require 'jiffy.conversion)
+     (require 'jiffy.test-specs)
+     (require '~(symbol-ns proto-fn))
+     (require '~(symbol-ns impl-ns))
      (defspec ~(gen-test-name proto-fn) {:num-tests ~(or num-tests default-num-tests)}
        (gen-prop ~proto-fn
-                 '~(symbol (jiffy-ns->java-class (str impl-ns))
-                           (jiffy-fn->java-fn (name proto-fn)))
-                 (get-spec '~(symbol (str impl-ns) (name proto-fn)))
+                 '~(jiffy-fn-sym->java-fn-sym (symbol-ns impl-ns) proto-fn)
+                 (get-spec '~(resolve-impl-fn impl-ns proto-fn))
                  {:static? false}))))
 
 (defmacro test-static-fn [jiffy-fn & [num-tests]]
   `(do
+     (require 'jiffy.conversion)
+     (require 'jiffy.test-specs)
      (require '~(symbol (namespace jiffy-fn)))
      (defspec ~(gen-test-name jiffy-fn) ~(or num-tests default-num-tests)
        (gen-prop ~jiffy-fn
-                 '~(symbol (jiffy-ns->java-class (namespace jiffy-fn))
-                           (jiffy-fn->java-fn (name jiffy-fn)))
+                 '~(jiffy-fn-sym->java-fn-sym jiffy-fn)
                  (get-spec '~jiffy-fn)
                  {:static? true}))))
 
@@ -184,7 +216,12 @@
      (let [results#
            (for [args# ~args-samples]
              (let [jiffy-result# (trycatch (invoke-jiffy ~jiffy-fn args#))
-                   java-args# (mapv jiffy->java args#)
+                   java-args# (try
+                                (mapv jiffy->java args#)
+                                (catch Exception e#
+                                  (throw (ex-info "Failed to convert Jiffy args to Java"
+                                                  {:failed/jiffy-args args#
+                                                   :failed/jiffy-result jiffy-result#}))))
                    result# {:failed/jiffy-args args#
                             :failed/jiffy-result jiffy-result#
                             :failed/java-args java-args#}
@@ -201,12 +238,12 @@
   `(do
      (require 'jiffy.conversion)
      (require 'jiffy.test-specs)
-     (require '~(symbol (namespace proto-fn)))
-     (require '~(symbol impl-ns))
+     (require '~(symbol-ns proto-fn))
+     (require '~(symbol-ns impl-ns))
      (test-fn! ~proto-fn
-               '~(symbol (jiffy-ns->java-class (str impl-ns))
-                         (jiffy-fn->java-fn (name proto-fn)))
-               (gen/sample (s/gen (get-spec '~(symbol (str impl-ns) (name proto-fn)))) ~(or num-tests default-num-tests))
+               '~(jiffy-fn-sym->java-fn-sym (symbol-ns impl-ns) proto-fn)
+               (gen/sample (s/gen (get-spec '~(resolve-impl-fn impl-ns proto-fn)))
+                           ~(or num-tests default-num-tests))
                {:static? false})))
 
 (defmacro test-static-fn! [jiffy-fn & [num-tests]]
@@ -215,7 +252,7 @@
      (require 'jiffy.test-specs)
      (require '~(symbol (namespace jiffy-fn)))
      (test-fn! ~jiffy-fn
-               '~(symbol (jiffy-ns->java-class (namespace jiffy-fn))
-                         (jiffy-fn->java-fn (name jiffy-fn)))
-               (gen/sample (s/gen (get-spec '~jiffy-fn)) ~(or num-tests default-num-tests))
+               '~(jiffy-fn-sym->java-fn-sym jiffy-fn)
+               (gen/sample (s/gen (get-spec '~jiffy-fn))
+                           ~(or num-tests default-num-tests))
                {:static? true})))

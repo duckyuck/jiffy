@@ -240,7 +240,7 @@
 ;; (s/fdef is-leap :args ::is-leap-args :ret ::j/boolean)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L141
-(def MIN_VALUE ::MIN_VALUE--not-implemented)
+(def MIN_VALUE -999999999)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L145
-(def MAX_VALUE ::MAX_VALUE--not-implemented)
+(def MAX_VALUE 999999999)

@@ -21,24 +21,25 @@
             [jiffy.temporal.temporal-query :as temporal-query]
             [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
             [jiffy.temporal.chrono-field :as chrono-field]
-            [jiffy.temporal.chrono-unit :as chrono-unit]))
+            [jiffy.temporal.chrono-unit :as chrono-unit]
+            [jiffy.temporal.temporal-queries :as temporal-queries]))
 
 (s/def ::chrono-local-date ::chrono-local-date/chrono-local-date)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L325
-(s/def ::get-era-args ::j/wip)
-(defn -get-era [this] (wip ::-get-era))
-(s/fdef -get-era :args ::get-era-args :ret ::era/era)
+(def-method -get-era ::era/era
+  [this ::chrono-local-date]
+  (wip ::-get-era))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L340
-(s/def ::is-leap-year-args ::j/wip)
-(defn -is-leap-year [this] (wip ::-is-leap-year))
-(s/fdef -is-leap-year :args ::is-leap-year-args :ret ::j/boolean)
+(def-method -is-leap-year ::j/boolean
+  [this ::chrono-local-date]
+  (wip ::-is-leap-year))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L362
-(s/def ::length-of-year-args ::j/wip)
-(defn -length-of-year [this] (wip ::-length-of-year))
-(s/fdef -length-of-year :args ::length-of-year-args :ret ::j/int)
+(def-method -length-of-year ::j/int
+  [this ::chrono-local-date]
+  (wip ::-length-of-year))
 
 ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L386
@@ -54,74 +55,105 @@
       (temporal-unit/is-date-based field-or-unit)
       (and field-or-unit (temporal-unit/is-supported-by field-or-unit this)))))
 
-(s/def ::with-args ::j/wip)
-(defn -with
+(def-method -with ::chrono-local-date
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L427
-  ([this adjuster] (wip ::-with))
+  ([this ::chrono-local-date
+    adjuster ::temporal-adjuster/temporal-adjuster]
+   (wip ::-with))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L438
-  ([this field new-value] (wip ::-with)))
-(s/fdef -with :args ::with-args :ret ::chrono-local-date)
+  ([this ::chrono-local-date
+    field ::temporal-field/temporal-field
+    new-value ::j/long]
+   (wip ::-with)))
 
-(s/def ::plus-args ::j/wip)
-(defn -plus
+(def-method -plus ::chrono-local-date
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L451
-  ([this amount] (wip ::-plus))
+  ([this ::chrono-local-date
+    amount ::temporal-amount/temporal-amount]
+   (wip ::-plus))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L461
-  ([this amount-to-add unit] (wip ::-plus)))
-(s/fdef -plus :args ::plus-args :ret ::chrono-local-date)
+  ([this ::chrono-local-date
+    amount-to-add ::j/long
+    unit ::temporal-unit/temporal-unit]
+   (wip ::-plus)))
 
-(s/def ::minus-args ::j/wip)
-(defn -minus
+(def-method -minus ::chrono-local-date
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L474
-  ([this amount] (wip ::-minus))
+  ([this ::chrono-local-date
+    amount ::temporal-amount/temporal-amount]
+   (wip ::-minus))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L485
-  ([this amount-to-subtract unit] (wip ::-minus)))
-(s/fdef -minus :args ::minus-args :ret ::chrono-local-date)
+  ([this ::chrono-local-date
+    amount-to-subtract ::j/long
+    unit ::temporal-unit/temporal-unit]
+   (wip ::-minus)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L510
-(s/def ::query-args ::j/wip)
-(defn -query [this query] (wip ::-query))
-(s/fdef -query :args ::query-args :ret ::j/wip)
+(def-method -query ::j/wip
+  [this ::chrono-local-date
+   query ::temporal-query/temporal-query]
+  (cond
+    (#{(temporal-queries/zone-id)
+       (temporal-queries/zone)
+       (temporal-queries/offset)
+       (temporal-queries/local-time)} query)
+    nil
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L550
-(s/def ::adjust-into-args ::j/wip)
-(defn -adjust-into [this temporal] (wip ::-adjust-into))
-(s/fdef -adjust-into :args ::adjust-into-args :ret ::temporal/temporal)
+    (= query (temporal-queries/chronology))
+    (chrono-local-date/get-chronology this)
+
+    (= query (temporal-queries/precision))
+    chrono-unit/DAYS
+
+    :else
+    (temporal-query/query-from query this)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L551
-(s/def ::to-epoch-day-args ::j/wip)
-(defn -to-epoch-day [this] (wip ::-to-epoch-day))
-(s/fdef -to-epoch-day :args ::to-epoch-day-args :ret ::j/long)
+(def-method -to-epoch-day ::j/long
+  [this ::chrono-local-date]
+  (temporal-accessor/get-long this chrono-field/EPOCH_DAY))
+
+;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L550
+(def-method -adjust-into ::temporal/temporal
+  [this ::chrono-local-date
+   temporal ::temporal/temporal]
+  (temporal/with temporal chrono-field/EPOCH_DAY (-to-epoch-day this)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L640
-(s/def ::format-args ::j/wip)
-(defn -format [this formatter] (wip ::-format))
-(s/fdef -format :args ::format-args :ret string?)
+(def-method -format string?
+  [this ::chrono-local-date
+   formatter ::date-time-formatter/date-time-formatter]
+  (wip ::-format))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L656
-(s/def ::at-time-args ::j/wip)
-(defn -at-time [this local-time] (wip ::-at-time))
-(s/fdef -at-time :args ::at-time-args :ret ::chrono-local-date-time/chrono-local-date-time)
+(def-method -at-time ::chrono-local-date-time/chrono-local-date-time
+  [this ::chrono-local-date
+   local-time ::local-time/local-time]
+  (wip ::-at-time))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L706
-(s/def ::compare-to-args ::j/wip)
-(defn -compare-to [this other] (wip ::-compare-to))
-(s/fdef -compare-to :args ::compare-to-args :ret ::j/int)
+(def-method -compare-to ::j/int
+  [this ::chrono-local-date
+   other ::chrono-local-date]
+  (wip ::-compare-to))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L728
-(s/def ::is-after-args ::j/wip)
-(defn -is-after [this other] (wip ::-is-after))
-(s/fdef -is-after :args ::is-after-args :ret ::j/boolean)
+(def-method -is-after ::j/boolean
+  [this ::chrono-local-date
+   other ::chrono-local-date]
+  (> (-to-epoch-day this) (-to-epoch-day other)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L746
-(s/def ::is-before-args ::j/wip)
-(defn -is-before [this other] (wip ::-is-before))
-(s/fdef -is-before :args ::is-before-args :ret ::j/boolean)
+(def-method -is-before ::j/boolean
+  [this ::chrono-local-date
+   other ::chrono-local-date]
+  (< (-to-epoch-day this) (-to-epoch-day other)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L764
-(s/def ::is-equal-args ::j/wip)
-(defn -is-equal [this other] (wip ::-is-equal))
-(s/fdef -is-equal :args ::is-equal-args :ret ::j/boolean)
+(def-method -is-equal ::j/boolean
+  [this ::chrono-local-date
+   other ::chrono-local-date]
+  (= (-to-epoch-day this) (-to-epoch-day other)))

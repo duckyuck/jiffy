@@ -5,9 +5,9 @@
             [jiffy.chrono.chrono-local-date-time-defaults :as chrono-local-date-time-defaults]
             [jiffy.day-of-week :as day-of-week]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.local-date :as local-date]
+            [jiffy.local-date-impl :as local-date-impl]
             [jiffy.local-date-time-impl :refer [#?@(:cljs [LocalDateTime])] :as impl]
-            [jiffy.local-time :as local-time]
+            [jiffy.local-time-impl :as local-time-impl]
             [jiffy.month :as month]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
             [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
@@ -15,9 +15,9 @@
             [jiffy.protocols.clock :as clock]
             [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
             [jiffy.protocols.instant :as instant]
-            [jiffy.protocols.local-date :as LocalDate]
+            [jiffy.protocols.local-date :as local-date]
             [jiffy.protocols.local-date-time :as local-date-time]
-            [jiffy.protocols.local-time :as LocalTime]
+            [jiffy.protocols.local-time :as local-time]
             [jiffy.protocols.offset-date-time :as offset-date-time]
             [jiffy.protocols.temporal.temporal :as temporal]
             [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
@@ -305,7 +305,7 @@
   (:date this))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L831
-(def-method -to-local-time ::LocalTime/local-time
+(def-method -to-local-time ::local-time/local-time
   [this ::instant]
   (:time this))
 
@@ -468,45 +468,45 @@
 
 (def-constructor of ::local-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L373
-  ([date ::LocalDate/local-date
-    time ::LocalTime/local-time]
+  ([date ::local-date/local-date
+    time ::local-time/local-time]
    (impl/of date time))
 
     ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L235
   ([year ::j/year
-    month (s/or :number ::j/month-of-yearh
+    month (s/or :number ::j/month-of-year
                 :month ::month/month)
     day-of-month ::j/day-of-month
     hour ::j/hour-of-day
     minute ::j/minute-of-hour]
-   (impl/of (local-date/of year month day-of-month)
-            (local-time/of hour minute)))
+   (impl/of (local-date-impl/of year month day-of-month)
+            (local-time-impl/of hour minute)))
 
   ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L260
   ([year ::j/year
-    month (s/or :number ::j/month-of-yearh
+    month (s/or :number ::j/month-of-year
                 :month ::month/month)
     day-of-month ::j/day-of-month
     hour ::j/hour-of-day
     minute ::j/minute-of-hour
     second ::j/second-of-minute]
-   (impl/of (local-date/of year month day-of-month)
-            (local-time/of hour minute second)))
+   (impl/of (local-date-impl/of year month day-of-month)
+            (local-time-impl/of hour minute second)))
 
   ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L285
   ([year ::j/year
-    month (s/or :number ::j/month-of-yearh
+    month (s/or :number ::j/month-of-year
                 :month ::month/month)
     day-of-month ::j/day-of-month
     hour ::j/hour-of-day
     minute ::j/minute-of-hour
     second ::j/second-of-minute
     nano-of-second ::j/nano-of-second]
-   (impl/of (local-date/of year month day-of-month)
-            (local-time/of hour minute second nano-of-second))))
+   (impl/of (local-date-impl/of year month day-of-month)
+            (local-time-impl/of hour minute second nano-of-second))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L393
 (def-constructor of-instant ::local-date-time

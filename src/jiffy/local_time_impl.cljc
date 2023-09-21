@@ -49,3 +49,23 @@
         nanos (- nanos (* seconds NANOS_PER_SECOND))]
     (create hours minutes seconds nanos)))
 (s/fdef of-nano-of-day :args ::of-nano-of-day-args :ret ::local-time)
+
+(def-constructor of ::local-time
+  ([hour ::j/hour-of-day
+    minute ::j/minute-of-hour]
+   (of hour minute 0 0))
+
+  ([hour ::j/hour-of-day
+    minute ::j/minute-of-hour
+    second ::j/second-of-minute]
+   (of hour minute second 0))
+
+  ([hour ::j/hour-of-day
+    minute ::j/minute-of-hour
+    second ::j/second-of-minute
+    nano-of-second ::j/nano-of-second]
+   (chrono-field/check-valid-value chrono-field/HOUR_OF_DAY hour)
+   (chrono-field/check-valid-value chrono-field/MINUTE_OF_HOUR minute)
+   (chrono-field/check-valid-value chrono-field/SECOND_OF_MINUTE second)
+   (chrono-field/check-valid-value chrono-field/NANO_OF_SECOND nano-of-second)
+   (create hour minute second nano-of-second)))
