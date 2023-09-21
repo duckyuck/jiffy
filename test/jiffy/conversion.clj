@@ -11,6 +11,7 @@
             [jiffy.local-time-impl]
             [jiffy.month]
             [jiffy.offset-date-time-impl]
+            [jiffy.offset-time-impl]
             [jiffy.period]
             [jiffy.precision :as precision]
             [jiffy.temporal.chrono-field]
@@ -33,6 +34,7 @@
            (jiffy.local_time_impl LocalTime)
            (jiffy.month Month)
            (jiffy.offset_date_time_impl OffsetDateTime)
+           (jiffy.offset_time_impl OffsetTime)
            (jiffy.period Period)
            (jiffy.temporal.chrono_field ChronoField)
            (jiffy.temporal.chrono_unit ChronoUnit)
@@ -204,6 +206,10 @@
 (defmethod jiffy->java* OffsetDateTime [{:keys [date-time offset]}]
   (java.time.OffsetDateTime/of (jiffy->java date-time)
                                (jiffy->java offset)))
+
+(defmethod jiffy->java* OffsetTime [{:keys [time offset]}]
+  (java.time.OffsetTime/of (jiffy->java time)
+                           (jiffy->java offset)))
 
 (defmethod jiffy->java* ValueRange [{:keys [min-smallest min-largest max-smallest max-largest]}]
   (java.time.temporal.ValueRange/of min-smallest min-largest max-smallest max-largest))

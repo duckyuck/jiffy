@@ -17,5 +17,6 @@
  jiffy/zoned-date-time jiffy.edn-clj/zoned-date-time
  jiffy/zone-region jiffy.edn-clj/zone-region
  jiffy/offset-date-time jiffy.edn-clj/offset-date-time
+ jiffy/offset-time jiffy.edn-clj/offset-time
 
  }

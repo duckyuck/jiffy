@@ -4,7 +4,7 @@
             #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.exception :refer [ex JavaNullPointerException UnsupportedTemporalTypeException]]
+            [jiffy.exception :refer [JavaNullPointerException DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.clock :as clock-impl]
             [jiffy.local-date-time-impl :as local-date-time-impl]
             [jiffy.local-time-impl :refer [create #?@(:cljs [LocalTime])] :as impl]

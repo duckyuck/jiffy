@@ -10,6 +10,7 @@
             [jiffy.local-date-time-impl #?@(:cljs [:refer [LocalDateTime]])]
             [jiffy.zoned-date-time-impl #?@(:cljs [:refer [ZonedDateTime]])]
             [jiffy.offset-date-time-impl #?@(:cljs [:refer [OffsetDateTime]])]
+            [jiffy.offset-time-impl #?@(:cljs [:refer [OffsetTime]])]
             [jiffy.zone-region-impl #?@(:cljs [:refer [ZonedRegion]])]
             [jiffy.month #?@(:cljs [:refer [Month]])]
             [jiffy.period #?@(:cljs [:refer [Period]])]
@@ -33,6 +34,7 @@
                    [jiffy.local_date_time_impl LocalDateTime]
                    [jiffy.zoned_date_time_impl ZonedDateTime]
                    [jiffy.offset_date_time_impl OffsetDateTime]
+                   [jiffy.offset_time_impl OffsetTime]
                    [jiffy.zone_region_impl ZoneRegion]
                    [jiffy.month Month]
                    [jiffy.period Period]
@@ -144,6 +146,11 @@
     :offset-date-time
     {:record OffsetDateTime
      :read-fn 'jiffy.offset-date-time-impl/map->OffsetDateTime
+     :write-fn '->map}
+
+    :offset-time
+    {:record OffsetTime
+     :read-fn 'jiffy.offset-time-impl/map->OffsetTime
      :write-fn '->map}
 
     })
