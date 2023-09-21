@@ -8,7 +8,8 @@
             [jiffy.protocols.month :as month]
             [jiffy.asserts :as asserts]
             [jiffy.protocols.chrono.chronology :as chronology]
-            [jiffy.chrono.iso-chronology :as iso-chronology-2]))
+            [jiffy.chrono.iso-chronology :as iso-chronology-2]
+            [jiffy.year-impl :as year-impl]))
 
 (def-record LocalDate ::local-date-record
   [year ::j/year
@@ -54,7 +55,6 @@
                   (- (long (/ year-est 100)))
                   (+ (long (/ year-est 400))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L340
 (def-constructor of-epoch-day ::local-date
   [epoch-day ::j/long]
   (chrono-field/check-valid-value chrono-field/EPOCH_DAY epoch-day)
@@ -93,3 +93,7 @@
   (if (satisfies? month/IMonth month)
     (create year (month/get-value month) day-of-month)
     (create year month day-of-month)))
+
+(def MIN (of year-impl/MIN_VALUE 1 1))
+(def MAX (of year-impl/MAX_VALUE 12 31))
+(def EPOCH (of 1970 1 1))

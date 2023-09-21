@@ -19,7 +19,8 @@
             [jiffy.protocols.year-month :as year-month]
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.specs :as j]
-            [jiffy.temporal.temporal-query :as temporal-query]))
+            [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.year-impl :as impl]))
 
 (defrecord Year [])
 
@@ -239,8 +240,5 @@
 (defn is-leap [year] (wip ::is-leap))
 (s/fdef is-leap :args ::is-leap-args :ret ::j/boolean)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L141
-(def MIN_VALUE -999999999)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L145
-(def MAX_VALUE 999999999)
+(def MIN_VALUE impl/MIN_VALUE)
+(def MAX_VALUE impl/MAX_VALUE)

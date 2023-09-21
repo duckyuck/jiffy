@@ -62,9 +62,9 @@
 (def DAYS_PER_CYCLE impl/DAYS_PER_CYCLE)
 (def DAYS_0000_TO_1970 impl/DAYS_0000_TO_1970)
 
-(def MIN (impl/of year/MIN_VALUE 1 1))
-(def MAX (impl/of year/MAX_VALUE 12 31))
-(def EPOCH (impl/of 1970 1 1))
+(def MIN impl/MIN)
+(def MAX impl/MAX)
+(def EPOCH impl/EPOCH)
 
 (def-method get-month ::month/month
   [this ::local-date]

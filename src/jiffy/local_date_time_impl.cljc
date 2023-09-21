@@ -38,13 +38,10 @@
                                                 (math/add-exact nano-of-second))))))
 
 (def-constructor of ::local-date-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L373
   ([date ::local-date/local-date
     time ::local-time/local-time]
    (create date time))
 
-  ;; NB! This method is overloaded!
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L235
   ([year ::j/year
     month (s/or :number ::j/month-of-year
                 :month ::month/month)
@@ -54,8 +51,6 @@
    (of (local-date-impl/of year month day-of-month)
             (local-time-impl/of hour minute)))
 
-  ;; NB! This method is overloaded!
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L260
   ([year ::j/year
     month (s/or :number ::j/month-of-year
                 :month ::month/month)
@@ -66,8 +61,6 @@
    (of (local-date-impl/of year month day-of-month)
        (local-time-impl/of hour minute second)))
 
-  ;; NB! This method is overloaded!
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L285
   ([year ::j/year
     month (s/or :number ::j/month-of-year
                 :month ::month/month)
