@@ -31,7 +31,6 @@
     [this hour minute second]
     [this hour minute second nano-of-second])
   (at-start-of-day [this] [this zone])
-  (to-epoch-second [this time offset])
-  (compare-to0 [this other-date]))
+  (to-epoch-second [this time offset]))
 
 (s/def ::local-date #(satisfies? ILocalDate %))

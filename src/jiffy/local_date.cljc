@@ -1,29 +1,35 @@
 (ns jiffy.local-date
   (:refer-clojure :exclude [range get format second])
-  (:require [clojure.spec.alpha :as s]
-            [jiffy.asserts :as asserts]
-            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+  (:require #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
-            [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException JavaIllegalArgumentException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
+            [clojure.spec.alpha :as s]
+            [jiffy.asserts :as asserts]
+            [jiffy.chrono.chrono-local-date-defaults :as chrono-local-date-defaults]
+            [jiffy.chrono.iso-chronology :as iso-chronology]
+            [jiffy.chrono.iso-era :as iso-era]
+            [jiffy.clock :as clock-impl]
+            [jiffy.day-of-week :as day-of-week]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.local-date-impl :refer [create #?@(:cljs [LocalDate])] :as impl]
+            [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException JavaIllegalArgumentException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.local-date-impl-impl :as impl-impl]
+            [jiffy.local-date-impl :refer [create #?@(:cljs [LocalDate])] :as impl]
+            [jiffy.local-date-time-impl :as local-date-time-impl]
+            [jiffy.local-time-impl :as local-time-impl]
+            [jiffy.math :as math]
+            [jiffy.month :as month]
+            [jiffy.offset-date-time-impl :as offset-date-time-impl]
+            [jiffy.period :as period-impl]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
             [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
             [jiffy.protocols.chrono.chronology :as chronology]
             [jiffy.protocols.chrono.chrono-period :as chrono-period]
             [jiffy.protocols.chrono.era :as era]
-            [jiffy.chrono.iso-era :as iso-era]
             [jiffy.protocols.clock :as clock]
-            [jiffy.day-of-week :as day-of-week]
-            [jiffy.temporal.value-range :as value-range-impl]
-            [jiffy.clock :as clock-impl]
             [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
             [jiffy.protocols.instant :as instant]
             [jiffy.protocols.local-date :as local-date]
             [jiffy.protocols.local-date-time :as local-date-time]
             [jiffy.protocols.local-time :as local-time]
-            [jiffy.month :as month]
             [jiffy.protocols.offset-date-time :as offset-date-time]
             [jiffy.protocols.offset-time :as offset-time]
             [jiffy.protocols.period :as period]
@@ -38,47 +44,28 @@
             [jiffy.protocols.zoned-date-time :as zoned-date-time]
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.protocols.zone-offset :as zone-offset]
-            [jiffy.specs :as j]
-            [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.chrono.iso-chronology :as iso-chronology]
-            [jiffy.math :as math]
-            [jiffy.chrono.chrono-local-date-defaults :as chrono-local-date-defaults]
-            [jiffy.temporal.chrono-field :as chrono-field]
-            [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
-            [jiffy.year :as year]
-            [jiffy.local-time-impl :as local-time-impl]
-            [jiffy.local-date-time-impl :as local-date-time-impl]
-            [jiffy.offset-date-time-impl :as offset-date-time-impl]
-            [jiffy.zoned-date-time-impl :as zoned-date-time-impl]
-            [jiffy.protocols.zone.zone-rules :as zone-rules]
             [jiffy.protocols.zone.zone-offset-transition :as zone-offset-transition]
-            [jiffy.asserts :as assert]
-            [jiffy.period :as period-impl]
+            [jiffy.protocols.zone.zone-rules :as zone-rules]
+            [jiffy.specs :as j]
+            [jiffy.temporal.chrono-field :as chrono-field]
+            [jiffy.temporal.chrono-unit :as chrono-unit]
+            [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
             [jiffy.temporal.temporal-queries :as temporal-queries]
-            [jiffy.temporal.chrono-unit :as chrono-unit])
+            [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.temporal.value-range :as value-range-impl]
+            [jiffy.year :as year]
+            [jiffy.zoned-date-time-impl :as zoned-date-time-impl])
   #?(:clj (:import [jiffy.local_date_impl LocalDate])))
+
+(s/def ::local-date ::impl/local-date)
 
 (def DAYS_PER_CYCLE impl/DAYS_PER_CYCLE)
 (def DAYS_0000_TO_1970 impl/DAYS_0000_TO_1970)
 
-(s/def ::local-date ::impl/local-date)
-
-(defn --get-proleptic-month [this]
-  (-> (math/multiply-exact (:year this) 12)
-      (math/add-exact (:month this))
-      (math/subtract-exact 1)))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L146
 (def MIN (impl/of year/MIN_VALUE 1 1))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L151
 (def MAX (impl/of year/MAX_VALUE 12 31))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L155
 (def EPOCH (impl/of 1970 1 1))
 
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L609
 (def-method get-month ::month/month
   [this ::local-date]
   (month/of (:month this)))
@@ -113,14 +100,12 @@
           dec)
         (math/subtract-exact DAYS_0000_TO_1970))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L694
 (def-method get-day-of-week ::day-of-week/day-of-week
   [this ::local-date]
   (day-of-week/of (-> (math/add-exact (to-epoch-day this) 3)
                       (math/floor-mod 7)
                       inc)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L698
 (def-method get-day-of-year ::j/int
   [this ::local-date]
   (-> (get-month this)
@@ -128,17 +113,14 @@
       (+ (:day this)
          (- 1))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L761
 (def-method get-year ::j/int
   [this ::local-date]
   (:year this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L775
 (def-method get-month-value ::j/int
   [this ::local-date]
   (:month this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L801
 (def-method get-day-of-month ::j/int
   [this ::local-date]
   (:day this))
@@ -157,7 +139,6 @@
                   day)]
     (impl/of year month new-day)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1081
 (def-method with-year ::local-date
   [{:keys [year month day] :as this} ::local-date
    new-year ::j/int]
@@ -167,7 +148,6 @@
       (chrono-field/check-valid-value chrono-field/YEAR new-year)
       (resolve-previous-valid new-year month day))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1100
 (def-method with-month ::local-date
   [{:keys [year month day] :as this} ::local-date
    new-month ::j/int]
@@ -177,8 +157,6 @@
       (chrono-field/check-valid-value chrono-field/MONTH_OF_YEAR new-month)
       (resolve-previous-valid year new-month day))))
 
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1120
 (def-method with-day-of-month ::local-date
   [{:keys [day year month] :as this} ::local-date
    day-of-month ::j/int]
@@ -186,7 +164,6 @@
     this
     (impl/of year month day-of-month)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1139
 (declare of-year-day)
 
 (def-method with-day-of-year ::local-date
@@ -196,7 +173,6 @@
     this
     (of-year-day (:year this) day-of-year)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1298
 (def-method plus-years ::local-date
   [{:keys [year month day] :as this} ::local-date
    years-to-add ::j/long]
@@ -207,7 +183,6 @@
      month
      day)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1326
 (def-method plus-months ::local-date
   [{:keys [year month day] :as this} ::local-date
    months-to-add ::j/long]
@@ -220,7 +195,6 @@
           new-month (math/add-exact (math/floor-mod calc-months 12) 1)]
       (resolve-previous-valid new-year new-month day))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1371
 (declare length-of-month)
 
 (def-method plus-days ::local-date
@@ -249,13 +223,11 @@
         (let [mj-day (math/add-exact (to-epoch-day this) days-to-add)]
           (impl/of-epoch-day mj-day))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1352
 (def-method plus-weeks ::local-date
   [this ::local-date
    weeks-to-add ::j/long]
   (plus-days this (math/multiply-exact weeks-to-add 7)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1472
 (def-method minus-years ::local-date
   [this ::local-date
    years-to-subtract ::j/long]
@@ -264,7 +236,6 @@
                 1)
     (plus-years this (- years-to-subtract))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1496
 (def-method minus-months ::local-date
   [this ::local-date
    months-to-subtract ::j/long]
@@ -273,7 +244,6 @@
                  1)
     (plus-months this (- months-to-subtract))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1515
 (def-method minus-weeks ::local-date
   [this ::local-date
    weeks-to-subtract ::j/long]
@@ -282,7 +252,6 @@
                 1)
     (plus-weeks this (- weeks-to-subtract))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1534
 (def-method minus-days ::local-date
   [this ::local-date
    days-to-subtract ::j/long]
@@ -291,15 +260,18 @@
                1)
     (plus-days this (- days-to-subtract))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1661
 (def-method days-until ::j/long
   [this ::local-date
    end ::local-date]
   (math/subtract-exact (to-epoch-day end) (to-epoch-day this)))
 
+(defn --get-proleptic-month [this]
+  (-> (math/multiply-exact (:year this) 12)
+      (math/add-exact (:month this))
+      (math/subtract-exact 1)))
+
 (declare of-epoch-day)
 (def-method dates-until (s/coll-of ::local-date)
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1732
   ([this ::local-date
     end-exclusive ::local-date]
    (let [end (to-epoch-day end-exclusive)
@@ -309,7 +281,6 @@
        (->> (clojure.core/range start end)
             (map of-epoch-day)))))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1759
   ([this ::local-date
     end-exclusive ::local-date
     step ::period/period]
@@ -357,9 +328,6 @@
              (->> (clojure.core/range 0 steps)
                   (map #(-> this (plus-months (math/multiply-exact months %)) (plus-days (math/multiply-exact days %))))))))))))
 
-
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1830
 (def-method at-time--chrono ::offset-date-time/offset-date-time
   [this ::local-date
    local-time ::local-time/local-time]
@@ -375,21 +343,17 @@
      (offset-time/to-local-time offset-time))
     (offset-time/get-offset offset-time)))
 
-
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1848
   ([this ::local-date
     hour ::j/hour-of-day
     minute ::j/minute-of-hour]
    (at-time--chrono this (local-time-impl/of hour minute)))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1867
   ([this ::local-date
     hour ::j/hour-of-day
     minute ::j/minute-of-hour
     second ::j/second-of-minute]
    (at-time--chrono this (local-time-impl/of hour minute second)))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1886
   ([this ::local-date
     hour ::j/hour-of-day
     minute ::j/minute-of-hour
@@ -399,11 +363,9 @@
 
 (def-method at-start-of-day (s/or ::local-date-time/local-date-time
                                    ::zoned-date-time/zoned-date-time)
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1912
   ([this ::local-date]
    (local-date-time-impl/of this local-time-impl/MIDNIGHT))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1936
   ([this ::local-date
     zone ::zone-id/zone-id]
    (asserts/require-non-nil zone "zone")
@@ -418,7 +380,6 @@
             zone)
            (zoned-date-time-impl/of ldt zone)))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1989
 (def-method to-epoch-second ::j/long
   [this ::local-date
    time ::local-time/local-time
@@ -430,11 +391,16 @@
                                        (local-time/to-second-of-day time))
                        (zone-offset/get-total-seconds offset)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L2020
 (def-method compare-to0 ::j/int
   [this ::local-date
-   other-date ::local-date]
-  (wip ::-compare-to0))
+   other ::local-date]
+  (let [cmp (math/subtract-exact (:year this) (:year other))]
+    (if-not (zero? cmp)
+      cmp
+      (let [cmp (math/subtract-exact (:month this) (:month other))]
+        (if-not (zero? cmp)
+          cmp
+          (math/subtract-exact (:day this) (:day other)))))))
 
 (extend-type LocalDate
   local-date/ILocalDate
@@ -468,54 +434,43 @@
   (at-start-of-day
     ([this] (at-start-of-day this))
     ([this zone] (at-start-of-day this zone)))
-  (to-epoch-second [this time offset] (to-epoch-second this time offset))
-  (compare-to0 [this other-date] (compare-to0 this other-date)))
+  (to-epoch-second [this time offset] (to-epoch-second this time offset)))
 
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L2013
 (def-method compare-to ::j/int
   [this ::local-date
    other ::chrono-local-date/chrono-local-date]
   (if-not (satisfies? chrono-local-date/IChronoLocalDate other)
     (chrono-local-date-defaults/-compare-to this other)
-    (let [cmp (math/subtract-exact (:year this) (:year other))]
-      (if-not (zero? cmp)
-        cmp
-        (let [cmp (math/subtract-exact (:month this) (:month other))]
-          (if-not (zero? cmp)
-            cmp
-            (math/subtract-exact (:day this) (:day other))))))))
+    (compare-to0 this other)))
 
 (extend-type LocalDate
   time-comparable/ITimeComparable
   (compare-to [this compare-to--overloaded-param] (compare-to this compare-to--overloaded-param)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L607
 (def-method length-of-month ::j/int
   [this ::local-date]
-  (month/-length (month/of (:month this)) (chronology/is-leap-year iso-chronology/INSTANCE (:year this))))
+  (->> (:year this)
+       (chronology/is-leap-year iso-chronology/INSTANCE)
+       (month/-length (month/of (:month this)))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L608
 (def-method length-of-year ::j/int
   [this ::local-date]
   (if (is-leap-year this)
     366
     365))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L727
 (def-method get-chronology ::chronology/chronology
   [this ::local-date]
   iso-chronology/INSTANCE)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L747
 (def-method get-era ::era/era
   [this ::local-date]
   (if (>= (get-year this) 1)
     iso-era/CE
     iso-era/BCE))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1704
 (declare from)
+
 (def-method until ::chrono-period/chrono-period
   [this ::local-date
    end-date-exclusive ::chrono-local-date/chrono-local-date]
@@ -541,34 +496,30 @@
         months (rem total-months 12)]
     (period-impl/of years months days)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1814
 (def-method format string?
   [this ::local-date
    formatter ::date-time-formatter/date-time-formatter]
   (wip ::-format))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L2053
 (def-method is-after ::j/boolean
   [this ::local-date
    other ::chrono-local-date/chrono-local-date]
   (if (satisfies? local-date/ILocalDate other)
-    (pos? (compare-to this other))
+    (pos? (compare-to0 this other))
     (chrono-local-date-defaults/-is-after this other)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L2082
 (def-method is-before ::j/boolean
   [this ::local-date
    other ::chrono-local-date/chrono-local-date]
   (if (satisfies? local-date/ILocalDate other)
-    (neg? (compare-to this other))
+    (neg? (compare-to0 this other))
     (chrono-local-date-defaults/-is-before this other)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L2111
 (def-method is-equal ::j/boolean
   [this ::local-date
    other ::chrono-local-date/chrono-local-date]
   (if (satisfies? local-date/ILocalDate other)
-    (zero? (compare-to this other))
+    (zero? (compare-to0 this other))
     (chrono-local-date-defaults/-is-equal this other)))
 
 (extend-type LocalDate
@@ -589,14 +540,12 @@
 (declare get-long of-epoch-day)
 
 (def-method with ::local-date
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L932
   ([this ::local-date
     adjuster ::temporal-adjuster/temporal-adjuster]
    (if (impl/local-date? adjuster)
      adjuster
      (temporal-adjuster/adjust-into adjuster this)))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1045
   ([this ::local-date
     field ::temporal-field/temporal-field
     new-value ::j/long]
@@ -648,16 +597,7 @@
 
          (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " (pr-str field)) {:this this :field field})))))))
 
-(defn with-field [this field new-value]
-  (if (instance? java.time.temporal.ChronoField field)
-    (let [f field]
-      (.checkValidValue f new-value)
-)
-    (.adjustInto field this new-value)))
-
-
 (def-method plus ::local-date
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1168
   ([this ::local-date
     amount-to-add ::temporal-amount/temporal-amount]
    (if (satisfies? period/IPeriod amount-to-add)
@@ -668,7 +608,6 @@
        (asserts/require-non-nil amount-to-add "amount-to-add")
        (temporal-amount/add-to amount-to-add this))))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1259
   ([this ::local-date
     amount-to-add ::j/long
     unit ::temporal-unit/temporal-unit]
@@ -689,7 +628,6 @@
                   {:this this :unit unit :amount-to-add amount-to-add}))))))
 
 (def-method minus ::local-date
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1418
   ([this ::local-date
     amount-to-subtract ::temporal-amount/temporal-amount]
    (if (satisfies? period/IPeriod amount-to-subtract)
@@ -700,7 +638,6 @@
        (asserts/require-non-nil amount-to-subtract "amount-to-subtract")
        (temporal-amount/subtract-from amount-to-subtract this))))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1447
   ([this ::local-date
     amount-to-subtract ::j/long
     unit ::temporal-unit/temporal-unit]
@@ -720,7 +657,6 @@
     (long (/ (math/subtract-exact packed-2 packed-1)
              32))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1643
 (declare from)
 (def-method until--temporal ::j/long
   [this ::local-date
@@ -755,15 +691,12 @@
     ([this amount-to-subtract unit] (minus this amount-to-subtract unit)))
   (until [this end-exclusive unit] (until--temporal this end-exclusive unit)))
 
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L539
 (def-method is-supported ::j/boolean
   [this ::local-date
    field-or-unit (s/or ::temporal-field/temporal-field
                        ::temporal-unit/temporal-unit)]
   (chrono-local-date-defaults/-is-supported this field-or-unit))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L602
 (def-method range ::value-range/value-range
   [this ::local-date
    field ::temporal-field/temporal-field]
@@ -784,14 +717,30 @@
                                    (value-range-impl/of 1 (inc year/MAX_VALUE)))
         (temporal-field/range field)))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L648
+(defn --get0 [{:keys [year month day] :as this} field]
+  (condp = field
+    chrono-field/DAY_OF_WEEK (day-of-week/get-value (get-day-of-week this))
+    chrono-field/ALIGNED_DAY_OF_WEEK_IN_MONTH (inc (rem (dec day) 7))
+    chrono-field/ALIGNED_DAY_OF_WEEK_IN_YEAR (inc (rem (dec (get-day-of-year this)) 7))
+    chrono-field/DAY_OF_MONTH day
+    chrono-field/DAY_OF_YEAR (get-day-of-year this)
+    chrono-field/EPOCH_DAY (throw (ex UnsupportedTemporalTypeException "Invalid field 'EpochDay' for `get` method, use `get-long`) instead" {:this this :field field}))
+    chrono-field/ALIGNED_WEEK_OF_MONTH (inc (quot (dec day) 7))
+    chrono-field/ALIGNED_WEEK_OF_YEAR (inc (quot (dec (get-day-of-year this)) 7))
+    chrono-field/MONTH_OF_YEAR month
+    chrono-field/PROLEPTIC_MONTH (throw (ex UnsupportedTemporalTypeException "Invalid field 'ProlepticMonth' for `get` method, use `get-long` instead" {:this this :field field}))
+    chrono-field/YEAR_OF_ERA (if (>= year 1) year (inc (- year)))
+    chrono-field/YEAR year
+    chrono-field/ERA (if (>= year 1) 1 0)
+    (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:this this :field field}))))
+
 (def-method get ::j/int
   [this ::local-date
    field ::temporal-field/temporal-field]
-  ;; TODO - this might not be right!
-  (temporal-accessor-defaults/-get this field))
+  (if (chrono-field/chrono-field? field)
+    (--get0 this field)
+    (temporal-accessor-defaults/-get this field)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L679
 (def-method get-long ::j/long
   [{:keys [year month day] :as this} ::local-date
    field ::temporal-field/temporal-field]
@@ -805,23 +754,8 @@
       (--get-proleptic-month this)
 
       :else
-      (condp = field
-        chrono-field/DAY_OF_WEEK (day-of-week/get-value (get-day-of-week this))
-        chrono-field/ALIGNED_DAY_OF_WEEK_IN_MONTH (inc (rem (dec day) 7))
-        chrono-field/ALIGNED_DAY_OF_WEEK_IN_YEAR (inc (rem (dec (get-day-of-year this)) 7))
-        chrono-field/DAY_OF_MONTH day
-        chrono-field/DAY_OF_YEAR (get-day-of-year this)
-        chrono-field/EPOCH_DAY (throw (ex UnsupportedTemporalTypeException "Invalid field 'EpochDay' for `get` method, use `get-long`) instead" {:this this :field field}))
-        chrono-field/ALIGNED_WEEK_OF_MONTH (inc (quot (dec day) 7))
-        chrono-field/ALIGNED_WEEK_OF_YEAR (inc (quot (dec (get-day-of-year this)) 7))
-        chrono-field/MONTH_OF_YEAR month
-        chrono-field/PROLEPTIC_MONTH (throw (ex UnsupportedTemporalTypeException "Invalid field 'ProlepticMonth' for `get` method, use `get-long` instead" {:this this :field field}))
-        chrono-field/YEAR_OF_ERA (if (>= year 1) year (inc (- year)))
-        chrono-field/YEAR year
-        chrono-field/ERA (if (>= year 1) 1 0)
-        (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:this this :field field}))))))
+      (--get0 this field))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1559
 (def-method query ::j/wip
   [this ::local-date
    q ::temporal-query/temporal-query]
@@ -838,7 +772,6 @@
   (get-long [this field] (get-long this field))
   (query [this q] (query this q)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L1591
 (def-method adjust-into ::temporal/temporal
   [this ::local-date
    temporal ::temporal/temporal]
@@ -850,12 +783,9 @@
 
 (declare of-instant)
 (def-constructor now ::local-date
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L197
   ([]
    (now (clock-impl/system-default-zone)))
 
-  ;; NB! This method is overloaded!
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L213
   ([clock-or-zone-id (s/or :clock ::clock/clock
                            :zone-id ::zone-id/zone-id)]
    (if (satisfies? zone-id/IZoneId clock-or-zone-id)
@@ -865,8 +795,6 @@
        (of-instant (clock/instant clock-or-zone-id)
                    (clock/get-zone clock-or-zone-id))))))
 
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L247
 (def-constructor of ::local-date
   [year ::j/year
    month (s/or :number ::j/month-of-year
@@ -874,7 +802,6 @@
    day-of-month ::j/day-of-month]
   (impl/of year month day-of-month))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L287
 (def-constructor of-year-day ::local-date
   [year ::j/int
    day-of-year ::j/int]
@@ -897,7 +824,6 @@
                   (+ 1))]
       (impl/create year (month/-get-value moy) dom))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L318
 (def-constructor of-instant ::local-date
   [instant ::instant/instant
    zone ::zone-id/zone-id]
@@ -911,12 +837,10 @@
                                         local-time-impl/SECONDS_PER_DAY)]
     (of-epoch-day local-epoch-day)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L340
 (def-constructor of-epoch-day ::local-date
   [epoch-day ::j/long]
   (impl/of-epoch-day epoch-day))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L391
 (def-constructor from ::local-date
   [temporal ::temporal-accessor/temporal-accessor]
   (impl-impl/from temporal))
