@@ -10,6 +10,7 @@
             [jiffy.local-date-time-impl :as local-date-time-impl]
             [jiffy.local-time-impl :as local-time-impl]
             [jiffy.month :as month]
+            [jiffy.offset-time-impl :as offset-time-impl]
             [jiffy.period :as period-impl]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
             [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
@@ -72,6 +73,7 @@
 (s/def ::local-date-time/local-date-time ::local-date-time-impl/local-date-time)
 (s/def ::local-time/local-time ::local-time-impl/local-time)
 (s/def ::zone-offset/zone-offset ::zone-offset-impl/zone-offset)
+(s/def ::offset-time/offset-time ::offset-time-impl/offset-time)
 (s/def ::zoned-date-time/zoned-date-time ::zoned-date-time-impl/zoned-date-time)
 (s/def ::ZoneOffsetTransition/zone-offset-transition ::zone-offset-transition/zone-offset-transition)
 (s/def ::ZoneOffsetTransitionRule/zone-offset-transition-rule ::transition-rule/zone-offset-transition-rule)
