@@ -756,7 +756,7 @@
       :else
       (--get0 this field))))
 
-(def-method query ::j/wip
+(def-method query ::temporal-query/result
   [this ::local-date
    q ::temporal-query/temporal-query]
   (if (= q (temporal-queries/local-date))

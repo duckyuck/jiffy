@@ -567,7 +567,7 @@
       (temporal-accessor/get-long (:time this) field)
       (temporal-accessor/get-long (:date this) field))))
 
-(def-method query ::j/wip
+(def-method query ::temporal-query/result
   [this ::local-date-time
    query ::temporal-query/temporal-query]
   (if (= query (temporal-queries/local-date))

@@ -660,7 +660,7 @@
       (temporal-accessor/get-long (:date-time this) field))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1544
-(def-method query ::j/wip
+(def-method query ::temporal-query/result
   [this ::offset-date-time
    query ::temporal-query/temporal-query]
   (cond

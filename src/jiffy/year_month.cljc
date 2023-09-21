@@ -374,7 +374,7 @@
       (range field)
       (value-range/check-valid-int-value (get-long this field) field)))
 
-(def-method query ::j/wip
+(def-method query ::temporal-query/result
   [this ::year-month
    query ::temporal-query/temporal-query]
   (condp = query

@@ -376,7 +376,7 @@
        (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:instant this :field field}))))
     (temporal-field/get-from field this)))
 
-(def-method query ::j/any
+(def-method query ::temporal-query/result
   [this ::instant
    q ::temporal-query/temporal-query]
   (if (= q (temporal-queries/precision))

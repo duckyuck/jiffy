@@ -311,7 +311,7 @@
       (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field)
                  {:this this :field field})))))
 
-(def-method query ::j/wip
+(def-method query ::temporal-query/result
   [this ::year
    query ::temporal-query/temporal-query]
   (condp = query

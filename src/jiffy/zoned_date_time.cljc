@@ -575,7 +575,7 @@
       (temporal-accessor/get-long (:date-time this) field))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L2055
-(def-method query ::j/wip
+(def-method query ::temporal-query/result
   [this ::zoned-date-time
    query ::temporal-query/temporal-query]
   (if (= query (temporal-queries/local-date))

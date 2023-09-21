@@ -469,7 +469,7 @@
       chrono-field/MICRO_OF_DAY (long (/ (to-nano-of-day this) 1000))
       (--get0 this field))))
 
-(def-method query ::j/wip
+(def-method query ::temporal-query/result
   [this ::local-time
    query ::temporal-query/temporal-query]
   (cond
