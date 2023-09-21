@@ -1,0 +1,42 @@
+(ns jiffy.year-month-test
+  #?(:clj (:require [jiffy.support-clj :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support])
+     :cljs (:require [jiffy.support-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true])))
+
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/get-year)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/get-month-value)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/get-month)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/is-leap-year)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/is-valid-day)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/length-of-month)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/length-of-year)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/with-year)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/with-month)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/plus-years)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/plus-months)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/minus-years)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/minus-months)
+;; (test-proto-fn! jiffy.year-month jiffy.protocols.year-month/format)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/at-day)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/at-end-of-month)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/is-after)
+(test-proto-fn jiffy.year-month jiffy.protocols.year-month/is-before)
+
+(test-proto-fn jiffy.year-month jiffy.protocols.time-comparable/compare-to)
+
+(test-proto-fn jiffy.year-month jiffy.protocols.temporal.temporal/with)
+(test-proto-fn jiffy.year-month jiffy.protocols.temporal.temporal/plus)
+(test-proto-fn jiffy.year-month jiffy.protocols.temporal.temporal/minus)
+(test-proto-fn jiffy.year-month jiffy.protocols.temporal.temporal/until)
+
+(test-proto-fn jiffy.year-month jiffy.protocols.temporal.temporal-accessor/is-supported)
+(test-proto-fn jiffy.year-month jiffy.protocols.temporal.temporal-accessor/range)
+(test-proto-fn jiffy.year-month jiffy.protocols.temporal.temporal-accessor/get)
+(test-proto-fn jiffy.year-month jiffy.protocols.temporal.temporal-accessor/get-long)
+(test-proto-fn jiffy.year-month jiffy.protocols.temporal.temporal-accessor/query)
+
+(test-proto-fn jiffy.year-month jiffy.protocols.temporal.temporal-adjuster/adjust-into)
+
+;; (test-static-fn! jiffy.year-month/now)
+(test-static-fn jiffy.year-month/of)
+(test-static-fn jiffy.year-month/from)
+;; (test-static-fn! jiffy.year-month/parse)

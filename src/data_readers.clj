@@ -10,6 +10,7 @@
  jiffy/local-time jiffy.edn-clj/local-time
  jiffy/local-date-time jiffy.edn-clj/local-date-time
  jiffy/month jiffy.edn-clj/month
+ jiffy/year-month jiffy.edn-clj/year-month
  jiffy/zone-offset jiffy.edn-clj/zone-offset
  jiffy/fixed-clock jiffy.edn-clj/fixed-clock
  jiffy/zone-rules jiffy.edn-clj/zone-rules

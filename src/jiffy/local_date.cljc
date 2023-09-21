@@ -53,7 +53,7 @@
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.temporal.temporal-query :as temporal-query]
             [jiffy.temporal.value-range :as value-range-impl]
-            [jiffy.year :as year]
+            [jiffy.year-impl :as year-impl]
             [jiffy.zoned-date-time-impl :as zoned-date-time-impl])
   #?(:clj (:import [jiffy.local_date_impl LocalDate])))
 
@@ -713,8 +713,8 @@
                                                                   4
                                                                   5))
         chrono-field/YEAR_OF_ERA (if (pos? (get-year this))
-                                   (value-range-impl/of 1 year/MAX_VALUE)
-                                   (value-range-impl/of 1 (inc year/MAX_VALUE)))
+                                   (value-range-impl/of 1 year-impl/MAX_VALUE)
+                                   (value-range-impl/of 1 (inc year-impl/MAX_VALUE)))
         (temporal-field/range field)))))
 
 (defn --get0 [{:keys [year month day] :as this} field]

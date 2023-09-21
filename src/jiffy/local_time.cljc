@@ -412,18 +412,17 @@
   [this ::local-time
    field-or-unit (s/or ::temporal-field/temporal-field
                        ::temporal-unit/temporal-unit)]
-  (cond
-    (satisfies? temporal-field/ITemporalField field-or-unit)
+  (condp satisfies? field-or-unit
+    temporal-field/ITemporalField
     (if (chrono-field/chrono-field? field-or-unit)
       (temporal-field/is-time-based field-or-unit)
       (and field-or-unit (temporal-field/is-supported-by field-or-unit this)))
 
-    (satisfies? temporal-unit/ITemporalUnit field-or-unit)
+    temporal-unit/ITemporalUnit
     (if (chrono-unit/chrono-unit? field-or-unit)
       (temporal-unit/is-time-based field-or-unit)
       (and field-or-unit (temporal-unit/is-supported-by field-or-unit this)))
 
-    :else
     (throw (ex-info "Unsupported field or unit" {:instant this :field-or-unit field-or-unit}))))
 
 (def-method range ::value-range/value-range

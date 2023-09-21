@@ -19,6 +19,7 @@
             [jiffy.temporal.chrono-unit]
             [jiffy.temporal.temporal-query]
             [jiffy.temporal.value-range]
+            [jiffy.year-month]
             [jiffy.zoned-date-time-impl]
             [jiffy.zone-offset-impl]
             [jiffy.zone.zone-offset-transition-rule]
@@ -42,6 +43,7 @@
            (jiffy.temporal.chrono_unit ChronoUnit)
            (jiffy.temporal.temporal_query TemporalQuery)
            (jiffy.temporal.value_range ValueRange)
+           (jiffy.year_month YearMonth)
            (jiffy.zoned_date_time_impl ZonedDateTime)
            (jiffy.zone_offset_impl ZoneOffset)
            (jiffy.zone.zone_offset_transition_rule ZoneOffsetTransitionRule)
@@ -186,6 +188,9 @@
 
 (defmethod jiffy->java* MonthDay [{:keys [month day]}]
   (java.time.MonthDay/of month day))
+
+(defmethod jiffy->java* YearMonth [{:keys [year month]}]
+  (java.time.YearMonth/of year month))
 
 (defmethod jiffy->java* Period [{:keys [years months days]}]
   (java.time.Period/of years months days))

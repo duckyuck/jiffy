@@ -13,6 +13,7 @@
             [jiffy.offset-time-impl #?@(:cljs [:refer [OffsetTime]])]
             [jiffy.zone-region-impl #?@(:cljs [:refer [ZonedRegion]])]
             [jiffy.month #?@(:cljs [:refer [Month]])]
+            [jiffy.year-month #?@(:cljs [:refer [YearMonth]])]
             [jiffy.period #?@(:cljs [:refer [Period]])]
             [jiffy.temporal.temporal-queries]
             [jiffy.temporal.value-range #?@(:cljs [:refer [ValueRange]])]
@@ -37,6 +38,7 @@
                    [jiffy.offset_time_impl OffsetTime]
                    [jiffy.zone_region_impl ZoneRegion]
                    [jiffy.month Month]
+                   [jiffy.year_month YearMonth]
                    [jiffy.period Period]
                    [jiffy.temporal.value_range ValueRange]
                    [jiffy.temporal.temporal_query TemporalQuery]
@@ -112,6 +114,11 @@
     {:record Month
      :read-fn 'jiffy.month/value-of
      :write-fn :enum-name}
+
+    :year-month
+    {:record YearMonth
+     :read-fn 'jiffy.year-month/map->YearMonth
+     :write-fn '->map}
 
     :zone-offset
     {:record ZoneOffset
