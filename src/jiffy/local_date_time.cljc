@@ -45,7 +45,8 @@
             [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.protocols.zone.zone-rules :as zone-rules]
-            [jiffy.clock :as clock-impl])
+            [jiffy.clock :as clock-impl]
+            [jiffy.offset-date-time-impl :as offset-date-time-impl])
   #?(:clj (:import [jiffy.local_date_time_impl LocalDateTime])))
 
 (s/def ::local-date-time ::impl/local-date-time)
@@ -314,7 +315,7 @@
 (def-method at-offset ::offset-date-time/offset-date-time
   [this ::local-date-time
    offset ::zone-offset/zone-offset]
-  (wip ::-at-offset))
+  (offset-date-time-impl/of this offset))
 
 (extend-type LocalDateTime
   local-date-time/ILocalDateTime

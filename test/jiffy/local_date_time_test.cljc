@@ -37,9 +37,7 @@
 (test-proto-fn jiffy.local-date-time jiffy.protocols.local-date-time/minus-minutes)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.local-date-time/minus-seconds)
 (test-proto-fn jiffy.local-date-time jiffy.protocols.local-date-time/minus-nanos)
-
-;; Depends on OffsetDateTime impl
-;; (test-proto-fn! jiffy.local-date-time jiffy.protocols.local-date-time/at-offset)
+(test-proto-fn jiffy.local-date-time jiffy.protocols.local-date-time/at-offset)
 
 (test-proto-fn jiffy.local-date-time jiffy.protocols.time-comparable/compare-to)
 
@@ -67,7 +65,7 @@
 (test-proto-fn jiffy.local-date-time jiffy.protocols.temporal.temporal-adjuster/adjust-into)
 
 ;; (test-static-fn! jiffy.local-date-time/now)
-(test-static-fn! jiffy.local-date-time/of)
+(test-static-fn jiffy.local-date-time/of)
 (test-static-fn jiffy.local-date-time/of-instant)
 (test-static-fn jiffy.local-date-time/of-epoch-second)
 (test-static-fn jiffy.local-date-time/from)

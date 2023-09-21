@@ -47,9 +47,7 @@
 ;; (test-proto-fn! jiffy.offset-date-time jiffy.protocols.offset-date-time/format)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.offset-date-time/at-zone-same-instant)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.offset-date-time/at-zone-similar-local)
-
-;; "not implemented: :jiffy.offset-time-impl/of"
-;; (test-proto-fn! jiffy.offset-date-time jiffy.protocols.offset-date-time/to-offset-time)
+(test-proto-fn jiffy.offset-date-time jiffy.protocols.offset-date-time/to-offset-time)
 
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.offset-date-time/to-zoned-date-time)
 (test-proto-fn jiffy.offset-date-time jiffy.protocols.offset-date-time/to-instant)

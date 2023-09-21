@@ -12,8 +12,8 @@
 (test-proto-fn jiffy.instant jiffy.protocols.instant/minus-millis)
 (test-proto-fn jiffy.instant jiffy.protocols.instant/minus-nanos)
 (test-proto-fn jiffy.instant jiffy.protocols.instant/to-epoch-milli)
-;; (test-proto-fn! jiffy.instant jiffy.protocols.instant/at-offset)
-;; (test-proto-fn! jiffy.instant jiffy.protocols.instant/at-zone)
+(test-proto-fn jiffy.instant jiffy.protocols.instant/at-offset)
+(test-proto-fn jiffy.instant jiffy.protocols.instant/at-zone)
 (test-proto-fn jiffy.instant jiffy.protocols.instant/is-after)
 (test-proto-fn jiffy.instant jiffy.protocols.instant/is-before)
 
@@ -29,12 +29,11 @@
 (test-proto-fn jiffy.instant jiffy.protocols.temporal.temporal-accessor/get)
 (test-proto-fn jiffy.instant jiffy.protocols.temporal.temporal-accessor/get-long)
 (test-proto-fn jiffy.instant jiffy.protocols.temporal.temporal-accessor/query)
+
 (test-proto-fn jiffy.instant jiffy.protocols.temporal.temporal-adjuster/adjust-into)
 
+#_(test-static-fn! jiffy.instant/now)
 (test-static-fn jiffy.instant/of-epoch-second)
 (test-static-fn jiffy.instant/of-epoch-milli)
 (test-static-fn jiffy.instant/from)
-
-;; TODO: (jiffy.instant/now) gets its value from the system's current time.
-;; We need to find a way to override the JDK function that provides this.
-#_(test-static-fn! jiffy.instant/now)
+;; (test-static-fn jiffy.instant/parse)

@@ -38,7 +38,7 @@
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.zoned-date-time/minus-minutes)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.zoned-date-time/minus-seconds)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.zoned-date-time/minus-nanos)
-;; (test-proto-fn! jiffy.zoned-date-time jiffy.protocols.zoned-date-time/to-offset-date-time)
+(test-proto-fn jiffy.zoned-date-time jiffy.protocols.zoned-date-time/to-offset-date-time)
 
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/get-offset)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/with-earlier-offset-at-overlap)
@@ -70,8 +70,3 @@
 (test-static-fn jiffy.zoned-date-time/of-strict)
 (test-static-fn jiffy.zoned-date-time/from)
 ;; (test-static-fn! jiffy.zoned-date-time/parse)
-
-(comment
-
-  (jiffy.zoned-date-time/now)
-  )

@@ -23,9 +23,7 @@
 (test-proto-fn jiffy.local-time jiffy.protocols.local-time/minus-nanos)
 ;;(test-proto-fn! jiffy.local-time jiffy.protocols.local-time/format)
 (test-proto-fn jiffy.local-time jiffy.protocols.local-time/at-date)
-
-;; "not implemented: :jiffy.offset-time-impl/of"
-;; (test-proto-fn! jiffy.local-time jiffy.protocols.local-time/at-offset)
+(test-proto-fn jiffy.local-time jiffy.protocols.local-time/at-offset)
 
 (test-proto-fn jiffy.local-time jiffy.protocols.local-time/to-epoch-second)
 (test-proto-fn jiffy.local-time jiffy.protocols.local-time/is-after)
