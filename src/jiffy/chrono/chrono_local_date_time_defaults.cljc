@@ -22,20 +22,27 @@
             [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.specs :as j]
             [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.math :as math]))
+            [jiffy.math :as math]
+            [jiffy.temporal.chrono-unit :as chrono-unit]
+            [jiffy.temporal.temporal-queries :as temporal-queries]
+            [jiffy.temporal.chrono-field :as chrono-field]))
 
 (s/def ::chrono-local-date-time ::chrono-local-date-time/chrono-local-date-time)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L192
 (def-method -get-chronology ::chronology/chronology
   [this ::chrono-local-date-time]
-  (wip ::-get-chronology))
+  (-> this
+      chrono-local-date-time/to-local-date
+      chrono-local-date/get-chronology))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L236
 (def-method -is-supported ::j/boolean
   [this ::chrono-local-date-time
    unit ::temporal-unit/temporal-unit]
-  (wip ::-is-supported))
+  (if (chrono-unit/chrono-unit? unit)
+    (not= unit chrono-unit/FOREVER)
+    (and unit (temporal-unit/is-supported-by unit this))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L272
 (def-method -with ::chrono-local-date-time
@@ -62,18 +69,39 @@
     unit ::temporal-unit/temporal-unit]
    (wip ::-minus)))
 
-
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L343
 (def-method -query ::j/wip
   [this ::chrono-local-date-time
    query ::temporal-query/temporal-query]
-  (wip ::-query))
+  (cond
+    (#{(temporal-queries/zone-id)
+       (temporal-queries/zone)
+       (temporal-queries/offset)} query)
+    nil
+
+    (= query (temporal-queries/local-time))
+    (chrono-local-date-time/to-local-time this)
+
+    (= query (temporal-queries/chronology))
+    (-get-chronology this)
+
+    (= query (temporal-queries/precision))
+    chrono-unit/NANOS
+
+    :else
+    (temporal-query/query-from query this)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L384
 (def-method -adjust-into ::temporal/temporal
   [this ::chrono-local-date-time
    temporal ::temporal/temporal]
-  (wip ::-adjust-into))
+  (-> temporal
+      (temporal/with chrono-field/EPOCH_DAY (-> this
+                                                chrono-local-date-time/to-local-date
+                                                chrono-local-date/to-epoch-day))
+      (temporal/with chrono-field/NANO_OF_DAY (-> this
+                                                  chrono-local-date-time/to-local-time
+                                                  local-time/to-nano-of-day))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L404
 (def-method -format string?

@@ -27,9 +27,9 @@
             [jiffy.protocols.zoned-date-time :as zoned-date-time]
             [jiffy.specs :as j]))
 
-(def-record IsoChronology ::iso-chronology [wip ::j/wip])
+(def-record IsoChronology ::iso-chronology [dummy ::dummy])
 
-(def-constructor create ::iso-chronology [] (IsoChronology. ::wip))
+(def-constructor create ::iso-chronology [] (IsoChronology. :dummy))
 
 (defmacro args [& x] `(s/tuple ::iso-chronology ~@x))
 
@@ -57,9 +57,10 @@
   (resolve-ymd [this field-values resolver-style] (-resolve-ymd this field-values resolver-style)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/IsoChronology.java#L157
-(s/def ::get-id-args (args))
-(defn -get-id [this] (wip ::-get-id))
-(s/fdef -get-id :args ::get-id-args :ret string?)
+
+(def-method -get-id string?
+  [this ::iso-chronology]
+  "ISO")
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/IsoChronology.java#L174
 (s/def ::get-calendar-type-args (args))

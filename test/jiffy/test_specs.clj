@@ -12,6 +12,7 @@
             [jiffy.month :as month]
             [jiffy.period :as period-impl]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
+            [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
             [jiffy.protocols.chrono.chrono-local-date-time-impl
              :as chrono-local-date-time-impl]
             [jiffy.protocols.chrono.chrono-period-impl :as chrono-period-impl]
@@ -65,6 +66,7 @@
 (s/def ::duration/duration ::duration-impl/duration)
 (s/def ::period/period ::period-impl/period)
 (s/def ::instant/instant ::instant-impl/instant)
+(s/def ::local-date/local-date ::local-date-impl/local-date)
 (s/def ::local-date-time/local-date-time ::local-date-time-impl/local-date-time)
 (s/def ::local-time/local-time ::local-time-impl/local-time)
 (s/def ::zone-offset/zone-offset ::zone-offset-impl/zone-offset)
@@ -72,22 +74,6 @@
 (s/def ::ZoneOffsetTransition/zone-offset-transition ::zone-offset-transition/zone-offset-transition)
 (s/def ::ZoneOffsetTransitionRule/zone-offset-transition-rule ::transition-rule/zone-offset-transition-rule)
 (s/def ::zone-rules/zone-rules (set (vals @zone-rules-store/zone-id->rules)))
-
-(s/def ::local-date/local-date ::local-date-impl/local-date)
-
-;; (->> (s/gen (s/and ::local-date-impl/local-date
-;;                    local-date-impl/valid?
-;;                    ))
-;;      (gen/sample ))
-
-;; (->> (s/tuple ~@fields-spec)
-;;      s/gen
-;;      (gen/such-that (fn [~(vec field-names)]
-;;                       (if (seq ~args)
-;;                         (do
-;;                           ~@args)
-;;                         true)))
-;;      (gen/fmap #(apply constructor# %)))
 
 (s/def ::clock/clock
   (s/with-gen #(satisfies? clock/IClock %)
@@ -126,6 +112,10 @@
                                    ;; :jiffy.chrono.thai-buddhist-date/thai-buddhist-date
                                    :jiffy.local-date/local-date])))))
 
+(s/def ::chrono-local-date-time/chrono-local-date-time
+  (s/with-gen #(satisfies? chrono-local-date-time/IChronoLocalDateTime %)
+    (fn [] (gen/one-of (map s/gen [:jiffy.local-date-time/local-date-time])))))
+
 (s/def ::temporal/temporal
   (s/with-gen #(satisfies? temporal/ITemporal %)
     (fn [] (gen/one-of (map s/gen [ ;; :jiffy.chrono.chrono-local-date-impl/chrono-local-date-impl
@@ -136,7 +126,7 @@
                                    ;; :jiffy.chrono.minguo-date/minguo-date
                                    ;; :jiffy.chrono.thai-buddhist-date/thai-buddhist-date
                                    :jiffy.instant-impl/instant
-                                   ;; :jiffy.local-date/local-date
+                                   :jiffy.local-date/local-date
                                    ;; :jiffy.local-date-time/local-date-time
                                    ;; :jiffy.local-time/local-time
                                    ;; :jiffy.offset-date-time/offset-date-time
@@ -161,7 +151,7 @@
     (fn [] (gen/one-of (map s/gen (concat
                                    [;; ::day-of-week/day-of-week
                                     ::instant/instant
-                                    ;; ::local-date/local-date
+                                    ::local-date/local-date
                                     ;; ::local-date-time/local-date-time
                                     ;; ::local-time/local-time
                                     ;; ::month/month
@@ -176,7 +166,8 @@
 
 (s/def ::temporal-accessor/temporal-accessor
   (s/with-gen any? ;; #(satisfies? temporal-accessor/ITemporalAccessor %)
-    (fn [] (gen/one-of (map s/gen [;; ::local-date-time/local-date-time
+    (fn [] (gen/one-of (map s/gen [
+                                   ::local-date-time/local-date-time
                                    ::instant/instant
                                    ;; ::day-of-week/day-of-week
                                    ;; ::hijrah-era/hijrah-era
@@ -187,7 +178,7 @@
                                    ;; ::minguo-date/minguo-date
                                    ;; ::thai-buddhist-date/thai-buddhist-date
                                    ;; ::chrono-local-date-time-impl/chrono-local-date-time-impl
-                                   ;; ::local-date/local-date
+                                   ::local-date/local-date
                                    ;; ::zone-offset/zone-offset
                                    ;; ::offset-time/offset-time
                                    ;; ::year/year

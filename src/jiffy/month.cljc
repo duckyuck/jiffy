@@ -1,7 +1,7 @@
 (ns jiffy.month
   (:require [clojure.spec.alpha :as s]
             [jiffy.chrono.chronology :as chronology]
-            [jiffy.chrono.iso-chronology-impl :as iso-chronology]
+            [jiffy.chrono.iso-chronology :as iso-chronology]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.enums #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException JavaIllegalArgumentException ex #?(:clj try*)]  #?@(:cljs [:refer-macros [try*]])]

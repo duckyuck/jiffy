@@ -374,7 +374,7 @@
            (= field chrono-field/CLOCK_HOUR_OF_AMPM) (-plus-hours this (- (if (= 12 new-value) 0 new-value) (mod (:hour this) 12)))
            (= field chrono-field/HOUR_OF_DAY) (-with-hour this (int new-value))
            (= field chrono-field/CLOCK_HOUR_OF_DAY) (-with-hour this (int (if (= 24 new-value) 0 new-value)))
-           (= field chrono-field/AMPM_OF_DAY) (-plus-hours this (* 12 (- new-value (/ (:hour this) 12))))
+           (= field chrono-field/AMPM_OF_DAY) (-plus-hours this (* 12 (- new-value (long (/ (:hour this) 12)))))
            :else (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field) {:local-time this :field field :new-value new-value}))))
      (temporal-field/adjust-into field this new-value))))
 (s/fdef -with :args ::with-args :ret ::temporal/temporal)

@@ -111,7 +111,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L697
 (def-method -is-time-based ::j/boolean
   [this ::chrono-field]
-  (wip ::-is-time-based))
+  (< (:ordinal this) (:ordinal DAY_OF_WEEK)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ChronoField.java#L741
 (s/def ::is-supported-by-args (args ::temporal-accessor/temporal-accessor))

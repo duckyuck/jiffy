@@ -7,6 +7,7 @@
             [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException JavaIllegalArgumentException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.local-date-impl :refer [create #?@(:cljs [LocalDate])] :as impl]
+            [jiffy.local-date-impl-impl :as impl-impl]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
             [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
             [jiffy.protocols.chrono.chronology :as chronology]
@@ -920,11 +921,7 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L391
 (def-constructor from ::local-date
   [temporal ::temporal-accessor/temporal-accessor]
-  (asserts/require-non-nil temporal "temporal")
-  (if-let [date (temporal-accessor/query temporal (temporal-queries/local-date))]
-    date
-    (throw (ex DateTimeException (str "Unable to obtain LocalDate from TemporalAccessor: " temporal " of type " (type temporal))
-               {:temporal temporal}))))
+  (impl-impl/from temporal))
 
 (def-constructor parse ::local-date
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L412

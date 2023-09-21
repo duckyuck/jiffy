@@ -4,7 +4,7 @@
             [clojure.test.check.generators]
             [jiffy.asserts :as asserts]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
-            [jiffy.chrono.iso-chronology-impl :as iso-chronology-impl]
+            [jiffy.chrono.iso-chronology :as iso-chronology-impl]
             [jiffy.protocols.chrono.iso-chronology :as iso-chronology]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.exception :refer [ex try* JavaArithmeticException DateTimeException DateTimeParseException UnsupportedTemporalTypeException]]

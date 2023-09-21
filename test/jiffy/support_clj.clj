@@ -55,7 +55,7 @@
   (let [obj (when-not static? (first args))
         args (if static? args (rest args))
         method-name (name f)
-        methods (->> (.getDeclaredMethods (Class/forName (namespace f)))
+        methods (->> (.getMethods (Class/forName (namespace f)))
                      (filter #(-> % .getName (= method-name)))
                      (filter #(-> % .getParameterCount (= (count args)))))]
     (when-not (seq methods)
@@ -216,12 +216,7 @@
      (let [results#
            (for [args# ~args-samples]
              (let [jiffy-result# (trycatch (invoke-jiffy ~jiffy-fn args#))
-                   java-args# (try
-                                (mapv jiffy->java args#)
-                                (catch Exception e#
-                                  (throw (ex-info "Failed to convert Jiffy args to Java"
-                                                  {:failed/jiffy-args args#
-                                                   :failed/jiffy-result jiffy-result#}))))
+                   java-args# (mapv jiffy->java args#)
                    result# {:failed/jiffy-args args#
                             :failed/jiffy-result jiffy-result#
                             :failed/java-args java-args#}

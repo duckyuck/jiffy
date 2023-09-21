@@ -3,7 +3,7 @@
             #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.asserts :as asserts]
-            [jiffy.local-date-time :as local-date-time-impl]
+            [jiffy.local-date-time-impl :as local-date-time-impl]
             [jiffy.protocols.local-date :as local-date]
             [jiffy.protocols.local-time :as local-time]
             [jiffy.protocols.duration :as duration]
