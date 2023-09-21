@@ -8,21 +8,30 @@
             [jiffy.protocols.local-time :as local-time]
             [jiffy.protocols.duration :as duration]
             [jiffy.protocols.zone-offset :as zone-offset]
+            [jiffy.protocols.instant :as instant]
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.protocols.zone.zone-rules :as zone-rules]
             [jiffy.protocols.local-date-time :as local-date-time]
             [jiffy.protocols.zone.zone-offset-transition :as zone-offset-transition]
-            [jiffy.specs :as j]))
+            [jiffy.specs :as j]
+            [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
+            [jiffy.instant-impl :as instant-impl]))
 
-(defrecord ZonedDateTime [date-time offset zone])
+(declare of-local)
 
-(s/def ::create-args (s/tuple ::local-date-time/local-date-time
-                              ::zone-offset/zone-offset
-                              ::zone-id/zone-id))
-(defn create [date-time offset zone]
-  (->ZonedDateTime date-time offset zone))
-(s/def ::zoned-date-time (j/constructor-spec ZonedDateTime create ::create-args))
-(s/fdef create :args ::create-args :ret ::zoned-date-time)
+(def-record ZonedDateTime ::zoned-date-time
+  [date-time ::local-date-time/local-date-time
+   offset ::zone-offset/zone-offset
+   zone ::zone-id/zone-id]
+  (of-local date-time zone offset))
+
+(defn create [epoch-second nano-of-second zone]
+  (let [rules (zone-id/get-rules zone)
+        instant (instant-impl/of-epoch-second epoch-second nano-of-second)
+        offset (zone-rules/get-offset rules instant)]
+    (->ZonedDateTime (local-date-time-impl/of-epoch-second epoch-second nano-of-second offset)
+                     offset
+                     zone)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L366
 (def-constructor of-local ::zoned-date-time
@@ -32,12 +41,12 @@
   (asserts/require-non-nil local-date-time "LocalDateTime")
   (asserts/require-non-nil zone "zone")
   (if (satisfies? zone-offset/IZoneOffset zone)
-    (create local-date-time zone zone)
+    (->ZonedDateTime local-date-time zone zone)
     (let [rules (zone-id/get-rules zone)
           valid-offsets (zone-rules/get-valid-offsets rules local-date-time)]
       (cond
         (= (count valid-offsets) 1)
-        (create local-date-time (first valid-offsets) zone)
+        (->ZonedDateTime local-date-time (first valid-offsets) zone)
 
         (= (count valid-offsets) 0)
         (let [trans (zone-rules/get-transition rules local-date-time)]
@@ -50,10 +59,10 @@
 
         :default (if (and (not (nil? preferred-offset))
                           ((set valid-offsets) preferred-offset))
-                   (create local-date-time preferred-offset zone)
+                   (->ZonedDateTime local-date-time preferred-offset zone)
                    (do
                      (asserts/require-non-nil (first valid-offsets) "offset")
-                     (create local-date-time (first valid-offsets) zone)))))))
+                     (->ZonedDateTime local-date-time (first valid-offsets) zone)))))))
 
 (def-constructor of ::zoned-date-time
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L292
@@ -77,3 +86,24 @@
     nano-of-second ::j/nano-of-second
     zone ::zone-id/zone-id]
    (of-local (local-date-time-impl/of year month day-of-month hour minute second nano-of-second) zone nil)))
+
+(def-constructor of-instant ::zoned-date-time
+  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L406
+  ([instant ::instant/instant
+    zone ::zone-id/zone-id]
+   (asserts/require-non-nil instant "instant")
+   (asserts/require-non-nil zone "zone")
+   (create (instant/get-epoch-second instant) (instant/get-nano instant) zone))
+
+  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L432
+  ([local-date-time ::local-date-time/local-date-time
+    offset ::zone-offset/zone-offset
+    zone ::zone-id/zone-id]
+   (asserts/require-non-nil local-date-time "LocalDateTime")
+   (asserts/require-non-nil offset "offset")
+   (asserts/require-non-nil zone "zone")
+   (if (-> zone zone-id/get-rules (zone-rules/is-valid-offset local-date-time offset))
+     (->ZonedDateTime local-date-time offset zone)
+     (create (chrono-local-date-time/to-epoch-second local-date-time offset)
+             (local-date-time/get-nano local-date-time)
+             zone))))
