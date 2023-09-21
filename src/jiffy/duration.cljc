@@ -178,9 +178,9 @@
   ([this amount-to-subtract unit]
    (if (= amount-to-subtract math/long-min-value)
      (-> this
-         (duration/plus math/long-max-value unit)
-         (duration/plus 1 unit))
-     (duration/plus this (- amount-to-subtract) unit))))
+         (-plus math/long-max-value unit)
+         (-plus 1 unit))
+     (-plus this (- amount-to-subtract) unit))))
 (s/fdef -minus :args ::minus-args :ret ::duration)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Duration.java#L887

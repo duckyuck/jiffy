@@ -262,9 +262,9 @@
     unit ::temporal-unit/temporal-unit]
    (if (= amount-to-subtract math/long-min-value)
      (-> this
-         (temporal/plus math/long-max-value unit)
-         (temporal/plus 1 unit))
-     (temporal/plus this (- amount-to-subtract) unit))))
+         (plus math/long-max-value unit)
+         (plus 1 unit))
+     (plus this (- amount-to-subtract) unit))))
 
 (defn- nanos-until [this end]
   (let [secs-diff (math/subtract-exact (:seconds end) (:seconds this))

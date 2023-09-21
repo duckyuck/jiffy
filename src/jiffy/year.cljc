@@ -1,8 +1,9 @@
 (ns jiffy.year
-  (:refer-clojure :exclude [format ])
+  (:refer-clojure :exclude [format range get])
   (:require [clojure.spec.alpha :as s]
             #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
+            [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.clock :as clock]
             [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
@@ -22,227 +23,366 @@
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.specs :as j]
             [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.year-impl :as impl]))
+            [jiffy.year-impl :as impl]
+            [jiffy.year-month :as year-month-impl]
+            [jiffy.temporal.chrono-field :as chrono-field]
+            [jiffy.math :as math]
+            [jiffy.local-date :as local-date-impl]
+            [jiffy.temporal.chrono-unit :as chrono-unit]
+            [jiffy.temporal.temporal-queries :as temporal-queries]
+            [jiffy.chrono.iso-chronology :as iso-chronology]
+            [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
+            [jiffy.asserts :as asserts]
+            [jiffy.chrono.chronology :as chronology]
+            [jiffy.temporal.value-range :as value-range-impl]
+            [jiffy.year-impl :as year-impl]
+            [jiffy.clock :as clock-impl]))
 
-(defrecord Year [])
+(def-record Year ::year-record
+  [year ::j/int])
 
-(s/def ::create-args ::j/wip)
-(defn create [])
-(s/def ::year (j/constructor-spec Year create ::create-args))
-(s/fdef create :args ::create-args :ret ::year)
+(defn- valid? [{:keys [year]}]
+  (try*
+   (chrono-field/check-valid-value chrono-field/YEAR year)
+   (catch :default e
+     false)))
 
-(defmacro args [& x] `(s/tuple ::year ~@x))
+(s/def ::year (s/and ::year-record valid?))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L337
-(s/def ::get-value-args (args))
-(defn -get-value [this] (wip ::-get-value))
-(s/fdef -get-value :args ::get-value-args :ret ::j/int)
+(def MIN_VALUE impl/MIN_VALUE)
+(def MAX_VALUE impl/MAX_VALUE)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L527
-(s/def ::is-leap-args (args))
-(defn -is-leap [this] (wip ::-is-leap))
-(s/fdef -is-leap :args ::is-leap-args :ret ::j/boolean)
+(def-method is-leap ::j/boolean
+  [year (s/or ::year
+              ::j/long)]
+  (cond
+    (satisfies? year/IYear year)
+    (is-leap (:year year))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L540
-(s/def ::is-valid-month-day-args (args ::month-day/month-day))
-(defn -is-valid-month-day [this month-day] (wip ::-is-valid-month-day))
-(s/fdef -is-valid-month-day :args ::is-valid-month-day-args :ret ::j/boolean)
+    (number? year)
+    (and (zero? (bit-and year 3))
+         (or (not= (mod year 100) 0)
+             (zero? (mod year 400))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L549
-(s/def ::length-args (args))
-(defn -length [this] (wip ::-length))
-(s/fdef -length :args ::length-args :ret ::j/int)
+(def-method is-leap--proto ::j/boolean
+  [year ::year]
+  (is-leap (:year year)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L731
-(s/def ::plus-years-args (args ::j/long))
-(defn -plus-years [this years-to-add] (wip ::-plus-years))
-(s/fdef -plus-years :args ::plus-years-args :ret ::year)
+(def-method get-value ::j/int
+  [this ::year]
+  (:year this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L797
-(s/def ::minus-years-args (args ::j/long))
-(defn -minus-years [this years-to-subtract] (wip ::-minus-years))
-(s/fdef -minus-years :args ::minus-years-args :ret ::year)
+(def-method is-valid-month-day ::j/boolean
+  [this ::year
+   month-day ::month-day/month-day]
+  (and month-day (month-day/is-valid-year month-day (:year this))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L938
-(s/def ::format-args (args ::date-time-formatter/date-time-formatter))
-(defn -format [this formatter] (wip ::-format))
-(s/fdef -format :args ::format-args :ret string?)
+(def-method length ::j/int
+  [this ::year]
+  (if (is-leap this)
+    366
+    365))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L956
-(s/def ::at-day-args (args ::j/int))
-(defn -at-day [this day-of-year] (wip ::-at-day))
-(s/fdef -at-day :args ::at-day-args :ret ::local-date/local-date)
+(declare of)
+(def-method plus-years ::year
+  [this ::year
+   years-to-add ::j/long]
+  (if (zero? years-to-add)
+    this
+    (of (chrono-field/check-valid-int-value chrono-field/YEAR (+ (:year this) years-to-add)))))
 
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L974
-(s/def ::at-month-args (args ::month/month))
-(defn -at-month [this at-month--overloaded-param] (wip ::-at-month))
-(s/fdef -at-month :args ::at-month-args :ret ::year-month/year-month)
+(def-method minus-years ::year
+  [this ::year
+   years-to-subtract ::j/long]
+  (if (= years-to-subtract math/long-min-value)
+    (-> this
+        (plus-years math/long-min-value)
+        (plus-years 1))
+    (plus-years this (- years-to-subtract))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L1008
-(s/def ::at-month-day-args (args ::month-day/month-day))
-(defn -at-month-day [this month-day] (wip ::-at-month-day))
-(s/fdef -at-month-day :args ::at-month-day-args :ret ::local-date/local-date)
+(def-method format string?
+  [this ::year
+   formatter ::date-time-formatter/date-time-formatter]
+  (wip ::format))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L1033
-(s/def ::is-after-args (args ::year))
-(defn -is-after [this other] (wip ::-is-after))
-(s/fdef -is-after :args ::is-after-args :ret ::j/boolean)
+(def-method at-day ::local-date/local-date
+  [this ::year
+   day-of-year ::j/int]
+  (local-date-impl/of-year-day (:year this) day-of-year))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L1043
-(s/def ::is-before-args (args ::year))
-(defn -is-before [this other] (wip ::-is-before))
-(s/fdef -is-before :args ::is-before-args :ret ::j/boolean)
+(def-method at-month ::year-month/year-month
+  [this ::year
+   month (s/or ::month/month
+               ::j/int)]
+  (year-month-impl/of (:year this) month))
+
+(def-method at-month-day ::local-date/local-date
+  [this ::year
+   month-day ::month-day/month-day]
+  (month-day/at-year month-day (:year this)))
+
+(def-method is-after ::j/boolean
+  [this ::year
+   other ::year]
+  (> (:year this) (:year other)))
+
+(def-method is-before ::j/boolean
+  [this ::year
+   other ::year]
+  (< (:year this) (:year other)))
 
 (extend-type Year
   year/IYear
-  (get-value [this] (-get-value this))
-  (is-leap [this] (-is-leap this))
-  (is-valid-month-day [this month-day] (-is-valid-month-day this month-day))
-  (length [this] (-length this))
-  (plus-years [this years-to-add] (-plus-years this years-to-add))
-  (minus-years [this years-to-subtract] (-minus-years this years-to-subtract))
-  (format [this formatter] (-format this formatter))
-  (at-day [this day-of-year] (-at-day this day-of-year))
-  (at-month [this at-month--overloaded-param] (-at-month this at-month--overloaded-param))
-  (at-month-day [this month-day] (-at-month-day this month-day))
-  (is-after [this other] (-is-after this other))
-  (is-before [this other] (-is-before this other)))
+  (get-value [this] (get-value this))
+  (is-leap [this] (is-leap--proto this))
+  (is-valid-month-day [this month-day] (is-valid-month-day this month-day))
+  (length [this] (length this))
+  (plus-years [this years-to-add] (plus-years this years-to-add))
+  (minus-years [this years-to-subtract] (minus-years this years-to-subtract))
+  (format [this formatter] (format this formatter))
+  (at-day [this day-of-year] (at-day this day-of-year))
+  (at-month [this at-month--overloaded-param] (at-month this at-month--overloaded-param))
+  (at-month-day [this month-day] (at-month-day this month-day))
+  (is-after [this other] (is-after this other))
+  (is-before [this other] (is-before this other)))
 
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L1023
-(s/def ::compare-to-args (args ::year))
-(defn -compare-to [this compare-to--overloaded-param] (wip ::-compare-to))
-(s/fdef -compare-to :args ::compare-to-args :ret ::j/int)
+(def-method compare-to ::j/int
+  [this ::year
+   other ::year]
+  (math/subtract-exact (:year this) (:year other)))
 
 (extend-type Year
   time-comparable/ITimeComparable
-  (compare-to [this compare-to--overloaded-param] (-compare-to this compare-to--overloaded-param)))
+  (compare-to [this other] (compare-to this other)))
 
-(s/def ::with-args (args ::j/wip))
-(defn -with
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L573
-  ([this adjuster] (wip ::-with))
+(declare get-long)
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L619
-  ([this field new-value] (wip ::-with)))
-(s/fdef -with :args ::with-args :ret ::temporal/temporal)
+(def-method with ::year
+  ([this ::year
+    adjuster ::temporal-adjuster/temporal-adjuster]
+   (temporal-adjuster/adjust-into adjuster this))
 
-(s/def ::plus-args (args ::j/wip))
-(defn -plus
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L655
-  ([this amount-to-add] (wip ::-plus))
+  ([{:keys [year] :as this} ::year
+    field ::temporal-field/temporal-field
+    new-value ::j/long]
+   (if-not (chrono-field/chrono-field? field)
+     (temporal-field/adjust-into field this new-value)
+     (do
+       (chrono-field/check-valid-value field new-value)
+       (condp = field
+         chrono-field/YEAR_OF_ERA
+         (of (if (< year 1)
+               (math/subtract-exact 1 new-value)
+               new-value))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L708
-  ([this amount-to-add unit] (wip ::-plus)))
-(s/fdef -plus :args ::plus-args :ret ::year)
+         chrono-field/YEAR
+         (of new-value)
 
-(s/def ::minus-args (args ::j/wip))
-(defn -minus
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L760
-  ([this amount-to-subtract] (wip ::-minus))
+         chrono-field/ERA
+         (if (= (get-long this chrono-field/ERA) new-value)
+           this
+           (of (math/subtract-exact 1 (:year this))))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L784
-  ([this amount-to-subtract unit] (wip ::-minus)))
-(s/fdef -minus :args ::minus-args :ret ::temporal/temporal)
+         (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field)
+                    {:this this :field field})))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L913
-(s/def ::until-args (args ::temporal/temporal ::temporal-unit/temporal-unit))
-(defn -until [this end-exclusive unit] (wip ::-until))
-(s/fdef -until :args ::until-args :ret ::j/long)
+(def-method plus ::year
+  ([this ::year
+    amount-to-add ::temporal-amount/temporal-amount]
+   (temporal-amount/add-to amount-to-add this))
+
+  ([this ::year
+    amount-to-add ::j/int
+    unit ::temporal-unit/temporal-unit]
+   (if-not (chrono-unit/chrono-unit? unit)
+     (temporal-unit/add-to unit this amount-to-add)
+     (condp = unit
+       chrono-unit/YEARS (plus-years this amount-to-add)
+       chrono-unit/DECADES (plus-years this (math/multiply-exact amount-to-add 10))
+       chrono-unit/CENTURIES (plus-years this (math/multiply-exact amount-to-add 100))
+       chrono-unit/MILLENNIA (plus-years this (math/multiply-exact amount-to-add 1000))
+       chrono-unit/ERAS (with this
+                              chrono-field/ERA
+                              (math/add-exact (get-long this chrono-field/ERA) amount-to-add))
+       (throw (ex UnsupportedTemporalTypeException (str "Unsupported unit: " unit)
+                  {:this this :unit unit :amount-to-add amount-to-add}))))))
+
+(def-method minus ::year
+  ([this ::year
+    amount-to-subtract ::temporal-amount/temporal-amount]
+   (temporal-amount/subtract-from amount-to-subtract this))
+
+  ([this ::year
+    amount-to-subtract ::j/int
+    unit ::temporal-unit/temporal-unit]
+   (if (= amount-to-subtract math/long-max-value)
+     (-> this
+         (plus math/long-max-value unit)
+         (plus 1 unit))
+     (plus this (- amount-to-subtract) unit))))
+
+(declare from)
+
+(def-method until ::j/long
+  [this ::year
+   end-exclusive ::temporal/temporal
+   unit ::temporal-unit/temporal-unit]
+  (let [end (from end-exclusive)]
+    (if-not (chrono-unit/chrono-unit? unit)
+      (temporal-unit/between unit this end)
+      (let [year-until (math/subtract-exact (:year end) (:year this))]
+        (condp = unit
+          chrono-unit/YEARS year-until
+          chrono-unit/DECADES (long (/ year-until 10))
+          chrono-unit/CENTURIES (long (/ year-until 100))
+          chrono-unit/MILLENNIA (long (/ year-until 1000))
+          chrono-unit/ERAS (math/subtract-exact (get-long end chrono-field/ERA)
+                                                (get-long this chrono-field/ERA))
+          (throw (ex UnsupportedTemporalTypeException (str "Unsupported unit: " unit)
+                     {:this this :unit unit :end-exclusive end-exclusive})))))))
 
 (extend-type Year
   temporal/ITemporal
   (with
-    ([this adjuster] (-with this adjuster))
-    ([this field new-value] (-with this field new-value)))
+    ([this adjuster] (with this adjuster))
+    ([this field new-value] (with this field new-value)))
   (plus
-    ([this amount-to-add] (-plus this amount-to-add))
-    ([this amount-to-add unit] (-plus this amount-to-add unit)))
+    ([this amount-to-add] (plus this amount-to-add))
+    ([this amount-to-add unit] (plus this amount-to-add unit)))
   (minus
-    ([this amount-to-subtract] (-minus this amount-to-subtract))
-    ([this amount-to-subtract unit] (-minus this amount-to-subtract unit)))
-  (until [this end-exclusive unit] (-until this end-exclusive unit)))
+    ([this amount-to-subtract] (minus this amount-to-subtract))
+    ([this amount-to-subtract unit] (minus this amount-to-subtract unit)))
+  (until [this end-exclusive unit] (until this end-exclusive unit)))
 
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L368
-(s/def ::is-supported-args (args ::temporal-unit/temporal-unit))
-(defn -is-supported [this is-supported--overloaded-param] (wip ::-is-supported))
-(s/fdef -is-supported :args ::is-supported-args :ret ::j/boolean)
+(def-method is-supported ::j/boolean
+  [this ::year
+   field-or-unit (s/or ::temporal-field/temporal-field
+                       ::temporal-unit/temporal-unit)]
+  (condp satisfies? field-or-unit
+    temporal-field/ITemporalField
+    (if (chrono-field/chrono-field? field-or-unit)
+      (some? (#{chrono-field/YEAR
+                chrono-field/YEAR_OF_ERA
+                chrono-field/ERA} field-or-unit))
+      (and field-or-unit (temporal-field/is-supported-by field-or-unit this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L434
-(s/def ::range-args (args ::temporal-field/temporal-field))
-(defn -range [this field] (wip ::-range))
-(s/fdef -range :args ::range-args :ret ::value-range/value-range)
+    temporal-unit/ITemporalUnit
+    (if (chrono-unit/chrono-unit? field-or-unit)
+      (some? (#{chrono-unit/YEARS
+                chrono-unit/DECADES
+                chrono-unit/CENTURIES
+                chrono-unit/MILLENNIA
+                chrono-unit/ERAS} field-or-unit))
+      (and field-or-unit (temporal-unit/is-supported-by field-or-unit this)))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L468
-(s/def ::get-args (args ::temporal-field/temporal-field))
-(defn -get [this field] (wip ::-get))
-(s/fdef -get :args ::get-args :ret ::j/int)
+(def-method range ::value-range/value-range
+  [this ::year
+   field ::temporal-field/temporal-field]
+  (if (= field chrono-field/YEAR_OF_ERA)
+    (if (<= (:year this) 0)
+      (value-range-impl/of 1 (inc MAX_VALUE))
+      (value-range-impl/of 1 MAX_VALUE))
+    (temporal-accessor-defaults/-range this field)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L496
-(s/def ::get-long-args (args ::temporal-field/temporal-field))
-(defn -get-long [this field] (wip ::-get-long))
-(s/fdef -get-long :args ::get-long-args :ret ::j/long)
+(def-method get ::j/int
+  [this ::year
+   field ::temporal-field/temporal-field]
+  (-> field
+      temporal-field/range
+      (value-range/check-valid-int-value (get-long this field) field)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L822
-(s/def ::query-args (args ::temporal-query/temporal-query))
-(defn -query [this query] (wip ::-query))
-(s/fdef -query :args ::query-args :ret ::j/wip)
+(def-method get-long ::j/long
+  [this ::year
+   field ::temporal-field/temporal-field]
+  (if-not (chrono-field/chrono-field? field)
+    (temporal-field/get-from field this)
+    (condp = field
+      chrono-field/YEAR_OF_ERA
+      (if (< (:year this) 1)
+        (math/subtract-exact 1 (:year this))
+        (:year this))
+
+      chrono-field/YEAR
+      (:year this)
+
+      chrono-field/ERA
+      (if (< (:year this) 1) 0 1)
+
+      (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field)
+                 {:this this :field field})))))
+
+(def-method query ::j/wip
+  [this ::year
+   query ::temporal-query/temporal-query]
+  (condp = query
+    (temporal-queries/chronology)
+    iso-chronology/INSTANCE
+
+    (temporal-queries/precision)
+    chrono-unit/YEARS
+
+    (temporal-accessor-defaults/-query this query)))
 
 (extend-type Year
   temporal-accessor/ITemporalAccessor
-  (is-supported [this is-supported--overloaded-param] (-is-supported this is-supported--overloaded-param))
-  (range [this field] (-range this field))
-  (get [this field] (-get this field))
-  (get-long [this field] (-get-long this field))
-  (query [this query] (-query this query)))
+  (is-supported [this field] (is-supported this field))
+  (range [this field] (range this field))
+  (get [this field] (get this field))
+  (get-long [this field] (get-long this field))
+  (query [this q] (query this q)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L858
-(s/def ::adjust-into-args (args ::temporal/temporal))
-(defn -adjust-into [this temporal] (wip ::-adjust-into))
-(s/fdef -adjust-into :args ::adjust-into-args :ret ::temporal/temporal)
+(def-method adjust-into ::temporal/temporal
+  [this ::year
+   temporal ::temporal/temporal]
+  (if-not (= (chronology/from temporal) iso-chronology/INSTANCE)
+    (throw (ex DateTimeException "Adjustment only supported on ISO date-time"
+               {:this this :temporal temporal}))
+    (temporal/with temporal chrono-field/YEAR (:year this))))
 
 (extend-type Year
   temporal-adjuster/ITemporalAdjuster
-  (adjust-into [this temporal] (-adjust-into this temporal)))
+  (adjust-into [this temporal] (adjust-into this temporal)))
 
-(s/def ::now-args (args ::j/wip))
-(defn now
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L175
-  ([] (wip ::now))
+(def-constructor now ::year
+  ([]
+   (now (clock-impl/system-default-zone)))
 
-  ;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L191
-  ([now--overloaded-param] (wip ::now)))
-(s/fdef now :args ::now-args :ret ::year)
+  ([clock-or-zone-id (s/or :clock ::clock/clock
+                           :zone-id ::zone-id/zone-id)]
+   (condp satisfies? clock-or-zone-id
+     zone-id/IZoneId (-> clock-or-zone-id clock-impl/system now)
+     clock/IClock (-> clock-or-zone-id local-date-impl/now local-date/get-year of))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L225
-(s/def ::of-args (args ::j/int))
-(defn of [iso-year] (wip ::of))
-(s/fdef of :args ::of-args :ret ::year)
+(def-constructor of ::year
+  [iso-year ::j/int]
+  (chrono-field/check-valid-value chrono-field/YEAR iso-year)
+  (->Year iso-year))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L249
-(s/def ::from-args (args ::temporal-accessor/temporal-accessor))
-(defn from [temporal] (wip ::from))
-(s/fdef from :args ::from-args :ret ::year)
+(def-constructor from ::year
+  [temporal ::temporal-accessor/temporal-accessor]
+  (if (satisfies? year/IYear temporal)
+    temporal
+    (do
+      (asserts/require-non-nil temporal "temporal")
+      (try*
+       (let [temporal (if-not (= iso-chronology/INSTANCE
+                                 (chronology/from temporal))
+                        (local-date-impl/from temporal)
+                        temporal)]
+         (of (temporal-accessor/get temporal chrono-field/YEAR)))
+       (catch DateTimeException e
+         (throw (ex DateTimeException
+                    (str "Unable to obtain Year from TemporalAccessor: "
+                         temporal " of type " (pr-str temporal))
+                    {:temporal temporal}
+                    e)))))))
 
-(s/def ::parse-args (args ::j/wip))
-(defn parse
+(def-constructor parse ::year
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L276
-  ([text] (wip ::parse))
+  ([text ::j/char-sequence]
+   (wip ::parse))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L290
-  ([text formatter] (wip ::parse)))
-(s/fdef parse :args ::parse-args :ret ::year)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L315
-;; TODO: figure out how to handle this (Java static) function. Replaces function in IYear protocol
-(def-constructor is-leap ::j/boolean
-  [year ::j/long]
-  (and (zero? (bit-and year 3))
-       (or (not= (mod year 100) 0)
-           (zero? (mod year 400)))))
-
-(def MIN_VALUE impl/MIN_VALUE)
-(def MAX_VALUE impl/MAX_VALUE)
+  ([text ::j/char-sequence
+    formatter ::date-time-formatter/date-time-formatter]
+   (wip ::parse)))
