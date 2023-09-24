@@ -8,7 +8,8 @@
             [clojure.spec.alpha :as s]
             [jiffy.local-time-constants :as consts]
             [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
-            [jiffy.math :as math]))
+            [jiffy.math :as math]
+            [clojure.string :as str]))
 
 (def HOURS_PER_DAY consts/HOURS_PER_DAY)
 (def MINUTES_PER_HOUR consts/MINUTES_PER_HOUR)
@@ -76,9 +77,11 @@
 (def-constructor parse ::local-time
   ([text ::j/char-sequence]
    (if-let [[hours minutes seconds nanos]
-            (some->> (re-matches #"(\d{2}):(\d{2}):(\d{2}).(\d*)" text)
+            (some->> (re-matches #"(\d{2}):(\d{2})(:(\d{2})(.(\d*))?)?" text)
                      rest
                      (remove empty?)
+                     (remove #(str/starts-with? % ":"))
+                     (remove #(str/starts-with? % "."))
                      (map math/parse-long))]
      (of (or hours 0)
          (or minutes 0)

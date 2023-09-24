@@ -77,7 +77,7 @@
 (def-constructor parse ::local-date-time
   ([text ::j/char-sequence]
    (if-let [[date time]
-            (some->> (re-matches #"([\d-]*)T([:\d-.]*)" text)
+            (some->> (re-matches #"(\+?[\d-]*)T([:\d-.]*)" text)
                      rest)]
      (of (local-date-impl/parse date)
          (local-time-impl/parse time))

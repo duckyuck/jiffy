@@ -87,10 +87,10 @@
     (throw (ex JavaIllegalArgumentException (str "prefix should be GMT, UTC or UT, is: " prefix)))
 
     (not= 0 (:total-seconds offset))
-    (zone-region/create (str prefix (zone-id/get-id offset)) (zone-id/get-rules offset))
+    (zone-region/->ZoneRegion (str prefix (zone-id/get-id offset)) (zone-id/get-rules offset))
 
     :default
-    (zone-region/create prefix (zone-id/get-rules offset))))
+    (zone-region/->ZoneRegion prefix (zone-id/get-rules offset))))
 (s/fdef of-offset :args ::of-offset-args :ret ::zone-id)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L459

@@ -682,7 +682,8 @@
 (def-method to-string string?
   [{:keys [date-time offset zone]} ::zoned-date-time]
   (cond-> (str (string/to-string date-time)
-               (string/to-string offset))
+               (when offset
+                 (string/to-string offset)))
     (not= offset zone)
     (str "[" (string/to-string zone) "]")))
 
