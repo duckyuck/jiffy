@@ -68,8 +68,8 @@
             jiffy.zoned-date-time
             jiffy.zone-id
             jiffy.zone-offset
+            jiffy.zone-region-impl
             jiffy.zone-region
-            jiffy.zone.tzdb-zone-rules-provider
             jiffy.zone.zone-offset-transition
             jiffy.zone.zone-offset-transition-rule
             jiffy.zone.zone-rules
@@ -149,7 +149,6 @@
   jiffy.year/keep-me
   jiffy.year-impl/keep-me
   jiffy.year-month/keep-me
-  jiffy.zone.tzdb-zone-rules-provider/keep-me
   jiffy.zone.zone-offset-transition/keep-me
   jiffy.zone.zone-offset-transition-rule/keep-me
   jiffy.zone.zone-rules/keep-me
