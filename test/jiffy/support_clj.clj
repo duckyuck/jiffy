@@ -217,13 +217,7 @@
      (let [results#
            (for [args# ~args-samples]
              (let [jiffy-result# (trycatch (invoke-jiffy ~jiffy-fn args#))
-                   java-args# (mapv jiffy->java args#)
-                   ;; (try
-                   ;;   (mapv jiffy->java args#)
-                   ;;   (catch Exception e#
-                   ;;     (throw (ex-info "Failed to convert from Jiffy to Java"
-                   ;;                     {:failed/jiffy-args args#
-                   ;;                      :failed/jiffy-result jiffy-result#}))))
+                   java-args# (trycatch (mapv jiffy->java args#))
                    result# {:failed/jiffy-args args#
                             :failed/jiffy-result jiffy-result#
                             :failed/java-args java-args#}
