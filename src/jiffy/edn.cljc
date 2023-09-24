@@ -69,6 +69,16 @@
 (defn read-value-range [args]
   (apply jiffy.temporal.value-range/->ValueRange args))
 
+(defn write-zone-rules [zone-rules]
+  (-> zone-rules
+      (update :standard-transitions vec)
+      (update :standard-offsets vec)
+      (update :savings-instant-transitions vec)
+      (update :savings-local-transitions vec)
+      (update :wall-offsets vec)
+      (update :last-rules vec)
+      ->map))
+
 (defn write-enum [enum]
   (-> enum :enum-name str/lower-case (str/replace #"_" "-") keyword))
 
@@ -170,7 +180,7 @@
     {:tag :zone-rules
      :record ZoneRules
      :read-fn 'jiffy.zone.zone-rules-impl/map->ZoneRules
-     :write-fn '->map}
+     :write-fn 'write-zone-rules}
 
     {:tag :zone
      :record ZoneRegion

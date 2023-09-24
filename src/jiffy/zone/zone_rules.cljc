@@ -19,14 +19,14 @@
             [jiffy.local-date :as local-date-impl]
             [jiffy.instant-impl :as instant-impl]
             [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
-            [jiffy.protocols.time-comparable :as time-comparable])
+            [jiffy.protocols.time-comparable :as time-comparable]
+            [jiffy.duration-impl :as duration-impl]
+            [jiffy.zone.zone-offset-transition-impl :as zone-offset-transition-impl]
+            [jiffy.year :as year])
   #?(:clj (:import [jiffy.zone.zone_rules_impl ZoneRules])))
 
 (s/def ::zone-rules ::impl/zone-rules)
 
-(defmacro args [& x] `(s/tuple ::zone-rules ~@x))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRules.java#L463
 (def-method is-fixed-offset ::j/boolean
   [this ::zone-rules]
   (empty? (:savings-instant-transitions this)))
@@ -34,7 +34,7 @@
 ;; NB! This method is overloaded!
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRules.java#L478
 
-(defn find-year [epoch-second offset]
+(defn- find-year [epoch-second offset]
   (->> (math/floor-div
         (math/add-exact
          epoch-second
@@ -42,7 +42,6 @@
         86400)
        local-date-impl/of-epoch-day
        local-date/get-year))
-
 
 ;; TODO implement caching. Maybe use memoization with a cache?
 (defn find-transition-array [this year]
@@ -55,17 +54,28 @@
     (> x y)
     (pos? (time-comparable/compare-to x y))))
 
+(defn compare* [x y]
+  (if (satisfies? time-comparable/ITimeComparable x)
+    (time-comparable/compare-to x y)
+    (compare x y)))
+
 (defn find-index [coll object]
-  (->> coll
-       sort
-       (map-indexed (fn [idx n]
-                      (cond
-                        (= n object) idx
-                        (or (greater? n object)) (- (- idx) 1)
-                        (= idx (dec (count coll))) (- (- idx) 2)
-                        )))
-       (drop-while nil?)
-       first))
+  (if (seq coll)
+    (->> coll
+         (sort compare*)
+         (map-indexed (fn [idx n]
+                        (cond
+                          (= n object)
+                          idx
+
+                          (or (greater? n object))
+                          (- (- idx) 1)
+
+                          (= idx (dec (count coll)))
+                          (- (- idx) 2))))
+         (drop-while nil?)
+         first)
+    -1))
 
 (defn get-offset-for-instant
   [{:keys [savings-instant-transitions standard-offsets last-rules wall-offsets] :as this}
@@ -78,7 +88,7 @@
         (let [year (find-year epoch-sec (last wall-offsets))
               trans-array (find-transition-array this year)
               trans (->> trans-array
-                         (drop-while #(< epoch-sec (transition/to-epoch-second %)))
+                         (drop-while #(>= epoch-sec (transition/to-epoch-second %)))
                          first)]
           (if trans
             (transition/get-offset-before trans)
@@ -119,14 +129,19 @@
     (first standard-offsets)
     (if (and (not (empty? last-rules))
              (chrono-local-date-time/is-after dt (last savings-local-transitions)))
-      (->> (local-date-time/get-year dt)
-           (find-transition-array this)
-           (keep (fn [trans]
-                   (let [info (find-offset-info dt trans)]
-                     (when (or (satisfies? transition/IZoneOffsetTransition info)
-                               (= info (transition/get-offset-before trans)))
-                       info))))
-           first)
+      (let [transitions (->> dt
+                             local-date-time/get-year
+                             (find-transition-array this))]
+        (or (->> transitions
+                 (keep (fn [trans]
+                         (let [info (find-offset-info dt trans)]
+                           (when (or (satisfies? transition/IZoneOffsetTransition info)
+                                     (= info (transition/get-offset-before trans)))
+                             info))))
+                 first)
+            (->> transitions
+                 last
+                 (find-offset-info dt))))
       (let [index (find-index savings-local-transitions dt)]
         (if (= index -1)
           (first wall-offsets)
@@ -148,7 +163,6 @@
                   (zone-offset-transition/of dt-after offset-before offset-after)))
               (nth wall-offsets (/ (inc index) 2)))))))))
 
-
 (defn get-offset-for-local-date-time [this local-date-time]
   (let [info (get-offset-info this local-date-time)]
     (if (satisfies? transition/IZoneOffsetTransition info)
@@ -157,8 +171,8 @@
 
 (def-method get-offset ::zone-offset/zone-offset
   [this ::zone-rules
-   arg (s/or ::instant/instant
-             ::local-date-time/local-date-time)]
+   arg (s/or :instant ::instant/instant
+             :local-date-time ::local-date-time/local-date-time)]
   (if (instant-impl/instant? arg)
     (get-offset-for-instant this arg)
     (get-offset-for-local-date-time this arg)))
@@ -184,53 +198,118 @@
 (def-method get-standard-offset ::zone-offset/zone-offset
   [this ::zone-rules
    instant ::instant/instant]
-  (wip ::-get-standard-offset))
+  (if (empty? (:savings-instant-transitions this))
+    (first (:standard-offsets this))
+    (let [idx (find-index (:standard-transitions this) (instant/get-epoch-second instant))]
+      (nth (:standard-offsets this)
+           (if (neg? idx)
+             (dec (- idx))
+             (inc idx))))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRules.java#L779
 (def-method get-daylight-savings ::duration/duration
   [this ::zone-rules
    instant ::instant/instant]
-  (wip ::-get-daylight-savings))
+  (if (empty? (:savings-instant-transitions this))
+    duration-impl/ZERO
+    (let [actual-offset (get-offset this instant)
+          standard-offset (get-standard-offset this instant)]
+      (duration-impl/of-seconds
+       (math/subtract-exact (zone-offset/get-total-seconds actual-offset)
+                            (zone-offset/get-total-seconds standard-offset))))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRules.java#L802
 (def-method is-daylight-savings ::j/boolean
   [this ::zone-rules
    instant ::instant/instant]
-  (wip ::-is-daylight-savings))
+  (not= (get-standard-offset this instant) (get-offset this instant)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRules.java#L820
 (def-method is-valid-offset ::j/boolean
   [this ::zone-rules
    local-date-time ::local-date-time/local-date-time
    offset ::zone-offset/zone-offset]
-  (some #{offset} (get-valid-offsets this local-date-time)))
+  (some? (some #{offset} (get-valid-offsets this local-date-time))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRules.java#L835
 (def-method next-transition ::zone-offset-transition/zone-offset-transition
-  [this ::zone-rules
+  [{:keys [savings-instant-transitions last-rules wall-offsets] :as this} ::zone-rules
    instant ::instant/instant]
-  (wip ::-previous-transition))
+  (when (seq savings-instant-transitions)
+    (let [epoch-sec (instant/get-epoch-second instant)]
+      (if (>= epoch-sec (last savings-instant-transitions))
+        (when (seq last-rules)
+          (let [year (find-year epoch-sec (last wall-offsets))
+                trans-array (find-transition-array this year)
+                trans (->> trans-array
+                           (drop-while #(>= epoch-sec (transition/to-epoch-second %)))
+                           first)]
+            (or trans
+                (when (< year year/MAX_VALUE)
+                  (first (find-transition-array this (inc year)))))))
+
+        (let [index (find-index savings-instant-transitions epoch-sec)
+              index (if (neg? index)
+                      (dec (- index))
+                      (inc index))]
+          (zone-offset-transition-impl/create
+           (nth savings-instant-transitions index)
+           (nth wall-offsets index)
+           (nth wall-offsets (inc index))))))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRules.java#L882
 (def-method previous-transition ::zone-offset-transition/zone-offset-transition
-  [this ::zone-rules
+  [{:keys [savings-instant-transitions last-rules wall-offsets] :as this} ::zone-rules
    instant ::instant/instant]
-  (wip ::-previous-transition))
+  (when (seq savings-instant-transitions)
+    (let [epoch-sec (instant/get-epoch-second instant)
+          epoch-sec (cond-> epoch-sec
+            (and (pos? (instant/get-nano instant))
+                 (< epoch-sec math/long-max-value))
+            inc)
+          last-historic (last savings-instant-transitions)]
+      (or
+       (when (and (seq last-rules)
+                  (> epoch-sec last-historic))
+         (let [last-historic-offset (last wall-offsets)
+               year (find-year epoch-sec last-historic-offset)
+               trans-array (find-transition-array this year)
+               trans (->> trans-array
+                          reverse
+                          (drop-while #(<= epoch-sec (transition/to-epoch-second %)))
+                          first)]
+           (or trans
+               (let [last-historic-year (find-year last-historic last-historic-offset)]
+                 (when (> (dec year) last-historic-year)
+                   (last (find-transition-array this (dec year))))))))
+       (let [index (find-index savings-instant-transitions epoch-sec)
+             index (if (neg? index)
+                     (dec (- index))
+                     index)]
+         (when (pos? index)
+           (zone-offset-transition-impl/create
+            (nth savings-instant-transitions (dec index))
+            (nth wall-offsets (dec index))
+            (nth wall-offsets index))))))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRules.java#L942
 (def-method get-transitions ::j/wip
-  [this ::zone-rules]
-  (wip ::-get-transitions))
+  [{:keys [savings-instant-transitions wall-offsets]} ::zone-rules]
+  (for [index (range 0 (count savings-instant-transitions))]
+    (zone-offset-transition-impl/create
+     (nth savings-instant-transitions index)
+     (nth wall-offsets index)
+     (nth wall-offsets (inc index)))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneRules.java#L971
 (def-method get-transition-rules ::j/wip
   [this ::zone-rules]
-  (wip ::-get-transition-rules))
+  (:last-rules this))
 
 (extend-type ZoneRules
   zone-rules/IZoneRules
   (is-fixed-offset [this] (is-fixed-offset this))
-  (get-offset [this get-offset--overloaded-param] (get-offset this get-offset--overloaded-param))
+  (get-offset [this arg] (get-offset this arg))
   (get-valid-offsets [this local-date-time] (get-valid-offsets this local-date-time))
   (get-transition [this local-date-time] (get-transition this local-date-time))
   (get-standard-offset [this instant] (get-standard-offset this instant))

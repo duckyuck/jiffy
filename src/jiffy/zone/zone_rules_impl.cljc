@@ -20,7 +20,8 @@
    savings-instant-transitions (s/* ::j/int)
    savings-local-transitions (s/* ::local-date-time/local-date-time)
    wall-offsets (s/* ::zone-offset/zone-offset)
-   last-rules (s/* ::transition-rule/zone-offset-transition-rule)])
+   last-rules (s/* ::transition-rule/zone-offset-transition-rule)
+   zone-id ::j/zone-id])
 
 (def-constructor create ::zone-rules
   [standard-transitions (s/* ::j/int)
@@ -29,7 +30,13 @@
    savings-local-transitions (s/* ::local-date-time/local-date-time)
    wall-offsets (s/* ::zone-offset/zone-offset)
    last-rules (s/* ::transition-rule/zone-offset-transition-rule)]
-  (->ZoneRules standard-transitions standard-offsets savings-instant-transitions savings-local-transitions wall-offsets last-rules))
+  (->ZoneRules standard-transitions
+               standard-offsets
+               savings-instant-transitions
+               savings-local-transitions
+               wall-offsets
+               last-rules
+               nil))
 
 (def-constructor of ::zone-rules
   ([zone-offset ::zone-offset/zone-offset]
