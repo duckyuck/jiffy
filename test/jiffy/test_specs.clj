@@ -52,7 +52,7 @@
             [jiffy.protocols.zone-region :as zone-region]
             [jiffy.protocols.zone.zone-offset-transition :as zone-offset-transition]
             [jiffy.protocols.zone.zone-offset-transition-rule :as zone-offset-transition-rule]
-            [jiffy.protocols.zone.zone-rules :as ZoneRules]
+            [jiffy.protocols.zone.zone-rules :as zone-rules]
             [jiffy.specs :as j]
             [jiffy.temporal.chrono-field :as chrono-field]
             [jiffy.temporal.chrono-unit :as chrono-unit]
@@ -64,7 +64,7 @@
             [jiffy.zone-region :as zone-region-impl]
             [jiffy.zone.zone-offset-transition-impl :as zone-offset-transition-impl]
             [jiffy.zone.zone-offset-transition-rule :as transition-rule-impl]
-            [jiffy.zone.zone-rules :as zone-rules]
+            [jiffy.zone.zone-rules :as zone-rules-impl]
             [jiffy.zone.zone-rules-conversion]
             [jiffy.zone.zone-rules-store :as zone-rules-store]))
 
@@ -85,9 +85,10 @@
                                                                       vals
                                                                       (mapcat :last-rules)
                                                                       set))
-(s/def ::zone-rules/zone-rules (set (vals @zone-rules-store/zone-id->rules)))
+(s/def ::zone-rules-impl/zone-rules (set (vals @zone-rules-store/zone-id->rules)))
+(s/def ::zone-rules/zone-rules ::zone-rules-impl/zone-rules)
 (s/def ::month-day/month-day ::month-day-impl/month-day)
-(s/def ::j/zone-id #{"Europe/Oslo"})
+(s/def ::j/zone-id (set (keys @zone-rules-store/zone-id->rules)))
 
 (s/def ::transition-rule-impl/time-definition (set (vals @transition-rule-impl/enums)))
 
@@ -328,6 +329,36 @@
       gen/sample)
 
   (-> :jiffy.protocols.zone.zone-rules/zone-rules
+      s/gen
+      gen/sample)
+
+  (-> ::zone-offset-impl/zone-offset
+      s/gen
+      gen/sample)
+
+  (def time-def
+    (-> :jiffy.zone.zone-offset-transition-rule/zone-offset-transition-rule
+        s/gen
+        gen/sample
+        first
+        :time-definition))
+
+  (-> ::zone-offset-transition-rule/zone-offset-transition-rule
+      s/gen
+      gen/sample)
+
+  (-> :jiffy.zone.zone-offset-transition-impl/record
+      s/gen
+      gen/sample)
+
+  (-> #'jiffy.zone.zone-rules/get-offset
+      s/get-spec
+      :args
+      s/gen
+      gen/sample)
+
+
+  (-> :jiffy.zone.zone-offset-transition-rule/record
       s/gen
       gen/sample)
 
