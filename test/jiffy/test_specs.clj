@@ -49,9 +49,8 @@
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.protocols.zone-region :as zone-region]
-            [jiffy.protocols.zone.zone-offset-transition :as ZoneOffsetTransition]
-            [jiffy.protocols.zone.zone-offset-transition-rule
-             :as ZoneOffsetTransitionRule]
+            [jiffy.protocols.zone.zone-offset-transition :as zone-offset-transition]
+            [jiffy.protocols.zone.zone-offset-transition-rule :as zone-offset-transition-rule]
             [jiffy.protocols.zone.zone-rules :as ZoneRules]
             [jiffy.specs :as j]
             [jiffy.temporal.chrono-field :as chrono-field]
@@ -62,8 +61,8 @@
             [jiffy.zoned-date-time :as zoned-date-time-impl]
             [jiffy.zone-offset :as zone-offset-impl]
             [jiffy.zone-region :as zone-region-impl]
-            [jiffy.zone.zone-offset-transition :as zone-offset-transition]
-            [jiffy.zone.zone-offset-transition-rule :as transition-rule]
+            [jiffy.zone.zone-offset-transition-impl :as zone-offset-transition-impl]
+            [jiffy.zone.zone-offset-transition-rule :as transition-rule-impl]
             [jiffy.zone.zone-rules :as zone-rules]
             [jiffy.zone.zone-rules-conversion]
             [jiffy.zone.zone-rules-store :as zone-rules-store]))
@@ -80,8 +79,11 @@
 (s/def ::zone-region/zone-region ::zone-region-impl/zone-region)
 (s/def ::offset-time/offset-time ::offset-time-impl/offset-time)
 (s/def ::zoned-date-time/zoned-date-time ::zoned-date-time-impl/zoned-date-time)
-(s/def ::ZoneOffsetTransition/zone-offset-transition ::zone-offset-transition/zone-offset-transition)
-(s/def ::ZoneOffsetTransitionRule/zone-offset-transition-rule ::transition-rule/zone-offset-transition-rule)
+(s/def ::zone-offset-transition/zone-offset-transition ::zone-offset-transition-impl/zone-offset-transition)
+(s/def ::zone-offset-transition-rule/zone-offset-transition-rule (->> @zone-rules-store/zone-id->rules
+                                                                      vals
+                                                                      (mapcat :last-rules)
+                                                                      set))
 (s/def ::zone-rules/zone-rules (set (vals @zone-rules-store/zone-id->rules)))
 (s/def ::month-day/month-day ::month-day-impl/month-day)
 (s/def ::j/zone-id #{"Europe/Oslo"})

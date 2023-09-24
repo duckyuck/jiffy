@@ -3,6 +3,7 @@
             #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.enums #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]
+            [jiffy.exception :refer [JavaIllegalArgumentException ex #?(:clj try*)]  #?@(:cljs [:refer-macros [try*]])]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.day-of-week :as day-of-week]
             [jiffy.protocols.local-time :as local-time]
@@ -24,21 +25,41 @@
             [jiffy.math :as math]
             [jiffy.zone-offset :as zone-offset-impl]
             [jiffy.protocols.local-date-time :as local-date-time]
-            [jiffy.zone.zone-offset-transition-impl :as zone-offset-transition-impl]))
+            [jiffy.zone.zone-offset-transition-impl :as zone-offset-transition-impl]
+            [jiffy.asserts :as asserts]
+            [clojure.test.check.generators :as gen]))
 
-(s/def ::time-definition #{::UTC ::WALL ::STANDARD})
+(def-record TimeDefinition ::time-definition
+  [ordinal ::j/long
+   enum-name string?])
+
+(def-constructor create-time-definition ::time-definition
+  [ordinal ::j/long
+   enum-name string?]
+  (->TimeDefinition ordinal enum-name))
+
+(defenum create-time-definition
+  [UTC []
+   STANDARD []
+   WALL []])
+
+(def-constructor value-of ::time-definition
+  [enum-name string?]
+  (or (@enums enum-name)
+      (throw (ex JavaIllegalArgumentException
+                 (str "no enum constant " (symbol (str *ns*) (str enum-name)))))))
 
 (defn create-date-time [time-definition local-date-time standard-offset wall-offset]
-  (case time-definition
-    ::UTC (->> (math/subtract-exact (:total-seconds wall-offset)
-                                    (:total-seconds zone-offset-impl/UTC))
-               (local-date-time/plus-seconds local-date-time))
-    ::STANDARD (->> (math/subtract-exact (:total-seconds wall-offset)
-                                         (:total-seconds standard-offset))
-                    (local-date-time/plus-seconds local-date-time))
-    ::WALL local-date-time))
+  (condp = time-definition
+    UTC (->> (math/subtract-exact (:total-seconds wall-offset)
+                                  (:total-seconds zone-offset-impl/UTC))
+             (local-date-time/plus-seconds local-date-time))
+    STANDARD (->> (math/subtract-exact (:total-seconds wall-offset)
+                                       (:total-seconds standard-offset))
+                  (local-date-time/plus-seconds local-date-time))
+    WALL local-date-time))
 
-(def-record ZoneOffsetTransitionRule ::record
+(def-record ZoneOffsetTransitionRule ::zone-offset-transition-rule
   [time-definition ::time-definition
    midnight-end-of-day ::j/boolean
    local-time (s/and ::local-time/local-time (comp zero? :nano))
@@ -49,72 +70,71 @@
    offset-after ::zone-offset/zone-offset
    offset-before ::zone-offset/zone-offset])
 
-(s/def ::zone-offset-transition-rule
-  (s/and ::record
-         (fn [{:keys [midnight-end-of-day local-time]}]
-           (or (not midnight-end-of-day)
-               (= local-time local-time-impl/MIDNIGHT)))))
-
 (def-constructor create ::zone-offset-transition-rule
-  [time-definition ::time-definition
-   midnight-end-of-day ::j/boolean
-   local-time ::local-time/local-time
-   month ::month/month
+  [month ::month/month
    day-of-month-indicator ::j/int
    day-of-week ::day-of-week/day-of-week
+   local-time ::local-time/local-time
+   time-end-of-day ::j/boolean
+   time-definition ::time-definition
    standard-offset ::zone-offset/zone-offset
-   offset-after ::zone-offset/zone-offset
-   offset-before ::zone-offset/zone-offset]
-  (->ZoneOffsetTransitionRule
-   time-definition midnight-end-of-day local-time month day-of-month-indicator
-   day-of-week standard-offset offset-after offset-before))
-
-(defmacro args [& x] `(s/tuple ::zone-offset-transition-rule ~@x))
+   offset-before ::zone-offset/zone-offset
+   offset-after ::zone-offset/zone-offset]
+  (->ZoneOffsetTransitionRule time-definition
+                              time-end-of-day
+                              local-time
+                              month
+                              day-of-month-indicator
+                              day-of-week
+                              standard-offset
+                              offset-after
+                              offset-before))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneOffsetTransitionRule.java#L374
-(def-method -get-month ::month/month
+(def-method get-month ::month/month
   [this ::zone-offset-transition-rule]
-  (wip ::-get-month))
+  (:month this))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneOffsetTransitionRule.java#L396
-(def-method -get-day-of-month-indicator ::j/int
+(def-method get-day-of-month-indicator ::j/int
   [this ::zone-offset-transition-rule]
-  (wip ::-get-day-of-month-indicator))
+  (:day-of-month-indicator this))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneOffsetTransitionRule.java#L412
-(def-method -get-day-of-week ::day-of-week/day-of-week
+(def-method get-day-of-week ::day-of-week/day-of-week
   [this ::zone-offset-transition-rule]
-  (wip ::-get-day-of-week))
+  (:day-of-week this))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneOffsetTransitionRule.java#L424
-(def-method -get-local-time ::local-time/local-time
+(def-method get-local-time ::local-time/local-time
   [this ::zone-offset-transition-rule]
-  (wip ::-get-local-time))
+  (:local-time this))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneOffsetTransitionRule.java#L435
-(def-method -is-midnight-end-of-day ::j/boolean
+(def-method is-midnight-end-of-day ::j/boolean
   [this ::zone-offset-transition-rule]
-  (wip ::-is-midnight-end-of-day))
+  (:time-end-of-day this)
+  (:midnight-end-of-day this))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneOffsetTransitionRule.java#L447
-(def-method -get-time-definition ::j/wip
+(def-method get-time-definition ::time-definition
   [this ::zone-offset-transition-rule]
-  (wip ::-get-time-definition))
+  (:time-definition this))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneOffsetTransitionRule.java#L456
-(def-method -get-standard-offset ::zone-offset/zone-offset
+(def-method get-standard-offset ::zone-offset/zone-offset
   [this ::zone-offset-transition-rule]
-  (wip ::-get-standard-offset))
+  (:standard-offset this))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneOffsetTransitionRule.java#L465
-(def-method -get-offset-before ::zone-offset/zone-offset
+(def-method get-offset-before ::zone-offset/zone-offset
   [this ::zone-offset-transition-rule]
-  (wip ::-get-offset-before))
+  (:offset-before this))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneOffsetTransitionRule.java#L474
-(def-method -get-offset-after ::zone-offset/zone-offset
+(def-method get-offset-after ::zone-offset/zone-offset
   [this ::zone-offset-transition-rule]
-  (wip ::-get-offset-after))
+  (:offset-after this))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneOffsetTransitionRule.java#L487
 (def-method create-transition ::zone-offset-transition/zone-offset-transition
@@ -135,19 +155,19 @@
                date)
         local-dt (local-date-time-impl/of date local-time)
         transition (create-date-time time-definition local-dt standard-offset offset-before)]
-    (zone-offset-transition-impl/create transition offset-before offset-after)))
+    (zone-offset-transition-impl/of transition offset-before offset-after)))
 
 (extend-type ZoneOffsetTransitionRule
   zone-offset-transition-rule/IZoneOffsetTransitionRule
-  (get-month [this] (-get-month this))
-  (get-day-of-month-indicator [this] (-get-day-of-month-indicator this))
-  (get-day-of-week [this] (-get-day-of-week this))
-  (get-local-time [this] (-get-local-time this))
-  (is-midnight-end-of-day [this] (-is-midnight-end-of-day this))
-  (get-time-definition [this] (-get-time-definition this))
-  (get-standard-offset [this] (-get-standard-offset this))
-  (get-offset-before [this] (-get-offset-before this))
-  (get-offset-after [this] (-get-offset-after this))
+  (get-month [this] (get-month this))
+  (get-day-of-month-indicator [this] (get-day-of-month-indicator this))
+  (get-day-of-week [this] (get-day-of-week this))
+  (get-local-time [this] (get-local-time this))
+  (is-midnight-end-of-day [this] (is-midnight-end-of-day this))
+  (get-time-definition [this] (get-time-definition this))
+  (get-standard-offset [this] (get-standard-offset this))
+  (get-offset-before [this] (get-offset-before this))
+  (get-offset-after [this] (get-offset-after this))
   (create-transition [this year] (create-transition this year)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/zone/ZoneOffsetTransitionRule.java#L172
@@ -157,8 +177,34 @@
    day-of-week ::day-of-week/day-of-week
    time ::local-time/local-time
    time-end-of-day ::j/boolean
-   time-defnition ::time-definition
+   time-definition ::time-definition
    standard-offset ::zone-offset/zone-offset
    offset-before ::zone-offset/zone-offset
    offset-after ::zone-offset/zone-offset]
-  (wip ::of))
+  (asserts/require-non-nil month "month")
+  (asserts/require-non-nil time "time")
+  (asserts/require-non-nil time-definition "time-definition")
+  (asserts/require-non-nil standard-offset "standard-offset")
+  (asserts/require-non-nil offset-before "offset-before")
+  (asserts/require-non-nil offset-after "offset-after")
+
+  (when (or (< day-of-month-indicator -28)
+            (> day-of-month-indicator 31)
+            (zero? day-of-month-indicator))
+    (throw (ex JavaIllegalArgumentException "Day of month indicator must be between -28 and 31 inclusive excluding zero")))
+
+  (when (and time-end-of-day (not (= time local-time-impl/MIDNIGHT)))
+    (throw (ex JavaIllegalArgumentException "Time must be midnight when end of day flag is true")))
+
+  (when-not (zero? (local-time/get-nano time))
+    (throw (ex JavaIllegalArgumentException "Time's nano-of-second must be zero")))
+
+  (->ZoneOffsetTransitionRule time-definition
+                              time-end-of-day
+                              time
+                              month
+                              day-of-month-indicator
+                              day-of-week
+                              standard-offset
+                              offset-after
+                              offset-before))

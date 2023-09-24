@@ -152,10 +152,19 @@
 (def-method -is-before  ::j/boolean
   [this ::chrono-local-date-time
    other ::chrono-local-date-time]
-  (wip ::-is-before))
+  (let [this-ep-day (-> this chrono-local-date-time/to-local-date chrono-local-date/to-epoch-day)
+        other-ep-day (-> other chrono-local-date-time/to-local-date chrono-local-date/to-epoch-day)
+        this-nano-of-day (-> this chrono-local-date-time/to-local-time local-time/to-nano-of-day)
+        other-nano-of-day (-> other chrono-local-date-time/to-local-time local-time/to-nano-of-day)]
+    (or (< this-ep-day other-ep-day)
+        (and (= this-ep-day other-ep-day)
+             (< this-nano-of-day other-nano-of-day)))))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L573
 (def-method -is-equal ::j/boolean
   [this ::chrono-local-date-time
    other ::chrono-local-date-time]
-  (wip ::-is-equal))
+  (and (= (-> this chrono-local-date-time/to-local-date chrono-local-date/to-epoch-day)
+          (-> other chrono-local-date-time/to-local-date chrono-local-date/to-epoch-day))
+       (= (-> this chrono-local-date-time/to-local-time local-time/to-nano-of-day)
+          (-> other chrono-local-date-time/to-local-time local-time/to-nano-of-day))))

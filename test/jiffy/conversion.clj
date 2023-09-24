@@ -48,7 +48,7 @@
            (jiffy.year_month YearMonth)
            (jiffy.zoned_date_time_impl ZonedDateTime)
            (jiffy.zone_offset_impl ZoneOffset)
-           (jiffy.zone.zone_offset_transition_rule ZoneOffsetTransitionRule)
+           (jiffy.zone.zone_offset_transition_rule ZoneOffsetTransitionRule TimeDefinition)
            (jiffy.zone.zone_rules_impl ZoneRules)))
 
 (defmulti jiffy->java* type)
@@ -77,10 +77,15 @@
 
 (def max-coll-result-size 10)
 
+(defn make-comparable [coll]
+  (if (set? coll)
+    coll
+    (take max-coll-result-size coll)))
+
 (defn same-coll? [jiffy-coll java-coll]
   (->> (map same?
-            (take max-coll-result-size jiffy-coll)
-            (take max-coll-result-size (to-seq java-coll)))
+        (make-comparable jiffy-coll)
+        (make-comparable (to-seq java-coll)))
        (every? true?)))
 
 (defmethod same?* :default
@@ -281,13 +286,19 @@
    (jiffy->java day-of-week)
    (jiffy->java local-time)
    (jiffy->java midnight-end-of-day)
-   (java.time.zone.ZoneOffsetTransitionRule$TimeDefinition/valueOf (name time-definition))
+   (jiffy->java time-definition)
    (jiffy->java standard-offset)
-   (jiffy->java offset-after)
-   (jiffy->java offset-before)))
+   (jiffy->java offset-before)
+   (jiffy->java offset-after)))
 
 (defmethod jiffy->java* ZoneOffsetTransitionRule [arg]
   (jiffy->zone-offset-transition-rule arg))
+
+(defn jiffy->time-definition [{:keys [enum-name]}]
+  (java.time.zone.ZoneOffsetTransitionRule$TimeDefinition/valueOf enum-name))
+
+(defmethod jiffy->java* TimeDefinition [this]
+  (jiffy->time-definition this))
 
 (defmethod jiffy->java* IsoChronology [iso-chronology]
   java.time.chrono.IsoChronology/INSTANCE)
