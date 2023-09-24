@@ -149,7 +149,7 @@
           (store-results ~jiffy-fn args# jiffy-result#))
         ok?#))))
 
-(def default-num-tests 500)
+(def default-num-tests 100)
 
 (def ns->class-anomalies
   {"jiffy.protocols.time-comparable" "java.lang.Comparable"
@@ -239,6 +239,8 @@
        (or (first (remove nil? results#))
            [(count results#) :success]))))
 
+(def default-num-interactive-tests 1000)
+
 (defmacro test-proto-fn! [impl-ns proto-fn & [num-tests]]
   `(do
      (require 'jiffy.conversion)
@@ -248,7 +250,7 @@
      (test-fn! ~proto-fn
                '~(jiffy-fn-sym->java-fn-sym (symbol-ns impl-ns) proto-fn)
                (gen/sample (s/gen (get-spec '~(resolve-impl-fn impl-ns proto-fn)))
-                           ~(or num-tests default-num-tests))
+                           ~(or num-tests default-num-interactive-tests))
                {:static? false})))
 
 (defmacro test-static-fn! [jiffy-fn & [num-tests]]
@@ -259,5 +261,5 @@
      (test-fn! ~jiffy-fn
                '~(jiffy-fn-sym->java-fn-sym jiffy-fn)
                (gen/sample (s/gen (get-spec '~jiffy-fn))
-                           ~(or num-tests default-num-tests))
+                           ~(or num-tests default-num-interactive-tests))
                {:static? true})))
