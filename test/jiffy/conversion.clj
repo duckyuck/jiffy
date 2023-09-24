@@ -23,6 +23,7 @@
             [jiffy.year-month]
             [jiffy.zoned-date-time-impl]
             [jiffy.zone-offset-impl]
+            [jiffy.zone.zone-offset-transition-impl]
             [jiffy.zone.zone-offset-transition-rule]
             [jiffy.zone.zone-rules])
   (:import java.lang.reflect.Constructor
@@ -48,6 +49,7 @@
            (jiffy.year_month YearMonth)
            (jiffy.zoned_date_time_impl ZonedDateTime)
            (jiffy.zone_offset_impl ZoneOffset)
+           (jiffy.zone.zone_offset_transition_impl ZoneOffsetTransition)
            (jiffy.zone.zone_offset_transition_rule ZoneOffsetTransitionRule TimeDefinition)
            (jiffy.zone.zone_rules_impl ZoneRules)))
 
@@ -101,6 +103,7 @@
 (defmethod same?* clojure.lang.PersistentVector [& args] (apply same-coll? args))
 (defmethod same?* clojure.lang.ArraySeq [& args] (apply same-coll? args))
 (defmethod same?* (Class/forName "[Ljava.math.BigInteger;") [& args] (apply same-coll? args))
+(defmethod same?* clojure.lang.PersistentHashSet [& args] (apply same-coll? args))
 
 (let [kind->class {exception/JavaException java.lang.Exception
                    exception/JavaRuntimeException java.lang.RuntimeException
@@ -299,6 +302,11 @@
 
 (defmethod jiffy->java* TimeDefinition [this]
   (jiffy->time-definition this))
+
+(defmethod jiffy->java* ZoneOffsetTransition [{:keys [transition offset-before offset-after]}]
+  (java.time.zone.ZoneOffsetTransition/of (jiffy->java transition)
+                                          (jiffy->java offset-before)
+                                          (jiffy->java offset-after)))
 
 (defmethod jiffy->java* IsoChronology [iso-chronology]
   java.time.chrono.IsoChronology/INSTANCE)

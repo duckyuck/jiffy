@@ -88,6 +88,34 @@
 (s/def ::month-day/month-day ::month-day-impl/month-day)
 (s/def ::j/zone-id #{"Europe/Oslo"})
 
+(s/def ::transition-rule-impl/time-definition (set (vals @transition-rule-impl/enums)))
+
+(s/def ::zone-offset-transition-impl/zone-offset-transition
+  (s/with-gen any?
+    #(->> 'jiffy.zone.zone-offset-transition-impl/of
+          s/get-spec
+          :args
+          s/gen
+          (gen/such-that (fn [[transition offset-before offset-after]]
+                           (try (jiffy.zone.zone-offset-transition-impl/of
+                                 (local-date-time/with-nano transition 0)
+                                 offset-before
+                                 offset-after)
+                                true
+                                (catch Exception e
+                                  false))))
+          (gen/fmap (fn [[transition offset-before offset-after]]
+                      (jiffy.zone.zone-offset-transition-impl/of
+                       (local-date-time/with-nano transition 0)
+                       offset-before
+                       offset-after))))))
+
+(s/def ::transition-rule-impl/zone-offset-transition-rule
+  (->> @zone-rules-store/zone-id->rules
+       vals
+       (mapcat :last-rules)
+       set))
+
 (s/def ::clock/clock
   (s/with-gen #(satisfies? clock/IClock %)
     (fn [] (gen/one-of [(s/gen ::clock-impl/fixed-clock)]))))

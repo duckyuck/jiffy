@@ -37,11 +37,7 @@
                         (local-time/of hour minute second nano))))
 
 (defmethod java->jiffy java.time.zone.ZoneOffsetTransitionRule$TimeDefinition [object]
-  (or ({"UTC" ::transition-rule/UTC
-        "WALL" ::transition-rule/WALL
-        "STANDARD"::transition-rule/STANDARD}
-       (.toString object))
-      (throw (ex-info (str "Unknown TimeDefinition: " (.toString object))))))
+  (transition-rule/value-of (.toString object)))
 
 (defmethod java->jiffy java.time.zone.ZoneOffsetTransitionRule [object]
   (let [{:keys [timeDefinition
@@ -55,15 +51,15 @@
                 offsetAfter
                 offsetBefore]} (bean object)]
     (transition-rule/create
-     (java->jiffy timeDefinition)
-     midnightEndOfDay
-     (->> [:hour :minute :second :nano] (map (bean localTime)) (apply local-time-impl/create))
      (-> month .toString month/value-of)
      dayOfMonthIndicator
      (-> dayOfWeek .toString day-of-week/value-of)
+     (->> [:hour :minute :second :nano] (map (bean localTime)) (apply local-time-impl/create))
+     midnightEndOfDay
+     (java->jiffy timeDefinition)
      (-> standardOffset .toString zone-offset/of)
-     (-> offsetAfter .toString zone-offset/of)
-     (-> offsetBefore .toString zone-offset/of))))
+     (-> offsetBefore .toString zone-offset/of)
+     (-> offsetAfter .toString zone-offset/of))))
 
 (defn extract-zone-rules-properties [^java.time.zone.ZoneRules object]
   (->> (for [[k property] {:standard-transitions "standardTransitions"
@@ -84,7 +80,9 @@
 (defn load-zone-rules []
   (let [zone-ids (java.time.zone.ZoneRulesProvider/getAvailableZoneIds)]
     (zipmap zone-ids
-            (map #(java->jiffy (java.time.zone.ZoneRulesProvider/getRules % false))
+            (map #(-> (java.time.zone.ZoneRulesProvider/getRules % false)
+                      java->jiffy
+                      (assoc :zone-id %))
                  zone-ids))))
 
 (do
