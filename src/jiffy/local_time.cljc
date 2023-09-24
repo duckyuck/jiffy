@@ -411,8 +411,8 @@
 
 (def-method is-supported ::j/boolean
   [this ::local-time
-   field-or-unit (s/or ::temporal-field/temporal-field
-                       ::temporal-unit/temporal-unit)]
+   field-or-unit (s/or :field ::temporal-field/temporal-field
+                       :unit ::temporal-unit/temporal-unit)]
   (condp satisfies? field-or-unit
     temporal-field/ITemporalField
     (if (chrono-field/chrono-field? field-or-unit)

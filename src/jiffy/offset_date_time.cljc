@@ -605,8 +605,8 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L484
 (def-method is-supported ::j/boolean
   [this ::offset-date-time
-   field-or-unit (s/or ::temporal-field/temporal-field
-                       ::temporal-unit/temporal-unit)]
+   field-or-unit (s/or :field ::temporal-field/temporal-field
+                       :unit ::temporal-unit/temporal-unit)]
   (condp satisfies? field-or-unit
     temporal-field/ITemporalField
     (or (chrono-field/chrono-field? field-or-unit)

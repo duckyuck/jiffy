@@ -335,8 +335,8 @@
    local-time ::local-time/local-time]
   (local-date-time-impl/of this local-time))
 
-(def-method at-time (s/or ::local-date-time/local-date-time
-                          ::offset-time/offset-time)
+(def-method at-time (s/or :local-date-time ::local-date-time/local-date-time
+                          :offset-time ::offset-time/offset-time)
   ([this ::local-date
     offset-time ::offset-time/offset-time]
    (offset-date-time-impl/of
@@ -363,8 +363,8 @@
     nano-of-second ::j/nano-of-second]
    (at-time--chrono this (local-time-impl/of hour minute second nano-of-second))))
 
-(def-method at-start-of-day (s/or ::local-date-time/local-date-time
-                                   ::zoned-date-time/zoned-date-time)
+(def-method at-start-of-day (s/or :local-date-time ::local-date-time/local-date-time
+                                  :zoned-date-time ::zoned-date-time/zoned-date-time)
   ([this ::local-date]
    (local-date-time-impl/of this local-time-impl/MIDNIGHT))
 
@@ -695,8 +695,8 @@
 
 (def-method is-supported ::j/boolean
   [this ::local-date
-   field-or-unit (s/or ::temporal-field/temporal-field
-                       ::temporal-unit/temporal-unit)]
+   field-or-unit (s/or :field ::temporal-field/temporal-field
+                       :unit ::temporal-unit/temporal-unit)]
   (chrono-local-date-defaults/-is-supported this field-or-unit))
 
 (def-method range ::value-range/value-range

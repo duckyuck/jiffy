@@ -532,8 +532,8 @@
 
 (def-method is-supported ::j/boolean
   [this ::local-date-time
-   field-or-unit (s/or ::temporal-field/temporal-field
-                       ::temporal-unit/temporal-unit)]
+   field-or-unit (s/or :field ::temporal-field/temporal-field
+                       :unit ::temporal-unit/temporal-unit)]
   (if (satisfies? temporal-unit/ITemporalUnit field-or-unit)
     (chrono-local-date-time-defaults/-is-supported this field-or-unit)
     (if (chrono-field/chrono-field? field-or-unit)

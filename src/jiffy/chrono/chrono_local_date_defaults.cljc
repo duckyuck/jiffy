@@ -45,8 +45,8 @@
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L386
 (def-method -is-supported ::j/boolean
   [this ::chrono-local-date/chrono-local-date
-   field-or-unit (s/or ::temporal-field/temporal-field
-                       ::temporal-unit/temporal-unit)]
+   field-or-unit (s/or :field ::temporal-field/temporal-field
+                       :unit ::temporal-unit/temporal-unit)]
   (if (satisfies? temporal-field/ITemporalField field-or-unit)
     (if (satisfies? chrono-field/IChronoField field-or-unit)
       (temporal-field/is-date-based field-or-unit)

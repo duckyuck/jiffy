@@ -54,8 +54,7 @@
 (def MAX_VALUE impl/MAX_VALUE)
 
 (def-method is-leap ::j/boolean
-  [year (s/or ::year
-              ::j/long)]
+  [year ::j/long]
   (cond
     (satisfies? year/IYear year)
     (is-leap (:year year))
@@ -113,8 +112,8 @@
 
 (def-method at-month ::year-month/year-month
   [this ::year
-   month (s/or ::month/month
-               ::j/int)]
+   month (s/or :month ::month/month
+               :int ::j/int)]
   (year-month-impl/of (:year this) month))
 
 (def-method at-month-day ::local-date/local-date
@@ -257,8 +256,8 @@
 
 (def-method is-supported ::j/boolean
   [this ::year
-   field-or-unit (s/or ::temporal-field/temporal-field
-                       ::temporal-unit/temporal-unit)]
+   field-or-unit (s/or :field ::temporal-field/temporal-field
+                       :unit ::temporal-unit/temporal-unit)]
   (condp satisfies? field-or-unit
     temporal-field/ITemporalField
     (if (chrono-field/chrono-field? field-or-unit)

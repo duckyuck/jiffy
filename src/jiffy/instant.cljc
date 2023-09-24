@@ -331,8 +331,8 @@
 
 (def-method is-supported ::j/boolean
   [this ::instant
-   field-or-unit (s/or ::temporal-unit/temporal-unit
-                       ::temporal-field/temporal-field)]
+   field-or-unit (s/or :unit ::temporal-unit/temporal-unit
+                       :field ::temporal-field/temporal-field)]
   (cond
     (satisfies? temporal-field/ITemporalField field-or-unit)
     (--is-supported-field this field-or-unit)
