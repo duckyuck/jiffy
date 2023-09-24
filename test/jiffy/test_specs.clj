@@ -9,7 +9,7 @@
             [jiffy.local-date-impl :as local-date-impl]
             [jiffy.local-date-time-impl :as local-date-time-impl]
             [jiffy.local-time-impl :as local-time-impl]
-            [jiffy.month :as month]
+            [jiffy.month :as month-impl]
             [jiffy.month-day :as month-day-impl]
             [jiffy.offset-time-impl :as offset-time-impl]
             [jiffy.period :as period-impl]
@@ -33,6 +33,7 @@
             [jiffy.protocols.local-date :as local-date]
             [jiffy.protocols.local-date-time :as local-date-time]
             [jiffy.protocols.local-time :as local-time]
+            [jiffy.protocols.month :as month]
             [jiffy.protocols.month-day :as month-day]
             [jiffy.protocols.offset-date-time :as offset-date-time]
             [jiffy.protocols.offset-time :as offset-time]
@@ -129,8 +130,10 @@
     (fn [] (gen/one-of (map gen/return (chrono-unit/values))))))
 
 (s/def ::month/month
-  (s/with-gen month/month?
-    (fn [] (gen/one-of (map gen/return (month/values))))))
+  (s/with-gen month-impl/month?
+    (fn [] (gen/one-of (map gen/return (month-impl/values))))))
+
+(s/def ::month-impl/month ::month/month)
 
 (s/def ::day-of-week/day-of-week
   (s/with-gen day-of-week/day-of-week?
