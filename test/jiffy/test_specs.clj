@@ -236,9 +236,9 @@
                                    :jiffy.local-date-time/local-date-time
                                    :jiffy.local-time/local-time
                                    :jiffy.offset-date-time/offset-date-time
-                                   ;; :jiffy.offset-time/offset-time
-                                   ;; :jiffy.year/year
-                                   ;; :jiffy.year-month/year-month
+                                   :jiffy.offset-time/offset-time
+                                   :jiffy.year/year
+                                   :jiffy.year-month/year-month
                                    ;; :jiffy.zoned-date-time/zoned-date-time
 
                                    ::chrono-local-date/chrono-local-date
@@ -276,7 +276,7 @@
                                     ::month/month
                                     ;; ::month-day/month-day
                                     ::offset-date-time/offset-date-time
-                                    ;; ::offset-time/offset-time
+                                    ::offset-time/offset-time
                                     ;; ::year/year
                                     ;; ::year-month/year-month
                                     ;; ::zone-offset/zone-offset
@@ -311,7 +311,7 @@
                                    ::month/month
                                    ;; ::month-day/month-day
                                    ::offset-date-time/offset-date-time
-                                   ;; ::offset-time/offset-time
+                                   ::offset-time/offset-time
                                    ;; ::year/year
                                    ;; ::year-month/year-month
                                    ;; ::zoned-date-time/zoned-date-time

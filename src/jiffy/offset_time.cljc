@@ -277,7 +277,7 @@
      (--with this (:time this) adjuster)
 
      offset-time/IOffsetTime
-     this
+     adjuster
 
      (temporal-adjuster/adjust-into adjuster this)))
 
