@@ -1,5 +1,5 @@
 (ns jiffy.math
-  (:refer-clojure :exclude [abs parse-long])
+  (:refer-clojure :exclude [abs parse-long compare])
   (:require [#?(:clj jiffy.math-clj :cljs jiffy.math-cljs) :as impl]
             [jiffy.exception :refer [ex JavaArithmeticException]]
             [jiffy.precision :as precision]))

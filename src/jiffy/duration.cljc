@@ -1,5 +1,5 @@
 (ns jiffy.duration
-  (:refer-clojure :exclude [abs])
+  (:refer-clojure :exclude [abs get])
   (:require [clojure.spec.alpha :as s]
             [clojure.test.check.generators :as gen]
             #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
