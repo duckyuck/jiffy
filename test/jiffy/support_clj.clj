@@ -132,7 +132,8 @@
          :append true))
 
 (defn precision-exception? [jiffy-result]
-  (some-> jiffy-result ex-data :jiffy.exception/kind (= :jiffy.precision/PrecisionException)))
+  (or (some-> jiffy-result ex-data :jiffy.exception/kind (= :jiffy.precision/PrecisionException))
+      (some-> jiffy-result ex-cause precision-exception?)))
 
 (defmacro gen-prop [jiffy-fn java-fn spec & [{:keys [static?]}]]
   `(prop/for-all
@@ -149,7 +150,7 @@
           (store-results ~jiffy-fn args# jiffy-result#))
         ok?#))))
 
-(def default-num-tests 100)
+(def default-num-tests 1000)
 
 (def ns->class-anomalies
   {"jiffy.protocols.time-comparable" "java.lang.Comparable"
