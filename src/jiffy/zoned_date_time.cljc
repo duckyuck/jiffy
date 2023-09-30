@@ -60,7 +60,7 @@
   [{:keys [zone offset date-time] :as this} ::zoned-date-time]
   (if (= zone offset)
     this
-    (impl/->ZonedDateTime date-time offset zone)))
+    (impl/->ZonedDateTime date-time offset offset)))
 
 (def-method get-year ::j/int
   [this ::zoned-date-time]
@@ -179,62 +179,94 @@
 (def-method plus-hours ::zoned-date-time
   [this ::zoned-date-time
    hours ::j/long]
-  (resolve-local this (local-date-time/plus-hours (:date-time this) hours)))
+  (resolve-instant this (local-date-time/plus-hours (:date-time this) hours)))
 
 (def-method plus-minutes ::zoned-date-time
   [this ::zoned-date-time
    minutes ::j/long]
-  (resolve-local this (local-date-time/plus-minutes (:date-time this) minutes)))
+  (resolve-instant this (local-date-time/plus-minutes (:date-time this) minutes)))
 
 (def-method plus-seconds ::zoned-date-time
   [this ::zoned-date-time
    seconds ::j/long]
-  (resolve-local this (local-date-time/plus-seconds (:date-time this) seconds)))
+  (resolve-instant this (local-date-time/plus-seconds (:date-time this) seconds)))
 
 (def-method plus-nanos ::zoned-date-time
   [this ::zoned-date-time
    nanos ::j/long]
-  (resolve-local this (local-date-time/plus-nanos (:date-time this) nanos)))
+  (resolve-instant this (local-date-time/plus-nanos (:date-time this) nanos)))
 
 (def-method minus-years ::zoned-date-time
   [this ::zoned-date-time
    years ::j/long]
-  (resolve-local this (local-date-time/minus-years (:date-time this) years)))
+  (if (= math/long-min-value years)
+    (-> this
+        (plus-years math/long-max-value)
+        (plus-years 1))
+    (plus-years this (- years))))
 
 (def-method minus-months ::zoned-date-time
   [this ::zoned-date-time
    months ::j/long]
-  (resolve-local this (local-date-time/minus-months (:date-time this) months)))
+  (if (= math/long-min-value months)
+    (-> this
+        (plus-months math/long-max-value)
+        (plus-months 1))
+    (plus-months this (- months))))
 
 (def-method minus-weeks ::zoned-date-time
   [this ::zoned-date-time
    weeks ::j/long]
-  (resolve-local this (local-date-time/minus-weeks (:date-time this) weeks)))
+  (if (= math/long-min-value weeks)
+    (-> this
+        (plus-weeks math/long-max-value)
+        (plus-weeks 1))
+    (plus-weeks this (- weeks))))
 
 (def-method minus-days ::zoned-date-time
   [this ::zoned-date-time
    days ::j/long]
-  (resolve-local this (local-date-time/minus-days (:date-time this) days)))
+  (if (= math/long-min-value days)
+    (-> this
+        (plus-days math/long-max-value)
+        (plus-days 1))
+    (plus-days this (- days))))
 
 (def-method minus-hours ::zoned-date-time
   [this ::zoned-date-time
    hours ::j/long]
-  (resolve-local this (local-date-time/minus-hours (:date-time this) hours)))
+  (if (= math/long-min-value hours)
+    (-> this
+        (plus-hours math/long-max-value)
+        (plus-hours 1))
+    (plus-hours this (- hours))))
 
 (def-method minus-minutes ::zoned-date-time
   [this ::zoned-date-time
    minutes ::j/long]
-  (resolve-local this (local-date-time/minus-minutes (:date-time this) minutes)))
+  (if (= math/long-min-value minutes)
+    (-> this
+        (plus-minutes math/long-max-value)
+        (plus-minutes 1))
+    (plus-minutes this (- minutes))))
 
 (def-method minus-seconds ::zoned-date-time
   [this ::zoned-date-time
    seconds ::j/long]
-  (resolve-local this (local-date-time/minus-seconds (:date-time this) seconds)))
+  (if (= math/long-min-value seconds)
+    (-> this
+        (plus-seconds math/long-max-value)
+        (plus-seconds 1))
+    (plus-seconds this (- seconds))))
 
 (def-method minus-nanos ::zoned-date-time
   [this ::zoned-date-time
    nanos ::j/long]
-  (resolve-local this (local-date-time/minus-nanos (:date-time this) nanos)))
+  (if (= math/long-min-value nanos)
+    (-> this
+        (plus-nanos math/long-max-value)
+        (plus-nanos 1))
+    (plus-nanos this (- nanos))))
 
 (def-method to-offset-date-time ::offset-date-time/offset-date-time
   [this ::zoned-date-time]

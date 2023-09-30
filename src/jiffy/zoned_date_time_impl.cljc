@@ -50,7 +50,7 @@
 
         (= (count valid-offsets) 0)
         (let [trans (zone-rules/get-transition rules local-date-time)]
-          (create
+          (->ZonedDateTime
            (local-date-time/plus-seconds
             local-date-time
             (-> trans zone-offset-transition/get-duration duration/get-seconds))

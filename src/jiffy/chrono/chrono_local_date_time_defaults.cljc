@@ -134,7 +134,16 @@
 (def-method -compare-to ::j/int
   [this ::chrono-local-date-time
    other ::chrono-local-date-time]
-  (wip ::-compare-to))
+  (let [cmp (time-comparable/compare-to (chrono-local-date-time/to-local-date this)
+                                        (chrono-local-date-time/to-local-date other))]
+    (if (zero? cmp)
+      (let [cmp (time-comparable/compare-to (chrono-local-date-time/to-local-time this)
+                                            (chrono-local-date-time/to-local-time other))]
+        (if (zero? cmp)
+          (time-comparable/compare-to (-get-chronology this)
+                                      (-get-chronology other))
+          cmp))
+      cmp)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L531
 (def-method -is-after ::j/boolean

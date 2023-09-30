@@ -23,6 +23,7 @@
             [jiffy.year-month]
             [jiffy.zoned-date-time-impl]
             [jiffy.zone-offset-impl]
+            [jiffy.zone-region-impl]
             [jiffy.zone.zone-offset-transition-impl]
             [jiffy.zone.zone-offset-transition-rule]
             [jiffy.zone.zone-rules])
@@ -49,6 +50,7 @@
            (jiffy.year_month YearMonth)
            (jiffy.zoned_date_time_impl ZonedDateTime)
            (jiffy.zone_offset_impl ZoneOffset)
+           (jiffy.zone_region_impl ZoneRegion)
            (jiffy.zone.zone_offset_transition_impl ZoneOffsetTransition)
            (jiffy.zone.zone_offset_transition_rule ZoneOffsetTransitionRule TimeDefinition)
            (jiffy.zone.zone_rules_impl ZoneRules)))
@@ -189,6 +191,9 @@
 
 (defmethod jiffy->java* ZoneOffset [{:keys [total-seconds]}]
   (java.time.ZoneOffset/ofTotalSeconds total-seconds))
+
+(defmethod jiffy->java* ZoneRegion [{:keys [id]}]
+  (java.time.ZoneId/of id))
 
 (defn jiffy->month [{:keys [enum-name]}]
   (java.time.Month/valueOf enum-name))

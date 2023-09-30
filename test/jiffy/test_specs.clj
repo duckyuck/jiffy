@@ -131,7 +131,7 @@
                     (.toString (conversion/jiffy->java jiffy-object))))))
 
 (s/def ::zoned-date-time-impl/string
-  (s/with-gen string? (to-string-gen ::zoned-date-time/zone-date-time)))
+  (s/with-gen string? (to-string-gen ::zoned-date-time/zoned-date-time)))
 
 (s/def ::offset-date-time-impl/string
   (s/with-gen string? (to-string-gen ::offset-date-time/offset-date-time)))

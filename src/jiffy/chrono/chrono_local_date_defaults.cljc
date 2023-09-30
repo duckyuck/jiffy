@@ -22,7 +22,8 @@
             [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
             [jiffy.temporal.chrono-field :as chrono-field]
             [jiffy.temporal.chrono-unit :as chrono-unit]
-            [jiffy.temporal.temporal-queries :as temporal-queries]))
+            [jiffy.temporal.temporal-queries :as temporal-queries]
+            [jiffy.math :as math]))
 
 (s/def ::chrono-local-date ::chrono-local-date/chrono-local-date)
 
@@ -138,7 +139,11 @@
 (def-method -compare-to ::j/int
   [this ::chrono-local-date
    other ::chrono-local-date]
-  (wip ::-compare-to))
+  (let [cmp (math/compare (-to-epoch-day this) (-to-epoch-day other))]
+    (if (zero? cmp)
+      (time-comparable/compare-to (chrono-local-date/get-chronology this)
+                                  (chrono-local-date/get-chronology other))
+      cmp)))
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDate.java#L728
 (def-method -is-after ::j/boolean

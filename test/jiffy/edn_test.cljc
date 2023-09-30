@@ -1,5 +1,7 @@
 (ns jiffy.edn-test
   (:require [clojure.test :refer [deftest is testing]]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.properties :as prop]
             #?(:clj [jiffy.edn-clj] :cljs [jiffy.edn-cljs])
             [jiffy.instant-impl :as instant-impl]
             [jiffy.duration-impl :as duration-impl]
@@ -12,7 +14,9 @@
             [jiffy.year :as year]
             [jiffy.zone-offset :as zone-offset]
             [jiffy.clock :as clock]
-            [jiffy.zone-id :as zone-id]
+            [jiffy.zone-id :as zone-id-impl]
+            [jiffy.protocols.zone-id :as zone-id]
+            [jiffy.protocols.zone.zone-rules :as zone-rules]
             [jiffy.zoned-date-time :as zoned-date-time]
             [jiffy.offset-date-time :as offset-date-time]
             [jiffy.offset-time :as offset-time]
@@ -21,7 +25,9 @@
             [jiffy.temporal.chrono-field :as chrono-field]
             [jiffy.temporal.chrono-unit :as chrono-unit]
             [jiffy.temporal.value-range :as value-range]
-            [jiffy.period :as period]))
+            [jiffy.period :as period]
+            [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]))
 
 :jiffy.edn-clj/keep
 
@@ -223,14 +229,14 @@
 
   (testing "FixedClock"
     (is (= (pr-str (clock/fixed (instant-impl/create 1692982727 544376000)
-                                (zone-id/of "Europe/Oslo")))
+                                (zone-id-impl/of "Europe/Oslo")))
            (str "#jiffy/fixed-clock {:instant #jiffy/instant {:seconds 1692982727, :nanos 544376000}, "
                 ":zone #jiffy/zone \"Europe/Oslo\"}"))))
 
   (testing "ZonedDateTime"
     (is (= (pr-str (zoned-date-time/of (local-date-time/of (local-date/of 1111 11 11)
                                                            (local-time/of 11 11 11 111111111))
-                                       (zone-id/of "Europe/Oslo")))
+                                       (zone-id-impl/of "Europe/Oslo")))
            "#jiffy/zdt \"1111-11-11T11:11:11.111111111+00:53:28[Europe/Oslo]\"")))
 
   (testing "OffsetDateTime"
@@ -445,13 +451,13 @@
      (testing "FixedClock"
        (is (= #jiffy/fixed-clock {:instant #jiffy/instant {:seconds 1692982727, :nanos 544376000}, :zone #jiffy/zone "Europe/Oslo"}
               (clock/fixed (instant-impl/create 1692982727 544376000)
-                           (zone-id/of "Europe/Oslo")))))
+                           (zone-id-impl/of "Europe/Oslo")))))
 
      (testing "ZonedDateTime"
        (is (= #jiffy/zdt "1111-11-11T11:11:11.111111111+00:53:28[Europe/Oslo]"
               (zoned-date-time/of (local-date-time/of (local-date/of 1111 11 11)
                                                       (local-time/of 11 11 11 111111111))
-                                  (zone-id/of "Europe/Oslo")))))
+                                  (zone-id-impl/of "Europe/Oslo")))))
 
      (testing "OffsetDateTime"
        (is (= #jiffy/odt "1111-11-11T11:11:11.111111111+11:11"
