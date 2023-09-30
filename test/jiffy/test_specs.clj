@@ -274,7 +274,7 @@
                                     ::local-date-time/local-date-time
                                     ::local-time/local-time
                                     ::month/month
-                                    ;; ::month-day/month-day
+                                    ::month-day/month-day
                                     ::offset-date-time/offset-date-time
                                     ::offset-time/offset-time
                                     ;; ::year/year
@@ -309,7 +309,7 @@
                                    ::local-date-time/local-date-time
                                    ::local-time/local-time
                                    ::month/month
-                                   ;; ::month-day/month-day
+                                   ::month-day/month-day
                                    ::offset-date-time/offset-date-time
                                    ::offset-time/offset-time
                                    ;; ::year/year
