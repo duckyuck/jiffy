@@ -583,7 +583,7 @@
     (if-not (chrono-unit/chrono-unit? unit)
       (temporal-unit/between unit this end)
       (temporal/until (:date-time this)
-                      (-> this
+                      (-> end
                           (with-offset-same-instant (:offset this))
                           :date-time)
                       unit))))

@@ -108,7 +108,7 @@
     (--with this
             (chrono-field/check-valid-int-value
              chrono-field/YEAR
-             (math/add-exact (:year this) years-to-add))
+             (math/add-exact (long (:year this)) years-to-add))
             (:month this))))
 
 (def-method plus-months ::year-month

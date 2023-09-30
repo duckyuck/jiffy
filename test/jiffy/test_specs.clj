@@ -175,7 +175,6 @@
                    (-> (java.time.format.DateTimeFormatterBuilder.)
                        (.appendValue java.time.temporal.ChronoField/YEAR 4 10 java.time.format.SignStyle/EXCEEDS_PAD)))))
 
-
 (s/def ::transition-rule-impl/zone-offset-transition-rule
   (->> @zone-rules-store/zone-id->rules
        vals
@@ -236,7 +235,7 @@
                                    :jiffy.local-date/local-date
                                    :jiffy.local-date-time/local-date-time
                                    :jiffy.local-time/local-time
-                                   ;; :jiffy.offset-date-time/offset-date-time
+                                   :jiffy.offset-date-time/offset-date-time
                                    ;; :jiffy.offset-time/offset-time
                                    ;; :jiffy.year/year
                                    ;; :jiffy.year-month/year-month
@@ -276,7 +275,7 @@
                                     ::local-time/local-time
                                     ::month/month
                                     ;; ::month-day/month-day
-                                    ;; ::offset-date-time/offset-date-time
+                                    ::offset-date-time/offset-date-time
                                     ;; ::offset-time/offset-time
                                     ;; ::year/year
                                     ;; ::year-month/year-month
@@ -311,7 +310,7 @@
                                    ::local-time/local-time
                                    ::month/month
                                    ;; ::month-day/month-day
-                                   ;; ::offset-date-time/offset-date-time
+                                   ::offset-date-time/offset-date-time
                                    ;; ::offset-time/offset-time
                                    ;; ::year/year
                                    ;; ::year-month/year-month

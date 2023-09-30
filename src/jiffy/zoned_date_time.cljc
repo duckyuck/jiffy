@@ -520,7 +520,7 @@
    unit ::temporal-unit/temporal-unit]
   (let [end (from end-exclusive)]
     (if (chrono-unit/chrono-unit? unit)
-      (let [end (with-zone-same-instant this (:zone this))]
+      (let [end (with-zone-same-instant end (:zone this))]
         (if (temporal-unit/is-date-based unit)
           (temporal/until (:date-time this) (:date-time end) unit)
           (temporal/until (to-offset-date-time this) (to-offset-date-time end) unit)))
@@ -687,10 +687,11 @@
                        zone)
           (of (local-date-impl/from temporal) (local-time-impl/from temporal))))
       (catch :default e
-        (throw (ex DateTimeException (str "Unable to obtain ZonedDateTime from TemporalAccessor: "
-                                          temporal " of type "
-                                          (type temporal)
-                                          e)))))))
+        (throw (ex DateTimeException
+                   (str "Unable to obtain ZonedDateTime from TemporalAccessor: "
+                        temporal " of type " (type temporal))
+                   {:temporal temporal}
+                   e))))))
 
 (s/def ::string string?)
 
