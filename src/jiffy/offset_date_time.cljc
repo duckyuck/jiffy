@@ -782,25 +782,29 @@
                                          (type temporal)
                                          e)))))))
 
+(s/def ::string string?)
+
+(def PATTERN
+  (delay (re-pattern (str "(" @local-date-time-impl/PATTERN ")"
+                          (str #"(([+-][\d:]*)|(Z))")))))
+
 (def-constructor parse ::offset-date-time
-  ([text ::j/char-sequence]
-   (if-let [[date-time offset]
-            (some->> (re-matches #"([:\d-\.T]*)(\+[\d:]*)" text)
+  ([text ::string]
+   (if-let [[date-time _ _ _ _ _ _ _ _ _ _ _ offset zulu-offset]
+            (some->> (re-matches @PATTERN text)
                      rest)]
      (of (local-date-time-impl/parse date-time)
-         (zone-offset-impl/of offset))
+         (zone-offset-impl/of (or offset zulu-offset)))
      (throw (ex DateTimeParseException (str "Failed to parse OffsetDateTime: '" text "'")))))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L400
-  ([text ::j/char-sequence
-    formatter ::date-time-formatter/date-time-formatter]
-   (wip ::parse)))
+  ;; ([text ::j/char-sequence
+  ;;   formatter ::date-time-formatter/date-time-formatter]
+  ;;  (wip ::parse))
+  )
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L138
-(def MIN ::MIN--not-implemented)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L146
-(def MAX ::MAX--not-implemented)
+(def MIN (local-date-time-impl/at-offset local-date-time-impl/MIN zone-offset-impl/MAX))
+(def MAX (local-date-time-impl/at-offset local-date-time-impl/MAX zone-offset-impl/MIN))
 
 (def-method to-string string?
   [{:keys [date-time offset]} ::offset-date-time]

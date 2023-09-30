@@ -74,16 +74,25 @@
    (of (local-date-impl/of year month day-of-month)
        (local-time-impl/of hour minute second nano-of-second))))
 
+(s/def ::string string?)
+
+(def PATTERN
+  (delay (re-pattern
+          (str "(" @local-date-impl/PATTERN ")"
+               "T"
+               "(" @local-time-impl/PATTERN ")"))))
+
 (def-constructor parse ::local-date-time
-  ([text ::j/char-sequence]
-   (if-let [[date time]
-            (some->> (re-matches #"(\+?[\d-]*)T([:\d-.]*)" text)
+  ([text ::string]
+   (if-let [[date _ _ _ time]
+            (some->> (re-matches @PATTERN text)
                      rest)]
      (of (local-date-impl/parse date)
          (local-time-impl/parse time))
      (throw (ex DateTimeParseException (str "Failed to parse LocalDateTime: '" text "'")))))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDateTime.java#L490
-  ([text ::j/char-sequence
-    formatter ::date-time-formatter/date-time-formatter]
-   (wip ::parse)))
+  ;; ([text ::j/char-sequence
+  ;;   formatter ::date-time-formatter/date-time-formatter]
+  ;;  (wip ::parse))
+  )

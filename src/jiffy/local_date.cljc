@@ -847,13 +847,16 @@
   [temporal ::temporal-accessor/temporal-accessor]
   (impl-impl/from temporal))
 
+(s/def ::string ::impl/string)
+
 (def-constructor parse ::local-date
-  ([text ::j/char-sequence]
+  ([text ::string]
    (impl/parse text))
 
-  ([text ::j/char-sequence
-    formatter ::date-time-formatter/date-time-formatter]
-   (impl/parse text)))
+  ;; ([text ::j/char-sequence
+  ;;   formatter ::date-time-formatter/date-time-formatter]
+  ;;  (impl/parse text))
+  )
 
 (def-method to-string string?
   [{:keys [year month day]} ::local-date]

@@ -517,42 +517,17 @@
    (catch :default e
      (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text s :multiplier multiplier})))))
 
+(s/def ::string string?)
+
 (def PATTERN (delay (re-pattern (str "(?i)([-+]?)P(?:([-+]?[0-9]+)D)?(T(?:([-+]?[0-9]+)H)?(?:([-+]?[0-9]+)M)?(?:([-+]?[0-9]+)(?:[.,]([0-9]{0,9}))?S)?)?"))))
 
-(s/def ::iso8601-duration
-  #?(:cljs (s/and string? #(re-find @PATTERN %))
-     :clj (s/with-gen (s/and string? #(re-find @PATTERN %))
-            (fn []
-              (let [sign #{"" "-" "+"}
-                    signed-long (s/nilable (s/tuple (s/? sign) ::j/pos-long))
-                    ->str (fn [[[sign] n]] (str sign n))]
-                (gen/let
-                    [prefix (s/gen sign)
-                     days (s/gen signed-long)
-                     hours (s/gen signed-long)
-                     minutes (s/gen signed-long)
-                     seconds (s/gen signed-long)
-                     second-fraction (s/gen (s/nilable ::j/pos-int))]
-                    (str prefix
-                         "P"
-                         (duration-part days "D")
-                         (when (some #(some-> % ->str) [hours minutes seconds])
-                           "T")
-                         (duration-part hours "H")
-                         (duration-part minutes "M")
-                         (when (ffirst seconds)
-                           (str (duration-part seconds)
-                                (when second-fraction
-                                  (str "." second-fraction))
-                                "S")))))))))
-
 (def-constructor parse ::duration
-  [text ::iso8601-duration]
+  [text ::string]
   (let [matches (re-matches @PATTERN text)]
     (if-not matches
       (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text text}))
-      (let [[_ prefix days T & [hours minutes seconds fraction :as more]] matches
-            nums (cons days more)
+      (let [[_ prefix days T hours minutes seconds fraction :as more] matches
+            nums [days hours minutes seconds fraction]
             factor (if (= "-" prefix) -1 1)
             multiplicands [(partial parse-number SECONDS_PER_DAY)
                            (partial parse-number SECONDS_PER_HOUR)
@@ -560,8 +535,7 @@
                            (partial parse-number 1)
                            (partial parse-fraction)]
             [d h m s f :as parts] (map #(%1 %2) multiplicands nums)]
-        (when (or (and T (not (some some? more)))
-                  (= d h m s f 0))
+        (when (and T (not (some some? nums)))
           (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text text :error-index 0})))
         (create (neg? factor) d h m s (if (neg? s) (- f) f))))))
 

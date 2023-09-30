@@ -97,19 +97,22 @@
     (create year (month/get-value month) day-of-month)
     (create year month day-of-month)))
 
+(s/def ::string string?)
+
+(def PATTERN (delay  #"([+-]?\d*)-(\d{2})-(\d{2})*"))
+
 (def-constructor parse ::local-date
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L412
-  ([text ::j/char-sequence]
-   (if-let [[year month day] (some->> (re-matches #"([+-]?\d*)-(\d{2})-(\d{2})*" text)
+  ([text ::string]
+   (if-let [[year month day] (some->> (re-matches @PATTERN text)
                                       rest
                                       (map math/parse-long))]
      (of year month day)
      (throw (ex DateTimeParseException (str "Failed to parse LocalDate: '" text "'")))))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/LocalDate.java#L426
-  ([text ::j/char-sequence
-    formatter ::date-time-formatter/date-time-formatter]
-   (wip ::parse)))
+  ;; ([text ::j/char-sequence
+  ;;   formatter ::date-time-formatter/date-time-formatter]
+  ;;  (wip ::parse))
+  )
 
 (def MIN (of year-impl/MIN_VALUE 1 1))
 (def MAX (of year-impl/MAX_VALUE 12 31))

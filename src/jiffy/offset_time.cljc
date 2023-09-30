@@ -545,22 +545,25 @@
                                          (type temporal)
                                          e)))))))
 
+(s/def ::string string?)
+
+(def PATTERN
+  (delay (re-pattern (str "(" @local-time-impl/PATTERN ")"
+                          (str #"(([+-][\d:]*)|(Z))")))))
+
 (def-constructor parse ::offset-time
-  ([text ::j/char-sequence]
-   (if-let [[date-time offset]
-            (some->> (re-matches #"([:\d\.]*)(\+[\d:]*)" text)
+  ([text ::string]
+   (if-let [[time _ _ _ _ _ _ _ offset zulu-offset]
+            (some->> (re-matches @PATTERN text)
                      rest)]
-     (of (local-time-impl/parse date-time)
-         (zone-offset-impl/of offset))
+     (of (local-time-impl/parse time)
+         (zone-offset-impl/of (or offset zulu-offset)))
      (throw (ex DateTimeParseException (str "Failed to parse OffsetTime: '" text "'")))))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L325
-  ([text ::j/char-sequence
-    formatter ::date-time-formatter/date-time-formatter]
-   (wip ::parse)))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L128
-(def MIN ::MIN--not-implemented)
+  ;; ([text ::j/char-sequence
+  ;;   formatter ::date-time-formatter/date-time-formatter]
+  ;;  (wip ::parse))
+  )
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L136
 (def MAX ::MAX--not-implemented)

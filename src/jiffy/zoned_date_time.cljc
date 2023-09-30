@@ -640,7 +640,7 @@
           (throw (ex DateTimeException (str "LocalDateTime '" local-date-time
                                             "' does not exist in zone '" zone
                                             "' due to a gap in the local time-line, typically caused by daylight savings")))
-          (throw (ex DateTimeException (str "ZoneOffset '" offset "' is not valid for LocalDateTime '"
+          (throw (ex DateTimeException (str "ZoneOffset '" (pr-str offset) "' is not valid for LocalDateTime '"
                                             local-date-time "' in zone '" zone "'"))))))))
 
 (def-constructor from ::zoned-date-time
@@ -660,24 +660,32 @@
                                           (type temporal)
                                           e)))))))
 
+(s/def ::string string?)
+
+(def PATTERN
+  (delay (re-pattern (str "(" @local-date-time-impl/PATTERN ")"
+                          (str #"(([+-][\d:]*)|(Z))(\[(.*)\])?")))))
+
 (def-constructor parse ::zoned-date-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L582
-  ([text ::j/char-sequence]
-   (if-let [[date-time offset zone]
-            (some->> (re-matches #"([:\d-.T]*)(\+[\d:]*)?\[(.*)\]" text)
+  ([text ::string]
+   (if-let [[date-time _ _ _ _ _ _ _ _ _ _ _ _ offset zulu-offset _ zone]
+            (some->> (re-matches @PATTERN text)
                      rest)]
-     (if offset
-       (of-strict (local-date-time-impl/parse date-time)
-                  (zone-id-impl/of offset)
-                  (zone-id-impl/of zone))
-       (of (local-date-time-impl/parse date-time)
-           (zone-id-impl/of zone)))
+     (let [offset (or offset zulu-offset)
+           zone (or zone zulu-offset offset)]
+       (if offset
+         (of-instant (local-date-time-impl/parse date-time)
+                     (zone-id-impl/of offset)
+                     (zone-id-impl/of zone))
+         (of (local-date-time-impl/parse date-time)
+             (zone-id-impl/of zone))))
      (throw (ex DateTimeParseException (str "Failed to parse ZonedDateTime: '" text "'")))))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZonedDateTime.java#L596
-  ([text ::j/char-sequence
-    formatter ::date-time-formatter/date-time-formatter]
-   (wip ::parse)))
+  ;; ([text ::j/char-sequence
+  ;;   formatter ::date-time-formatter/date-time-formatter]
+  ;;  (wip ::parse))
+  )
 
 (def-method to-string string?
   [{:keys [date-time offset zone]} ::zoned-date-time]

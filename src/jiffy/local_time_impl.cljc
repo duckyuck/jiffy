@@ -74,21 +74,30 @@
    (chrono-field/check-valid-value chrono-field/NANO_OF_SECOND nano-of-second)
    (create hour minute second nano-of-second)))
 
+(s/def ::string string?)
+
+(def PATTERN (delay #"(\d{2}):(\d{2})(:(\d{2})(.(\d*))?)?"))
+
+(defn- append-zeros [s preferred-len]
+  (->> (repeat (- preferred-len (count s)) \0)
+       (apply str)
+       (str s)))
+
 (def-constructor parse ::local-time
-  ([text ::j/char-sequence]
+  ([text ::string]
    (if-let [[hours minutes seconds nanos]
-            (some->> (re-matches #"(\d{2}):(\d{2})(:(\d{2})(.(\d*))?)?" text)
+            (some->> (re-matches @PATTERN text)
                      rest
                      (remove empty?)
                      (remove #(str/starts-with? % ":"))
-                     (remove #(str/starts-with? % "."))
-                     (map math/parse-long))]
-     (of (or hours 0)
-         (or minutes 0)
-         (or seconds 0)
-         (or nanos 0))
+                     (remove #(str/starts-with? % ".")))]
+     (of (or (some-> hours math/parse-long) 0)
+         (or (some-> minutes math/parse-long) 0)
+         (or (some-> seconds math/parse-long) 0)
+         (or (some-> nanos (append-zeros 9) math/parse-long) 0))
      (throw (ex DateTimeParseException (str "Failed to parse LocalTime: '" text "'")))))
 
-  ([text ::j/char-sequence
-    formatter ::date-time-formatter/date-time-formatter]
-   (wip ::parse)))
+  ;; ([text ::j/char-sequence
+  ;;   formatter ::date-time-formatter/date-time-formatter]
+  ;;  (wip ::parse))
+  )

@@ -560,13 +560,16 @@
   [temporal ::temporal-accessor/temporal-accessor]
   (impl-impl/from temporal))
 
+(s/def ::string ::impl/string)
+
 (def-constructor parse ::local-time
-  ([text ::j/char-sequence]
+  ([text ::string]
    (impl/parse text))
 
-  ([text ::j/char-sequence
-    formatter ::date-time-formatter/date-time-formatter]
-   (impl/parse text formatter)))
+  ;; ([text ::j/char-sequence
+  ;;   formatter ::date-time-formatter/date-time-formatter]
+  ;;  (impl/parse text formatter))
+  )
 
 (def-method to-string string?
   [{:keys [hour minute second nano]} ::local-time]

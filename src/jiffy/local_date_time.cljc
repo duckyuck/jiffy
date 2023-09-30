@@ -682,13 +682,17 @@
                   {:temporal temporal}
                   e))))))
 
+(s/def ::string ::impl/string)
+(def PATTERN impl/PATTERN)
+
 (def-constructor parse ::local-date-time
-  ([text ::j/char-sequence]
+  ([text ::string]
    (impl/parse text))
 
-  ([text ::j/char-sequence
-    formatter ::date-time-formatter/date-time-formatter]
-   (impl/parse text formatter)))
+  ;; ([text ::j/char-sequence
+  ;;   formatter ::date-time-formatter/date-time-formatter]
+  ;;  (impl/parse text formatter))
+  )
 
 (def MIN (impl/of local-date-impl/MIN local-time-impl/MIN))
 (def MAX (impl/of local-date-impl/MAX local-time-impl/MAX))
