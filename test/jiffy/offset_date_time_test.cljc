@@ -70,5 +70,5 @@
 (test-static-fn jiffy.offset-date-time/of)
 (test-static-fn jiffy.offset-date-time/of-instant)
 (test-static-fn jiffy.offset-date-time/from)
-;; (test-static-fn! jiffy.offset-date-time/parse)
+(test-static-fn jiffy.offset-date-time/parse)
 

@@ -46,4 +46,4 @@
 (test-static-fn jiffy.local-time/of)
 (test-static-fn jiffy.local-time/of-second-of-day)
 (test-static-fn jiffy.local-time/from)
-;; (test-static-fn! jiffy.local-time/parse)
+(test-static-fn jiffy.local-time/parse)

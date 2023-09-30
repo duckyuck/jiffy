@@ -31,4 +31,4 @@
 (test-static-fn jiffy.year/of)
 (test-static-fn jiffy.year/from)
 (test-static-fn jiffy.year/is-leap)
-;; (test-static-fn! jiffy.year/parse)
+(test-static-fn jiffy.year/parse)

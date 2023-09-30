@@ -11,7 +11,8 @@
             [jiffy.local-time-impl :as local-time-impl]
             [jiffy.month :as month-impl]
             [jiffy.month-day :as month-day-impl]
-            [jiffy.offset-time-impl :as offset-time-impl]
+            [jiffy.offset-date-time :as offset-date-time-impl]
+            [jiffy.offset-time :as offset-time-impl]
             [jiffy.period :as period-impl]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
             [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
@@ -59,6 +60,8 @@
             [jiffy.temporal.temporal-adjusters :as temporal-adjusters-impl]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.year :as year-impl]
+            [jiffy.year-month :as year-month-impl]
             [jiffy.zoned-date-time :as zoned-date-time-impl]
             [jiffy.zone-offset :as zone-offset-impl]
             [jiffy.zone-region :as zone-region-impl]
@@ -77,9 +80,9 @@
 (s/def ::local-date-time/local-date-time ::local-date-time-impl/local-date-time)
 (s/def ::local-time/local-time ::local-time-impl/local-time)
 (s/def ::zone-offset/zone-offset ::zone-offset-impl/zone-offset)
-(s/def ::zone-region/zone-region ::zone-region-impl/zone-region)
 (s/def ::offset-time/offset-time ::offset-time-impl/offset-time)
 (s/def ::zoned-date-time/zoned-date-time ::zoned-date-time-impl/zoned-date-time)
+(s/def ::offset-date-time/offset-date-time ::offset-date-time-impl/offset-date-time)
 (s/def ::zone-offset-transition/zone-offset-transition ::zone-offset-transition-impl/zone-offset-transition)
 (s/def ::zone-offset-transition-rule/zone-offset-transition-rule (->> @zone-rules-store/zone-id->rules
                                                                       vals
@@ -91,6 +94,15 @@
 (s/def ::j/zone-id (set (keys @zone-rules-store/zone-id->rules)))
 
 (s/def ::transition-rule-impl/time-definition (set (vals @transition-rule-impl/enums)))
+
+(s/def ::zone-region/zone-region
+  (s/with-gen any?
+    #(->> #'jiffy.zone-region-impl/of-id
+          s/get-spec
+          :args
+          s/gen
+          (gen/fmap (fn [[id]]
+                      (zone-region-impl/of-id id true))))))
 
 (s/def ::zone-offset-transition-impl/zone-offset-transition
   (s/with-gen any?
@@ -111,6 +123,58 @@
                        (local-date-time/with-nano transition 0)
                        offset-before
                        offset-after))))))
+
+(defn to-string-gen [spec]
+  #(->> spec
+        s/gen
+        (gen/fmap (fn [jiffy-object]
+                    (.toString (conversion/jiffy->java jiffy-object))))))
+
+(s/def ::zoned-date-time-impl/string
+  (s/with-gen string? (to-string-gen ::zoned-date-time/zone-date-time)))
+
+(s/def ::offset-date-time-impl/string
+  (s/with-gen string? (to-string-gen ::offset-date-time/offset-date-time)))
+
+(s/def ::offset-time-impl/string
+  (s/with-gen string? (to-string-gen ::offset-time/offset-time)))
+
+(s/def ::local-date-time-impl/string
+  (s/with-gen string? (to-string-gen ::local-date-time/local-date-time)))
+
+(s/def ::local-time-impl/string
+  (s/with-gen string? (to-string-gen ::local-time/local-time)))
+
+(s/def ::local-date-impl/string
+  (s/with-gen string? (to-string-gen ::local-date/local-date)))
+
+(s/def ::duration-impl/string
+  (s/with-gen string? (to-string-gen ::duration/duration)))
+
+(s/def ::period-impl/string
+  (s/with-gen string? (to-string-gen ::period/period)))
+
+(defn formatter-gen [spec formatter-builder]
+  #(->> spec
+        s/gen
+        (gen/fmap (fn [jiffy-object]
+                    (.format (conversion/jiffy->java jiffy-object)
+                             (.toFormatter formatter-builder))))))
+
+(s/def ::year-month-impl/string
+  (s/with-gen string?
+    (formatter-gen ::year-month-impl/year-month
+                   (-> (java.time.format.DateTimeFormatterBuilder.)
+                       (.appendValue java.time.temporal.ChronoField/YEAR 4 10 java.time.format.SignStyle/EXCEEDS_PAD)
+                       (.appendLiteral "-")
+                       (.appendValue java.time.temporal.ChronoField/MONTH_OF_YEAR 2)))))
+
+(s/def ::year-impl/string
+  (s/with-gen string?
+    (formatter-gen ::year-impl/year
+                   (-> (java.time.format.DateTimeFormatterBuilder.)
+                       (.appendValue java.time.temporal.ChronoField/YEAR 4 10 java.time.format.SignStyle/EXCEEDS_PAD)))))
+
 
 (s/def ::transition-rule-impl/zone-offset-transition-rule
   (->> @zone-rules-store/zone-id->rules
@@ -282,105 +346,37 @@
   (s/with-gen #(satisfies? zone-id/IZoneId %)
     (fn [] (gen/one-of (map s/gen [
                                    ::zone-offset/zone-offset
-                                   ;; ::zone-region/zone-region
+                                   ::zone-region/zone-region
                                    ])))))
 
 (comment
 
-  ;; (satisfies? temporal/ITemporal
-  ;;               (first (gen/sample (s/gen :jiffy.instant/instant))))
-
-  (gen/sample (s/gen (:args (s/get-spec #'instant-impl/with))))
-
-  (gen/sample (s/gen (:args (s/get-spec #'instant-impl/of-epoch-milli))))
-
-  (gen/sample (s/gen :jiffy.instant/instant))
-
-  (gen/sample (s/gen ::temporal-amount/temporal-amount))
-
-  (gen/sample (s/gen :jiffy.protocols.temporal.temporal-unit/temporal-unit))
-
-
-  (first
-   (gen/sample
-    (s/gen (s/cat
-            :this
-            (s/spec :jiffy.instant/instant)
-            :amount-to-subtract
-            (s/spec
-             :jiffy.protocols.temporal.temporal-amount/temporal-amount)))))
-
-  (gen/sample (s/gen ::temporal-field/temporal-field))
-
-  (gen/sample (s/gen :jiffy.protocols.temporal.temporal-field/temporal-field))
-
-  (first (gen/sample (s/gen :jiffy.zoned-date-time/zoned-date-time)))
-
-  (conversion/jiffy->java (:date-time (first (gen/sample (s/gen :jiffy.zoned-date-time/zoned-date-time)))))
-
-  (gen/sample (s/gen :jiffy.zone.zone-offset-transition-rule/zone-offset-transition-rule))
-
-  (gen/sample (s/gen :jiffy.protocols.zone.zone-rules/zone-rules))
-
-  (gen/sample (s/gen :jiffy.protocols.zone-region/zone-region))
-
-  (-> :jiffy.specs/zone-id
-      s/gen
-      gen/sample)
-
-  (-> :jiffy.protocols.zone.zone-rules/zone-rules
-      s/gen
-      gen/sample)
-
-  (-> ::zone-offset-impl/zone-offset
-      s/gen
-      gen/sample)
-
-  (def time-def
-    (-> :jiffy.zone.zone-offset-transition-rule/zone-offset-transition-rule
-        s/gen
-        gen/sample
-        first
-        :time-definition))
-
-  (-> ::zone-offset-transition-rule/zone-offset-transition-rule
-      s/gen
-      gen/sample)
-
-  (-> :jiffy.zone.zone-offset-transition-impl/record
-      s/gen
-      gen/sample)
-
-  (-> #'jiffy.zone.zone-rules/get-offset
+  (-> #'jiffy.duration/parse
       s/get-spec
       :args
       s/gen
       gen/sample)
 
-
-  (-> :jiffy.zone.zone-offset-transition-rule/record
+  (-> ::offset-date-time/offset-date-time
       s/gen
       gen/sample)
 
-
-
-
-
-  (gen/sample (s/gen :jiffy.protocols.zone-offset/zone-offset))
-
-
-  (-> :jiffy.zone.zone-rules/zone-rules
+  (-> ::zone-id/zone-id
       s/gen
       gen/sample)
 
-  zone-offset-transition-rule
+  (-> #'jiffy.local-date/of-instant
+      s/get-spec
+      :args
+      s/gen
+      gen/sample)
 
-
-
-  (satisfies? temporal/ITemporal
-              (first (gen/sample (s/gen :jiffy.zoned-date-time/zoned-date-time))))
-
-
+  (-> :jiffy.zoned-date-time/zoned-date-time
+      s/gen
+      gen/sample
+      first
+      :date-time
+      conversion/jiffy->java)
 
   ;; (gen/sample
   ;;  (gen'/string-from-regex

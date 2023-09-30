@@ -47,7 +47,7 @@
 (test-proto-fn jiffy.duration jiffy.protocols.string/to-string)
 
 (test-static-fn jiffy.duration/between)
-;; (test-static-fn! jiffy.duration/parse)
+(test-static-fn jiffy.duration/parse)
 (test-static-fn jiffy.duration/from)
 (test-static-fn jiffy.duration/of)
 (test-static-fn jiffy.duration/of-nanos)

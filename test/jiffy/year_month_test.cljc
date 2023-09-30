@@ -36,4 +36,4 @@
 ;; (test-static-fn! jiffy.year-month/now)
 (test-static-fn jiffy.year-month/of)
 (test-static-fn jiffy.year-month/from)
-;; (test-static-fn! jiffy.year-month/parse)
+(test-static-fn jiffy.year-month/parse)

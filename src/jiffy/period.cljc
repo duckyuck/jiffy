@@ -314,38 +314,18 @@
    days ::j/int]
   (create years months days))
 
-(def ^:private PATTERN #"([-+]?)P(?:([-+]?[0-9]+)Y)?(?:([-+]?[0-9]+)M)?(?:([-+]?[0-9]+)W)?(?:([-+]?[0-9]+)D)?")
-
 (defn- period-part [prefix n postfix]
   (when-not (nil? n)
     (str prefix n postfix)))
 
-(s/def ::iso8601-period
-  #?(:cljs (s/and string? #(re-find PATTERN %))
-     :clj (s/with-gen (s/and string? #(re-find PATTERN %))
-            (fn []
-              (let [spec (s/or :nil nil? :int (s/int-in 0 math/integer-max-value))]
-                (clojure.test.check.generators/let
-                    [prefix (s/gen #{"" "-" "+"})
-                     year (s/gen spec)
-                     year-prefix (s/gen #{"" "-" "+"})
-                     month (s/gen spec)
-                     month-prefix (s/gen #{"" "-" "+"})
-                     week (s/gen spec)
-                     week-prefix (s/gen #{"" "-" "+"})
-                     day (s/gen spec)
-                     day-prefix (s/gen #{"" "-" "+"})]
-                  (str prefix
-                       "P"
-                       (period-part year-prefix year "Y")
-                       (period-part month-prefix month "M")
-                       (period-part week-prefix week "W")
-                       (period-part day-prefix day "D"))))))))
+(s/def ::string string?)
+
+(def PATTERN (delay #"([-+]?)P(?:([-+]?[0-9]+)Y)?(?:([-+]?[0-9]+)M)?(?:([-+]?[0-9]+)W)?(?:([-+]?[0-9]+)D)?"))
 
 (def-constructor parse ::period
-  [text ::iso8601-period]
+  [text ::string]
   (asserts/require-non-nil text "text")
-  (if-let [matches (re-find PATTERN text)]
+  (if-let [matches (re-find @PATTERN text)]
     (try*
      (let [[_ prefix & nums] matches
            factor (if (= "-" prefix) -1 1)

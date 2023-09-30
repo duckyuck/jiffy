@@ -1,5 +1,6 @@
 (ns jiffy.zoned-date-time-test
-  #?(:clj (:require [jiffy.support-clj :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support])
+  #?(:clj (:require [jiffy.support-clj :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support]
+                    [jiffy.conversion :as conversion])
      :cljs (:require [jiffy.support-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true])))
 
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.zoned-date-time/with-fixed-offset-zone)
@@ -68,9 +69,9 @@
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.string/to-string)
 
 ;; (test-static-fn! jiffy.zoned-date-time/now)
-(test-static-fn! jiffy.zoned-date-time/of)
+(test-static-fn jiffy.zoned-date-time/of)
 (test-static-fn jiffy.zoned-date-time/of-local)
 (test-static-fn jiffy.zoned-date-time/of-instant)
 (test-static-fn jiffy.zoned-date-time/of-strict)
 (test-static-fn jiffy.zoned-date-time/from)
-;; (test-static-fn! jiffy.zoned-date-time/parse)
+(test-static-fn jiffy.zoned-date-time/parse)

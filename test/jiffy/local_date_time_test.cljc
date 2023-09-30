@@ -65,4 +65,4 @@
 (test-static-fn jiffy.local-date-time/of-instant)
 (test-static-fn jiffy.local-date-time/of-epoch-second)
 (test-static-fn jiffy.local-date-time/from)
-;; (test-static-fn! jiffy.local-date-time/parse)
+(test-static-fn jiffy.local-date-time/parse)
