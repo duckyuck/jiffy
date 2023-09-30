@@ -43,14 +43,10 @@
 
 (s/def ::offset-time ::impl/offset-time)
 
-(defmacro args [& x] `(s/tuple ::offset-time ~@x))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L547
 (def-method get-offset ::zone-offset/zone-offset
   [this ::offset-time]
   (:offset this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L568
 (def-method with-offset-same-local ::offset-time
   [this ::offset-time
    offset ::zone-offset/zone-offset]
@@ -58,7 +54,6 @@
     this
     (impl/->OffsetTime (:time this) offset)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L590
 (def-method with-offset-same-instant ::offset-time
   [this ::offset-time
    offset ::zone-offset/zone-offset]
@@ -70,32 +65,26 @@
                                    (zone-offset/get-total-seconds (:offset this))))
              offset)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L608
 (def-method to-local-time ::local-time/local-time
   [this ::offset-time]
   (:time this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L618
 (def-method get-hour ::j/int
   [this ::offset-time]
   (-> this :time local-time/get-hour))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L627
 (def-method get-minute ::j/int
   [this ::offset-time]
   (-> this :time local-time/get-minute))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L636
 (def-method get-second ::j/int
   [this ::offset-time]
   (-> this :time local-time/get-second))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L645
 (def-method get-nano ::j/int
   [this ::offset-time]
   (-> this :time local-time/get-nano))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L750
 (defn --with [this time offset]
   (if (and (= time (:time this))
            (= offset (:offset this)))
@@ -109,7 +98,6 @@
           (-> this :time (local-time/with-hour hour))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L765
 (def-method with-minute ::offset-time
   [this ::offset-time
    minute ::j/int]
@@ -117,7 +105,6 @@
           (-> this :time (local-time/with-minute minute))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L780
 (def-method with-second ::offset-time
   [this ::offset-time
    second ::j/int]
@@ -125,7 +112,6 @@
           (-> this :time (local-time/with-second second))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L795
 (def-method with-nano ::offset-time
   [this ::offset-time
    nano-of-second ::j/int]
@@ -133,7 +119,6 @@
           (-> this :time (local-time/with-nano nano-of-second))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L822
 (def-method truncated-to ::offset-time
   [this ::offset-time
    unit ::temporal-unit/temporal-unit]
@@ -141,7 +126,6 @@
           (-> this :time (local-time/truncated-to unit))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L897
 (def-method plus-hours ::offset-time
   [this ::offset-time
    hours ::j/long]
@@ -149,7 +133,6 @@
           (-> this :time (local-time/plus-hours hours))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L912
 (def-method plus-minutes ::offset-time
   [this ::offset-time
    minutes ::j/long]
@@ -157,7 +140,6 @@
           (-> this :time (local-time/plus-minutes minutes))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L927
 (def-method plus-seconds ::offset-time
   [this ::offset-time
    seconds ::j/long]
@@ -165,7 +147,6 @@
           (-> this :time (local-time/plus-seconds seconds))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L942
 (def-method plus-nanos ::offset-time
   [this ::offset-time
    nanos ::j/long]
@@ -173,7 +154,6 @@
           (-> this :time (local-time/plus-nanos nanos))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1008
 (def-method minus-hours ::offset-time
   [this ::offset-time
    hours ::j/long]
@@ -181,7 +161,6 @@
           (-> this :time (local-time/minus-hours hours))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1023
 (def-method minus-minutes ::offset-time
   [this ::offset-time
    minutes ::j/long]
@@ -189,7 +168,6 @@
           (-> this :time (local-time/minus-minutes minutes))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1038
 (def-method minus-seconds ::offset-time
   [this ::offset-time
    seconds ::j/long]
@@ -197,7 +175,6 @@
           (-> this :time (local-time/minus-seconds seconds))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1053
 (def-method minus-nanos ::offset-time
   [this ::offset-time
    nanos ::j/long]
@@ -205,19 +182,16 @@
           (-> this :time (local-time/minus-nanos nanos))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1204
 (def-method format string?
   [this ::offset-time
    formatter ::date-time-formatter/date-time-formatter]
   (wip ::-format))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1219
 (def-method at-date ::offset-date-time/offset-date-time
   [this ::offset-time
    date ::local-date/local-date]
   (offset-date-time-impl/of date (:time this) (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1249
 (def-method to-epoch-second ::j/long
   [this ::offset-time
    date ::local-date/local-date]
@@ -233,19 +207,16 @@
       (math/subtract-exact (math/multiply-exact (zone-offset/get-total-seconds (:offset this))
                                                 local-time-impl/NANOS_PER_SECOND))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1308
 (def-method is-after ::j/boolean
   [this ::offset-time
    other ::offset-time]
   (> (to-epoch-nano this) (to-epoch-nano other)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1323
 (def-method is-before ::j/boolean
   [this ::offset-time
    other ::offset-time]
   (< (to-epoch-nano this) (to-epoch-nano other)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1338
 (def-method is-equal ::j/boolean
   [this ::offset-time
    other ::offset-time]
@@ -281,8 +252,6 @@
   (is-before [this other] (is-before this other))
   (is-equal [this other] (is-equal this other)))
 
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1285
 (def-method compare-to ::j/int
   [this ::offset-time
    other ::offset-time]
@@ -298,7 +267,6 @@
   (compare-to [this other] (compare-to this other)))
 
 (def-method with ::offset-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L679
   ([this ::offset-time
     adjuster ::temporal-adjuster/temporal-adjuster]
    (condp satisfies? adjuster
@@ -313,7 +281,6 @@
 
      (temporal-adjuster/adjust-into adjuster this)))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L348
   ([this ::offset-time
     field ::temporal-field/temporal-field
     new-value ::j/long]
@@ -328,12 +295,10 @@
                (:offset this))))))
 
 (def-method plus ::offset-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L848
   ([this ::offset-time
     amount-to-add ::temporal-amount/temporal-amount]
    (temporal-amount/add-to amount-to-add this))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L878
   ([this ::offset-time
     amount-to-add ::j/long
     unit ::temporal-unit/temporal-unit]
@@ -344,12 +309,10 @@
      (temporal-unit/add-to unit this amount-to-add))))
 
 (def-method minus ::offset-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L968
   ([this ::offset-time
     amount-to-subtract ::temporal-amount/temporal-amount]
    (temporal-amount/subtract-from amount-to-subtract this))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L992
   ([this ::offset-time
     amount-to-subtract ::j/long
     unit ::temporal-unit/temporal-unit]
@@ -359,7 +322,6 @@
          (plus 1 unit))
      (plus this (- amount-to-subtract) unit))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1177
 (declare from)
 (def-method until ::j/long
   [this ::offset-time
@@ -393,8 +355,6 @@
     ([this amount-to-subtract unit] (minus this amount-to-subtract unit)))
   (until [this end-exclusive unit] (until this end-exclusive unit)))
 
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L395
 (def-method is-supported ::j/boolean
   [this ::offset-time
    field-or-unit (s/or :field ::temporal-field/temporal-field
@@ -411,7 +371,6 @@
       (temporal-unit/is-time-based field-or-unit)
       (and field-or-unit (temporal-unit/is-supported-by field-or-unit this)))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L463
 (def-method range ::value-range/value-range
   [this ::offset-time
    field ::temporal-field/temporal-field]
@@ -421,13 +380,11 @@
       (temporal-accessor/range (:time this) field))
     (temporal-field/range-refined-by field this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L501
 (def-method get ::j/int
   [this ::offset-time
    field ::temporal-field/temporal-field]
   (temporal-accessor-defaults/-get this field))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L529
 (def-method get-long ::j/long
   [this ::offset-time
    field ::temporal-field/temporal-field]
@@ -437,7 +394,6 @@
       (-> this get-offset zone-offset/get-total-seconds)
       (temporal-accessor/get-long (:time this) field))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1078
 (def-method query ::temporal-query/result
   [this ::offset-time
    query ::temporal-query/temporal-query]
@@ -468,7 +424,6 @@
   (get-long [this field] (get-long this field))
   (query [this q] (query this q)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L1120
 (def-method adjust-into ::temporal/temporal
   [this ::offset-time
    temporal ::temporal/temporal]
@@ -481,12 +436,10 @@
   (adjust-into [this temporal] (adjust-into this temporal)))
 
 (def-constructor of ::offset-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L212
   ([time ::local-time/local-time
     offset ::zone-offset/zone-offset]
    (impl/of time offset))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L235
   ([hour ::j/hour-of-day
     minute ::j/minute-of-hour
     second ::j/second-of-minute
@@ -494,7 +447,6 @@
     offset ::zone-offset/zone-offset]
    (impl/of hour minute second nano-of-second offset)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L255
 (def-constructor of-instant ::offset-time
   [instant ::instant/instant
    zone ::zone-id/zone-id]
@@ -513,12 +465,9 @@
      offset)))
 
 (def-constructor now ::offset-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L165
   ([]
    (now (clock-impl/system-default-zone)))
 
-  ;; NB! This method is overloaded!
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L182
   ([clock-or-zone-id (s/or :clock ::clock/clock
                            :zone-id ::zone-id/zone-id)]
    (condp satisfies? clock-or-zone-id
@@ -530,7 +479,6 @@
          (of-instant now
                      (-> clock-or-zone-id clock/get-zone zone-id/get-rules (zone-rules/get-offset now))))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L286
 (def-constructor from ::offset-time
   [temporal ::temporal-accessor/temporal-accessor]
   (if (satisfies? offset-time/IOffsetTime temporal)
@@ -565,8 +513,8 @@
   ;;  (wip ::parse))
   )
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L136
-(def MAX ::MAX--not-implemented)
+(def MIN (local-time/at-offset local-time-impl/MIN zone-offset-impl/MAX))
+(def MAX (local-time/at-offset local-time-impl/MAX zone-offset-impl/MIN))
 
 (def-method to-string string?
   [{:keys [time offset]} ::offset-time]
