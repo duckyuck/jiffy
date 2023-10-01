@@ -270,7 +270,7 @@
   (s/with-gen #(satisfies? temporal-adjuster/ITemporalAdjuster %)
     (fn [] (gen/one-of (map s/gen (concat
                                    [
-                                    ;; ::day-of-week/day-of-week
+                                    ::day-of-week/day-of-week
                                     ::instant/instant
                                     ::local-date/local-date
                                     ::local-date-time/local-date-time
@@ -305,7 +305,7 @@
 (s/def ::temporal-accessor/temporal-accessor
   (s/with-gen any? ;; #(satisfies? temporal-accessor/ITemporalAccessor %)
     (fn [] (gen/one-of (map s/gen [
-                                   ;; ::day-of-week/day-of-week
+                                   ::day-of-week/day-of-week
                                    ::instant/instant
                                    ::local-date/local-date
                                    ::local-date-time/local-date-time
