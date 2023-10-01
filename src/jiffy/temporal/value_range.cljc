@@ -1,5 +1,7 @@
 (ns jiffy.temporal.value-range
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.specs :as j]
             [jiffy.exception :refer [DateTimeException JavaIllegalArgumentException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.protocols.temporal.value-range :as value-range]
@@ -25,17 +27,14 @@
                         #(<= (:max-smallest %) (:max-largest %))
                         #(<= (:min-largest %) (:max-largest %)))))
 (defn create
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L125
   ([min max]
    (if (> min max)
      (throw (ex JavaIllegalArgumentException "Minimum value must be less than maximum value" {:min min :max max}))
      (create min min max max)))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L146
   ([min max-smallest max-largest]
    (create min min max-smallest max-largest))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L165
   ([min-smallest min-largest max-smallest max-largest]
    (cond
      (> min-smallest min-largest)
@@ -43,10 +42,6 @@
 
      (> max-smallest max-largest)
      (throw (ex JavaIllegalArgumentException "Smallest maximum value must be less than largest maximum value" {:min-smallest min-smallest :min-largest min-largest :max-smallest max-smallest :max-largest max-largest}))
-;; [jiffy.dev.wip :refer [wip]]
-;; [jiffy.protocols.temporal.temporal-field :as temporal-field]
-;; [jiffy.protocols.temporal.value-range :as value-range]
-;; [jiffy.specs :as j]
 
      (> min-largest max-largest)
      (throw (ex JavaIllegalArgumentException "Minimum value must be less than maximum value" {:min-smallest min-smallest :min-largest min-largest :max-smallest max-smallest :max-largest max-largest}))
@@ -58,53 +53,43 @@
 
 (defmacro args [& x] `(s/tuple ::value-range ~@x))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L203
-(s/def ::is-fixed-args (args))
-(defn -is-fixed [this]
+(def-method is-fixed ::j/boolean
+  [this ::value-range]
   (and (= (:min-smallest this) (:min-largest this))
        (= (:max-smallest this) (:max-largest this))))
-(s/fdef -is-fixed :args ::is-fixed-args :ret ::j/boolean)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L216
-(s/def ::get-minimum-args (args))
-(defn -get-minimum [this] (:min-smallest this))
-(s/fdef -get-minimum :args ::get-minimum-args :ret ::j/long)
+(def-method get-minimum ::j/long
+  [this ::value-range]
+  (:min-smallest this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L228
-(s/def ::get-largest-minimum-args (args))
-(defn -get-largest-minimum [this] (:min-largest this))
-(s/fdef -get-largest-minimum :args ::get-largest-minimum-args :ret ::j/long)
+(def-method get-largest-minimum ::j/long
+  [this ::value-range]
+  (:min-largest this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L240
-(s/def ::get-smallest-maximum-args (args))
-(defn -get-smallest-maximum [this] (:max-smallest this))
-(s/fdef -get-smallest-maximum :args ::get-smallest-maximum-args :ret ::j/long)
+(def-method get-smallest-maximum ::j/long
+  [this ::value-range]
+  (:max-smallest this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L252
-(s/def ::get-maximum-args (args))
-(defn -get-maximum [this] (:max-largest this))
-(s/fdef -get-maximum :args ::get-maximum-args :ret ::j/long)
+(def-method get-maximum ::j/long
+  [this ::value-range]
+  (:max-largest this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L269
-(s/def ::is-int-value-args (args))
-(defn -is-int-value [this]
-  (and (>= (-get-minimum this) math/integer-min-value)
-       (<= (-get-maximum this) math/integer-max-value)))
-(s/fdef -is-int-value :args ::is-int-value-args :ret ::j/boolean)
+(def-method is-int-value ::j/boolean
+  [this ::value-range]
+  (and (>= (get-minimum this) math/integer-min-value)
+       (<= (get-maximum this) math/integer-max-value)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L281
-(s/def ::is-valid-value-args (args ::j/long))
-(defn -is-valid-value [this value]
-  (and (>= value (-get-minimum this))
-       (<= value (-get-maximum this))))
-(s/fdef -is-valid-value :args ::is-valid-value-args :ret ::j/boolean)
+(def-method is-valid-value ::j/boolean
+  [this ::value-range
+   value ::j/long]
+  (and (>= value (get-minimum this))
+       (<= value (get-maximum this))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L294
-(s/def ::is-valid-int-value-args (args ::j/long))
-(defn -is-valid-int-value [this value]
-  (and (-is-int-value this)
-       (-is-valid-value this value)))
-(s/fdef -is-valid-int-value :args ::is-valid-int-value-args :ret ::j/boolean)
+(def-method is-valid-int-value ::j/boolean
+  [this ::value-range
+   value ::j/long]
+  (and (is-int-value this)
+       (is-valid-value this value)))
 
 ;; TODO: improve error message:
 ;; Jiffy example: "Invalid value for -1 (valid values jiffy.temporal.value_range.ValueRange@55c26df2): jiffy.temporal.chrono_field.ChronoField@7858bcad"
@@ -114,34 +99,35 @@
     (str "Invalid value for " (pr-str field) " (valid values " (pr-str this) "): " (pr-str value))
     (str "Invalid value (valid values " (pr-str this) "): " (pr-str value))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L309
-(s/def ::check-valid-value-args (args ::j/long ::temporal-field/temporal-field))
-(defn -check-valid-value [this value field]
-  (when-not (-is-valid-value this value)
+(def-method check-valid-value ::j/long
+  [this ::value-range
+   value ::j/long
+   field ::temporal-field/temporal-field]
+  (when-not (is-valid-value this value)
     (throw (ex DateTimeException (--gen-invalid-field-message this value field))))
   value)
-(s/fdef -check-valid-value :args ::check-valid-value-args :ret ::j/long)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/temporal/ValueRange.java#L328
-(s/def ::check-valid-int-value-args (args ::j/long ::temporal-field/temporal-field))
-(defn -check-valid-int-value [this value field]
-  (when-not (-is-valid-int-value this value)
+(s/def ::check-valid-int-value-args (args ))
+(def-method check-valid-int-value ::j/int
+  [this ::value-range
+   value ::j/long
+   field ::temporal-field/temporal-field]
+  (when-not (is-valid-int-value this value)
     (throw (ex DateTimeException (--gen-invalid-field-message this value field))))
   (int value))
-(s/fdef -check-valid-int-value :args ::check-valid-int-value-args :ret ::j/int)
 
 (extend-type ValueRange
   value-range/IValueRange
-  (is-fixed [this] (-is-fixed this))
-  (get-minimum [this] (-get-minimum this))
-  (get-largest-minimum [this] (-get-largest-minimum this))
-  (get-smallest-maximum [this] (-get-smallest-maximum this))
-  (get-maximum [this] (-get-maximum this))
-  (is-int-value [this] (-is-int-value this))
-  (is-valid-value [this value] (-is-valid-value this value))
-  (is-valid-int-value [this value] (-is-valid-int-value this value))
-  (check-valid-value [this value field] (-check-valid-value this value field))
-  (check-valid-int-value [this value field] (-check-valid-int-value this value field)))
+  (is-fixed [this] (is-fixed this))
+  (get-minimum [this] (get-minimum this))
+  (get-largest-minimum [this] (get-largest-minimum this))
+  (get-smallest-maximum [this] (get-smallest-maximum this))
+  (get-maximum [this] (get-maximum this))
+  (is-int-value [this] (is-int-value this))
+  (is-valid-value [this value] (is-valid-value this value))
+  (is-valid-int-value [this value] (is-valid-int-value this value))
+  (check-valid-value [this value field] (check-valid-value this value field))
+  (check-valid-int-value [this value field] (check-valid-int-value this value field)))
 
 (s/def ::of-args ::create-args)
 (defn of [& args] (apply create args))
