@@ -50,12 +50,10 @@
 
 (s/def ::offset-date-time ::impl/offset-date-time)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L602
 (def-method get-offset ::zone-offset/zone-offset
   [this ::offset-date-time]
   (:offset this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L636
 (def-method to-epoch-second ::j/long
   [{:keys [date-time offset]} ::offset-date-time]
   (chrono-local-date-time/to-epoch-second date-time offset))
@@ -66,13 +64,11 @@
     this
     (impl/of date-time offset)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L673
 (def-method with-offset-same-local ::offset-date-time
   [this ::offset-date-time
    offset ::zone-offset/zone-offset]
   (--with this (:date-time this) offset))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L696
 (def-method with-offset-same-instant ::offset-date-time
   [this ::offset-date-time
    offset ::zone-offset/zone-offset]
@@ -84,72 +80,58 @@
                                    (zone-offset/get-total-seconds (:offset this))))
              offset)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L714
 (def-method to-local-date-time ::local-date-time/local-date-time
   [this ::offset-date-time]
   (:date-time this))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L727
 (def-method to-local-date ::local-date/local-date
   [this ::offset-date-time]
   (-> this :date-time chrono-local-date-time/to-local-date))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L741
 (def-method get-year ::j/int
   [this ::offset-date-time]
   (-> this :date-time local-date-time/get-year))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L755
 (def-method get-month-value ::j/int
   [this ::offset-date-time]
   (-> this :date-time local-date-time/get-month-value))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L770
 (def-method get-month ::month/month
   [this ::offset-date-time]
   (-> this :date-time local-date-time/get-month))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L781
 (def-method get-day-of-month ::j/int
   [this ::offset-date-time]
   (-> this :date-time local-date-time/get-day-of-month))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L792
 (def-method get-day-of-year ::j/int
   [this ::offset-date-time]
   (-> this :date-time local-date-time/get-day-of-year))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L809
 (def-method get-day-of-week ::day-of-week/day-of-week
   [this ::offset-date-time]
   (-> this :date-time local-date-time/get-day-of-week))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L822
 (def-method to-local-time ::local-time/local-time
   [this ::offset-date-time]
   (-> this :date-time chrono-local-date-time/to-local-time))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L831
 (def-method get-hour ::j/int
   [this ::offset-date-time]
   (-> this :date-time local-date-time/get-hour))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L840
 (def-method get-minute ::j/int
   [this ::offset-date-time]
   (-> this :date-time local-date-time/get-minute))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L849
 (def-method get-second ::j/int
   [this ::offset-date-time]
   (-> this :date-time local-date-time/get-second))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L858
 (def-method get-nano ::j/int
   [this ::offset-date-time]
   (-> this :date-time local-date-time/get-nano))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L994
 (def-method with-year ::offset-date-time
   [this ::offset-date-time
    year ::j/int]
@@ -157,7 +139,6 @@
           (-> this :date-time (local-date-time/with-year year))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1010
 (def-method with-month ::offset-date-time
   [this ::offset-date-time
    month ::j/int]
@@ -165,7 +146,6 @@
           (-> this :date-time (local-date-time/with-month month))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1027
 (def-method with-day-of-month ::offset-date-time
   [this ::offset-date-time
    day-of-month ::j/int]
@@ -173,7 +153,6 @@
           (-> this :date-time (local-date-time/with-day-of-month day-of-month))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1044
 (def-method with-day-of-year ::offset-date-time
   [this ::offset-date-time
    day-of-year ::j/int]
@@ -181,7 +160,6 @@
           (-> this :date-time (local-date-time/with-day-of-year day-of-year))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1060
 (def-method with-hour ::offset-date-time
   [this ::offset-date-time
    hour ::j/int]
@@ -189,7 +167,6 @@
           (-> this :date-time (local-date-time/with-hour hour))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1075
 (def-method with-minute ::offset-date-time
   [this ::offset-date-time
    minute ::j/int]
@@ -197,7 +174,6 @@
           (local-date-time/with-minute (:date-time this) minute)
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1090
 (def-method with-second ::offset-date-time
   [this ::offset-date-time
    second ::j/int]
@@ -205,7 +181,6 @@
           (-> this :date-time (local-date-time/with-second second))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1105
 (def-method with-nano ::offset-date-time
   [this ::offset-date-time
    nano-of-second ::j/int]
@@ -213,7 +188,6 @@
           (-> this :date-time (local-date-time/with-nano nano-of-second))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1132
 (def-method truncated-to ::offset-date-time
   [this ::offset-date-time
    unit ::temporal-unit/temporal-unit]
@@ -221,7 +195,6 @@
           (-> this :date-time (local-date-time/truncated-to unit))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1216
 (def-method plus-years ::offset-date-time
   [this ::offset-date-time
    years ::j/long]
@@ -229,7 +202,6 @@
           (-> this :date-time (local-date-time/plus-years years))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1240
 (def-method plus-months ::offset-date-time
   [this ::offset-date-time
    months ::j/long]
@@ -237,7 +209,6 @@
           (-> this :date-time (local-date-time/plus-months months))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1259
 (def-method plus-weeks ::offset-date-time
   [this ::offset-date-time
    weeks ::j/long]
@@ -245,7 +216,6 @@
           (-> this :date-time (local-date-time/plus-weeks weeks))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1278
 (def-method plus-days ::offset-date-time
   [this ::offset-date-time
    days ::j/long]
@@ -253,7 +223,6 @@
           (-> this :date-time (local-date-time/plus-days days))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1291
 (def-method plus-hours ::offset-date-time
   [this ::offset-date-time
    hours ::j/long]
@@ -261,7 +230,6 @@
           (-> this :date-time (local-date-time/plus-hours hours))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1304
 (def-method plus-minutes ::offset-date-time
   [this ::offset-date-time
    minutes ::j/long]
@@ -269,7 +237,6 @@
           (-> this :date-time (local-date-time/plus-minutes minutes))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1317
 (def-method plus-seconds ::offset-date-time
   [this ::offset-date-time
    seconds ::j/long]
@@ -277,7 +244,6 @@
           (-> this :date-time (local-date-time/plus-seconds seconds))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1330
 (def-method plus-nanos ::offset-date-time
   [this ::offset-date-time
    nanos ::j/long]
@@ -285,7 +251,6 @@
           (-> this :date-time (local-date-time/plus-nanos nanos))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1405
 (def-method minus-years ::offset-date-time
   [this ::offset-date-time
    years ::j/long]
@@ -293,7 +258,6 @@
           (-> this :date-time (local-date-time/minus-years years))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1429
 (def-method minus-months ::offset-date-time
   [this ::offset-date-time
    months ::j/long]
@@ -301,7 +265,6 @@
           (-> this :date-time (local-date-time/minus-months months))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1448
 (def-method minus-weeks ::offset-date-time
   [this ::offset-date-time
    weeks ::j/long]
@@ -309,7 +272,6 @@
           (-> this :date-time (local-date-time/minus-weeks weeks))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1467
 (def-method minus-days ::offset-date-time
   [this ::offset-date-time
    days ::j/long]
@@ -317,7 +279,6 @@
           (-> this :date-time (local-date-time/minus-days days))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1480
 (def-method minus-hours ::offset-date-time
   [this ::offset-date-time
    hours ::j/long]
@@ -325,7 +286,6 @@
           (-> this :date-time (local-date-time/minus-hours hours))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1493
 (def-method minus-minutes ::offset-date-time
   [this ::offset-date-time
    minutes ::j/long]
@@ -333,7 +293,6 @@
           (-> this :date-time (local-date-time/minus-minutes minutes))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1506
 (def-method minus-seconds ::offset-date-time
   [this ::offset-date-time
    seconds ::j/long]
@@ -341,7 +300,6 @@
           (-> this :date-time (local-date-time/minus-seconds seconds))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1519
 (def-method minus-nanos ::offset-date-time
   [this ::offset-date-time
    nanos ::j/long]
@@ -349,41 +307,34 @@
           (-> this :date-time (local-date-time/minus-nanos nanos))
           (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1672
 (def-method format string?
   [this ::offset-date-time
    formatter ::date-time-formatter/date-time-formatter]
   (wip ::format))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1693
 (def-method at-zone-same-instant ::zoned-date-time/zoned-date-time
   [this ::offset-date-time
    zone ::zone-id/zone-id]
   (zoned-date-time-impl/of-instant (:date-time this) (:offset this) zone))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1721
 (def-method at-zone-similar-local ::zoned-date-time/zoned-date-time
   [this ::offset-date-time
    zone ::zone-id/zone-id]
   (zoned-date-time-impl/of-local (:date-time this) zone (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1733
 (def-method to-offset-time ::offset-time/offset-time
   [this ::offset-date-time]
   (offset-time-impl/of (-> this :date-time chrono-local-date-time/to-local-time)
                        (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1748
 (def-method to-zoned-date-time ::zoned-date-time/zoned-date-time
   [this ::offset-date-time]
   (zoned-date-time-impl/of (:date-time this) (:offset this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1760
 (def-method to-instant ::instant/instant
   [this ::offset-date-time]
   (-> this :date-time (chrono-local-date-time/to-instant (:offset this))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1821
 (def-method is-after ::j/boolean
   [this ::offset-date-time
    other ::offset-date-time]
@@ -394,7 +345,6 @@
              (> (-> this to-local-time local-time/get-nano)
                 (-> other to-local-time local-time/get-nano))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1838
 (def-method is-before ::j/boolean
   [this ::offset-date-time
    other ::offset-date-time]
@@ -405,7 +355,6 @@
              (< (-> this to-local-time local-time/get-nano)
                 (-> other to-local-time local-time/get-nano))))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1855
 (def-method is-equal ::j/boolean
   [this ::offset-date-time
    other ::offset-date-time]
@@ -483,8 +432,6 @@
                                  local-time/get-nano))
         cmp))))
 
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1802
 (def-method compare-to ::j/int
   [this ::offset-date-time
    other ::offset-date-time]
@@ -500,7 +447,6 @@
 
 (declare of-instant)
 (def-method with ::offset-date-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L908
   ([{:keys [date-time offset] :as this} ::offset-date-time
     adjuster ::temporal-adjuster/temporal-adjuster]
    (cond
@@ -521,7 +467,6 @@
      :else
      (temporal-adjuster/adjust-into adjuster this)))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L423
   ([{:keys [offset date-time] :as this} ::offset-date-time
     field ::temporal-field/temporal-field
     new-value ::j/long]
@@ -542,12 +487,10 @@
                offset)))))
 
 (def-method plus ::offset-date-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1158
   ([this ::offset-date-time
     amount-to-add ::temporal-amount/temporal-amount]
    (temporal-amount/add-to amount-to-add this))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1188
   ([this ::offset-date-time
     amount-to-add ::j/long
     unit ::temporal-unit/temporal-unit]
@@ -558,12 +501,10 @@
      (temporal-unit/add-to unit this amount-to-add))))
 
 (def-method minus ::offset-date-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1356
   ([this ::offset-date-time
     amount-to-subtract ::temporal-amount/temporal-amount]
    (temporal-amount/subtract-from amount-to-subtract this))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1380
   ([this ::offset-date-time
     amount-to-subtract ::j/long
     unit ::temporal-unit/temporal-unit]
@@ -573,7 +514,6 @@
          (plus 1 unit))
      (plus this (- amount-to-subtract) unit))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1654
 (declare from)
 (def-method until ::j/long
   [this ::offset-date-time
@@ -601,8 +541,6 @@
     ([this amount-to-subtract unit] (minus this amount-to-subtract unit)))
   (until [this end-exclusive unit] (until this end-exclusive unit)))
 
-;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L484
 (def-method is-supported ::j/boolean
   [this ::offset-date-time
    field-or-unit (s/or :field ::temporal-field/temporal-field
@@ -617,7 +555,6 @@
       (not= field-or-unit chrono-unit/FOREVER)
       (and field-or-unit (temporal-unit/is-supported-by field-or-unit this)))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L557
 (def-method range ::value-range/value-range
   [this ::offset-date-time
    field ::temporal-field/temporal-field]
@@ -628,7 +565,6 @@
       (temporal-accessor/range (:date-time this) field))
     (temporal-field/range-refined-by field this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L596
 (def-method get ::j/int
   [this ::offset-date-time
    field ::temporal-field/temporal-field]
@@ -644,7 +580,6 @@
       :else
       (temporal-accessor/get (:date-time this) field))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L633
 (def-method get-long ::j/long
   [this ::offset-date-time
    field ::temporal-field/temporal-field]
@@ -660,7 +595,6 @@
       :else
       (temporal-accessor/get-long (:date-time this) field))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1544
 (def-method query ::temporal-query/result
   [this ::offset-date-time
    query ::temporal-query/temporal-query]
@@ -695,7 +629,6 @@
   (get-long [this field] (get-long this field))
   (query [this q] (query this q)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L1590
 (def-method adjust-into ::temporal/temporal
   [this ::offset-date-time
    temporal ::temporal/temporal]
@@ -708,17 +641,13 @@
   temporal-adjuster/ITemporalAdjuster
   (adjust-into [this temporal] (adjust-into this temporal)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L161
 (defn time-line-order [] (wip ::time-line-order))
 (s/fdef time-line-order :ret ::j/wip)
 
 (def-constructor now ::offset-date-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L211
   ([]
    (now (clock-impl/system-default-zone)))
 
-  ;; NB! This method is overloaded!
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L228
   ([clock-or-zone-id (s/or :clock ::clock/clock
                            :zone-id ::zone-id/zone-id)]
    (condp satisfies? clock-or-zone-id
@@ -731,18 +660,15 @@
                      (-> clock-or-zone-id clock/get-zone zone-id/get-rules (zone-rules/get-offset now))))))))
 
 (def-constructor of ::offset-date-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L275
   ([date-time ::local-date-time/local-date-time
     offset ::zone-offset/zone-offset]
    (impl/of date-time offset))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L261
   ([date ::local-date/local-date
     time ::local-time/local-time
     offset ::zone-offset/zone-offset]
    (impl/of date time offset))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L303
   ([year ::j/year
     month ::j/month
     day-of-month ::j/day
@@ -753,7 +679,6 @@
     offset ::zone-offset/zone-offset]
    (impl/of year month day-of-month hour minute second nano-of-second offset)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L323
 (def-constructor of-instant ::offset-date-time
   [instant ::instant/instant
    zone ::zone-id/zone-id]
@@ -764,7 +689,6 @@
                                                   offset)]
     (impl/->OffsetDateTime ldt offset)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L354
 (def-constructor from ::offset-date-time
   [temporal ::temporal-accessor/temporal-accessor]
   (if (satisfies? offset-date-time/IOffsetDateTime temporal)

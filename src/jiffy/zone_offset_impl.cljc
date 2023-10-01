@@ -34,14 +34,12 @@
 
 (def MAX_SECONDS (* 18 local-time/SECONDS_PER_HOUR))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L413
 (s/def ::of-total-seconds-args (s/tuple ::total-seconds))
 (defn of-total-seconds [total-seconds]
   (when (not (<= (- MAX_SECONDS) total-seconds MAX_SECONDS))
     (throw (ex DateTimeException "Zone offset not in valid range: -18:00 to +18:00")))
   (create total-seconds))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L151
 (def UTC (of-total-seconds 0))
 
 (defn --validate [hours minutes seconds]
@@ -78,7 +76,6 @@
   (--validate hours minutes seconds)
   (of-total-seconds (--total-seconds hours minutes seconds)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneOffset.java#L202
 (defn of [offset-id]
   (if (= "Z" offset-id)
     UTC

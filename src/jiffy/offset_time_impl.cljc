@@ -13,12 +13,10 @@
    offset ::zone-offset/zone-offset])
 
 (def-constructor of ::offset-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L212
   ([time ::local-time/local-time
     offset ::zone-offset/zone-offset]
    (->OffsetTime time offset))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetTime.java#L235
   ([hour ::j/hour-of-day
     minute ::j/minute-of-hour
     second ::j/second-of-minute

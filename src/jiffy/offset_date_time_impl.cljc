@@ -15,19 +15,16 @@
    offset ::zone-offset/zone-offset])
 
 (def-constructor of ::offset-date-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L275
   ([date-time ::local-date-time/local-date-time
     offset ::zone-offset/zone-offset]
    (->OffsetDateTime date-time offset))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L261
   ([date ::local-date/local-date
     time ::local-time/local-time
     offset ::zone-offset/zone-offset]
    (->OffsetDateTime (local-date-time-impl/of date time)
                      offset))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/OffsetDateTime.java#L303
   ([year ::j/year
     month ::j/month
     day-of-month ::j/day

@@ -380,7 +380,6 @@
 (s/def ::string string?)
 
 (def-constructor parse ::year
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/Year.java#L276
   ([text ::string]
    (of (math/parse-long text)))
 
