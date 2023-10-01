@@ -192,6 +192,8 @@
   (s/with-gen #(satisfies? clock/IClock %)
     (fn [] (gen/one-of [(s/gen ::clock-impl/fixed-clock)]))))
 
+;; TODO - add jiffy.temporal.iso-fields as temporal-field
+;; TODO - add jiffy.temporal.week-fields as temporal-field
 (s/def ::temporal-field/temporal-field (set (chrono-field/values)))
 (s/def ::chrono-unit/chrono-unit (set (chrono-unit/values)))
 (s/def ::month/month (set (month-impl/values)))
@@ -202,6 +204,7 @@
 
 (s/def ::day-of-week/day-of-week (set (day-of-week/values)))
 
+;; TODO - add jiffy.temporal.iso-fields as temporal-unit
 (s/def ::temporal-unit/temporal-unit ::chrono-unit/chrono-unit)
 
 (s/def ::temporal-amount/temporal-amount
