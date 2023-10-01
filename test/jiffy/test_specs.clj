@@ -91,6 +91,7 @@
 (s/def ::zone-rules-impl/zone-rules (set (vals @zone-rules-store/zone-id->rules)))
 (s/def ::zone-rules/zone-rules ::zone-rules-impl/zone-rules)
 (s/def ::month-day/month-day ::month-day-impl/month-day)
+(s/def ::year-month/year-month ::year-month-impl/year-month)
 (s/def ::year/year ::year-impl/year)
 (s/def ::j/zone-id (set (keys @zone-rules-store/zone-id->rules)))
 
@@ -279,7 +280,7 @@
                                     ::offset-date-time/offset-date-time
                                     ::offset-time/offset-time
                                     ::year/year
-                                    ;; ::year-month/year-month
+                                    ::year-month/year-month
                                     ;; ::zone-offset/zone-offset
                                     ;; ::iso-era/iso-era
 
@@ -314,7 +315,7 @@
                                    ::offset-date-time/offset-date-time
                                    ::offset-time/offset-time
                                    ::year/year
-                                   ;; ::year-month/year-month
+                                   ::year-month/year-month
                                    ;; ::zoned-date-time/zoned-date-time
                                    ;; TODO: See method ZoneId#toTemporal
                                    ;; ::zone-offset/zone-offset
