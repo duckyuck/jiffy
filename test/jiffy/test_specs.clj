@@ -158,6 +158,9 @@
 (s/def ::period-impl/string
   (s/with-gen string? (to-string-gen ::period/period)))
 
+(s/def ::month-day-impl/string
+  (s/with-gen string? (to-string-gen ::month-day/month-day)))
+
 (defn formatter-gen [spec formatter-builder]
   #(->> spec
         s/gen
@@ -346,7 +349,7 @@
 
 (comment
 
-  (-> #'jiffy.month/from
+  (-> #'jiffy.month-day/parse
       s/get-spec
       :args
       s/gen
@@ -360,7 +363,7 @@
 
 
 
-  (-> ::iso-era/iso-era
+  (-> ::month-day/month-day
       s/gen
       gen/sample)
 

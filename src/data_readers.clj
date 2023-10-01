@@ -10,6 +10,7 @@
  jiffy/lt jiffy.edn-clj/lt
  jiffy/ld jiffy.edn-clj/ld
  jiffy/month jiffy.edn-clj/month
+ jiffy/month-day jiffy.edn-clj/month-day
  jiffy/year-month jiffy.edn-clj/year-month
  jiffy/year jiffy.edn-clj/year
  jiffy/zone jiffy.edn-clj/zone

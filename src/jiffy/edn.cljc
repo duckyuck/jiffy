@@ -18,6 +18,7 @@
             [jiffy.offset-time]
             [jiffy.zone-region-impl #?@(:cljs [:refer [ZonedRegion]])]
             [jiffy.month #?@(:cljs [:refer [Month]])]
+            [jiffy.month-day #?@(:cljs [:refer [MonthDay]])]
             [jiffy.year-month #?@(:cljs [:refer [YearMonth]])]
             [jiffy.year #?@(:cljs [:refer [Year]])]
             [jiffy.period #?@(:cljs [:refer [Period]])]
@@ -46,6 +47,7 @@
                    [jiffy.offset_time_impl OffsetTime]
                    [jiffy.zone_region_impl ZoneRegion]
                    [jiffy.month Month]
+                   [jiffy.month_day MonthDay]
                    [jiffy.year_month YearMonth]
                    [jiffy.year Year]
                    [jiffy.period Period]
@@ -155,6 +157,11 @@
     {:tag :year-month
      :record YearMonth
      :read-fn 'jiffy.year-month/parse
+     :write-fn 'jiffy.protocols.string/to-string}
+
+    {:tag :month-day
+     :record MonthDay
+     :read-fn 'jiffy.month-day/parse
      :write-fn 'jiffy.protocols.string/to-string}
 
     {:tag :year

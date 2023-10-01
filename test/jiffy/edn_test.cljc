@@ -11,6 +11,7 @@
             [jiffy.local-date-time :as local-date-time]
             [jiffy.month :as month]
             [jiffy.year-month :as year-month]
+            [jiffy.month-day :as month-day]
             [jiffy.year :as year]
             [jiffy.zone-offset :as zone-offset]
             [jiffy.clock :as clock]
@@ -218,6 +219,10 @@
   (testing "YearMonth"
     (is (= (pr-str (year-month/of 1111 11))
            "#jiffy/year-month \"1111-11\"")))
+
+  (testing "MonthDay"
+    (is (= (pr-str (month-day/of 11 11))
+           "#jiffy/month-day \"--11-11\"")))
 
   (testing "Year"
     (is (= (pr-str (year/of 1111))
@@ -440,6 +445,10 @@
        (is (= #jiffy/year-month "1111-11"
               (year-month/of 1111 11))))
 
+     (testing "MonthDay"
+       (is (= #jiffy/month-day "--11-11"
+              (month-day/of 11 11))))
+
      (testing "Year"
        (is (= #jiffy/year "1111"
               (year/of 1111))))
@@ -468,6 +477,4 @@
      (testing "OffsetTime"
        (is (= #jiffy/ot "11:11:11.111111111+11:11"
               (offset-time/of (local-time/of 11 11 11 111111111)
-                              (zone-offset/of "+11:11")))))
-
-     ))
+                              (zone-offset/of "+11:11")))))))

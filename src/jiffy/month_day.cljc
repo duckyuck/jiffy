@@ -3,7 +3,7 @@
   (:require [clojure.spec.alpha :as s]
             #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
-            [jiffy.exception :refer [DateTimeException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
+            [jiffy.exception :refer [DateTimeException DateTimeParseException UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.clock :as clock]
             [jiffy.protocols.format.date-time-formatter :as date-time-formatter]
@@ -30,7 +30,8 @@
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.chrono.iso-chronology :as iso-chronology]
             [jiffy.chrono.chronology :as chronology]
-            [jiffy.clock :as clock-impl]))
+            [jiffy.clock :as clock-impl]
+            [jiffy.protocols.string :as string]))
 
 (def-record MonthDay ::month-day-record
   [month ::j/month-of-year
@@ -261,12 +262,36 @@
                   {:temporal temporal}
                   e))))))
 
+(s/def ::string string?)
+
+(def PATTERN (delay #"--(\d{2})-(\d{2})"))
+
 (def-constructor parse ::month-day
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L293
-  ([text ::j/char-sequence]
-   (wip ::parse))
+  ([text ::string]
+   (if-let [[month day]
+            (some->> (re-matches @PATTERN text)
+                     rest
+                     (map math/parse-long))]
+     (of month day)
+     (throw (ex DateTimeParseException (str "Failed to parse MonthDay: '" text "'")))))
 
   ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/MonthDay.java#L307
-  ([text ::j/char-sequence
-    formatter ::date-time-formatter/date-time-formatter]
-   (wip ::parse)))
+  ;; ([text ::j/char-sequence
+  ;;   formatter ::date-time-formatter/date-time-formatter]
+  ;;  (wip ::parse))
+  )
+
+(def-method to-string string?
+  [{:keys [month day]} ::month-day]
+  (str "--"
+       (when (< month 10)
+         "0")
+       month
+       "-"
+       (when (< day 10)
+         "0")
+       day))
+
+(extend-type MonthDay
+  string/IString
+  (to-string [this] (to-string this)))
