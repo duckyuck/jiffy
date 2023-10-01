@@ -164,20 +164,9 @@
 
 (comment
 
-  (let [i1 (instant/now)
-        i2 (-> i1
-               (Instant/plus-seconds 30)
-               (Instant/plus-millis 2500))]
-    (duration/between i1 i2))
-
-  (let [i1 (instant/now)
-        i2 (-> i1
-               (Instant/plus-seconds 30)
-               (Instant/plus-millis 2500))]
-    (compare i1 i2))
-
-  (compare 1 0)
-
+  (do
+    (require '[flow-storm.api :as fs-api])
+    (fs-api/local-connect))
 
   )
 
