@@ -10,13 +10,14 @@
             [jiffy.specs :as j]
             [jiffy.temporal.temporal-queries :as temporal-queries]
             [jiffy.zone-offset-impl :as zone-offset]
-            [jiffy.zone-region-impl :as zone-region]))
+            [jiffy.zone-region-impl :as zone-region]
+            [jiffy.zone.zone-rules-provider :as zone-rules-provider]))
 
 (s/def ::zone-id ::zone-id/zone-id)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L287
-(defn get-available-zone-ids [] (wip ::get-available-zone-ids))
-(s/fdef get-available-zone-ids :ret ::j/wip)
+(def-constructor get-available-zone-ids (s/coll-of ::j/zone-id)
+  []
+  (zone-rules-provider/get-available-zone-ids))
 
 (declare of-offset)
 
@@ -36,14 +37,13 @@
        (catch DateTimeException e
          (throw (ex DateTimeException (str "Invalid ID for offset-based ZoneId: " zone-id) ex)))))))
 
-(s/def ::of-args (s/tuple ::j/wip))
-(defn of
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L355
-  ([zone-id]
+(def-constructor of ::zone-id
+  ([zone-id ::j/zone-id]
    (of zone-id true))
 
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L308
-  ([zone-id arg]
+  ([zone-id ::j/zone-id
+    arg (s/or :check-available ::j/boolean
+              :alias-map (s/map-of string? string?))]
    (cond
      (boolean? arg)
      (do
@@ -70,11 +70,10 @@
 
      :default
      (throw (ex JavaNullPointerException "Second argument to of should not be null")))))
-(s/fdef of :args ::of-args :ret ::zone-id)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L372
-(s/def ::of-offset-args (s/tuple string? :ijffy.zone-offset/zone-offset))
-(defn of-offset [prefix offset]
+(def-constructor of-offset ::zone-id
+  [prefix string?
+   offset ::zone-offset/zone-offset]
   (assert/require-non-nil prefix "prefix")
   (assert/require-non-nil offset "offset")
   (cond
@@ -91,22 +90,18 @@
 
     :default
     (zone-region/->ZoneRegion prefix (zone-id/get-rules offset))))
-(s/fdef of-offset :args ::of-offset-args :ret ::zone-id)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L459
-(s/def ::from-args (s/tuple ::temporal-accessor/temporal-accessor))
-(defn from [temporal]
+(def-constructor from ::zone-id
+  [temporal ::temporal-accessor/temporal-accessor]
   (let [obj (temporal-accessor/query temporal (temporal-queries/zone))]
     (if (nil? obj)
       (throw (ex DateTimeException (str "Unable to obtain ZoneId from TemporalAccessor: "
                                         temporal " of type " (type temporal))))
       obj)))
-(s/fdef from :args ::from-args :ret ::zone-id)
 
 ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L224
 (def SHORT_IDS ::SHORT_IDS--not-implemented)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/ZoneId.java#L271
 (def-constructor system-default ::zone-id
   []
   #?(:clj
