@@ -30,48 +30,20 @@
 
 (s/def ::chrono-local-date-time ::chrono-local-date-time/chrono-local-date-time)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L192
-(def-method -get-chronology ::chronology/chronology
+(def-method get-chronology ::chronology/chronology
   [this ::chrono-local-date-time]
   (-> this
       chrono-local-date-time/to-local-date
       chrono-local-date/get-chronology))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L236
-(def-method -is-supported ::j/boolean
+(def-method is-supported ::j/boolean
   [this ::chrono-local-date-time
    unit ::temporal-unit/temporal-unit]
   (if (chrono-unit/chrono-unit? unit)
     (not= unit chrono-unit/FOREVER)
     (and unit (temporal-unit/is-supported-by unit this))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L272
-(def-method -with ::chrono-local-date-time
-  [this ::chrono-local-date-time
-   adjuster ::temporal-adjuster/temporal-adjuster]
-  (wip ::-with))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L290
-(def-method -plus ::chrono-local-date-time
-  [this ::chrono-local-date-time
-   amount ::temporal-amount/temporal-amount]
-  (wip ::-plus))
-
-
-(def-method -minus ::chrono-local-date-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L308
-  ([this ::chrono-local-date-time
-    amount ::temporal-amount/temporal-amount]
-   (wip ::-minus))
-
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L318
-  ([this ::chrono-local-date-time
-    amount-to-subtract ::j/long
-    unit ::temporal-unit/temporal-unit]
-   (wip ::-minus)))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L343
-(def-method -query ::j/wip
+(def-method query ::j/wip
   [this ::chrono-local-date-time
    query ::temporal-query/temporal-query]
   (cond
@@ -84,7 +56,7 @@
     (chrono-local-date-time/to-local-time this)
 
     (= query (temporal-queries/chronology))
-    (-get-chronology this)
+    (get-chronology this)
 
     (= query (temporal-queries/precision))
     chrono-unit/NANOS
@@ -92,8 +64,7 @@
     :else
     (temporal-query/query-from query this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L384
-(def-method -adjust-into ::temporal/temporal
+(def-method adjust-into ::temporal/temporal
   [this ::chrono-local-date-time
    temporal ::temporal/temporal]
   (-> temporal
@@ -104,14 +75,7 @@
                                                   chrono-local-date-time/to-local-time
                                                   local-time/to-nano-of-day))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L404
-(def-method -format string?
-  [this ::chrono-local-date-time
-   formatter ::date-time-formatter/date-time-formatter]
-  (wip ::-format))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L470
-(def-method -to-epoch-second ::j/long
+(def-method to-epoch-second ::j/long
   [this ::chrono-local-date-time
    offset ::zone-offset/zone-offset]
   (let [epoch-day (-> this chrono-local-date-time/to-local-date chrono-local-date/to-epoch-day)
@@ -121,17 +85,15 @@
                  (math/add-exact (math/multiply-exact epoch-day 86400)))]
     (->> offset zone-offset/get-total-seconds (math/subtract-exact secs))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L452
-(def-method -to-instant ::instant/instant
+(def-method to-instant ::instant/instant
   [this ::chrono-local-date-time
    offset ::zone-offset/zone-offset]
-  (instant-impl/of-epoch-second (-to-epoch-second this offset)
+  (instant-impl/of-epoch-second (to-epoch-second this offset)
                                 (-> this
                                     chrono-local-date-time/to-local-time
                                     local-time/get-nano)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L506
-(def-method -compare-to ::j/int
+(def-method compare-to ::j/int
   [this ::chrono-local-date-time
    other ::chrono-local-date-time]
   (let [cmp (time-comparable/compare-to (chrono-local-date-time/to-local-date this)
@@ -140,13 +102,12 @@
       (let [cmp (time-comparable/compare-to (chrono-local-date-time/to-local-time this)
                                             (chrono-local-date-time/to-local-time other))]
         (if (zero? cmp)
-          (time-comparable/compare-to (-get-chronology this)
-                                      (-get-chronology other))
+          (time-comparable/compare-to (get-chronology this)
+                                      (get-chronology other))
           cmp))
       cmp)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L531
-(def-method -is-after ::j/boolean
+(def-method is-after ::j/boolean
   [this ::chrono-local-date-time
    other ::chrono-local-date-time]
   (let [this-ep-day (-> this chrono-local-date-time/to-local-date chrono-local-date/to-epoch-day)
@@ -157,8 +118,7 @@
         (and (= this-ep-day other-ep-day)
              (> this-nano-of-day other-nano-of-day)))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L552
-(def-method -is-before  ::j/boolean
+(def-method is-before  ::j/boolean
   [this ::chrono-local-date-time
    other ::chrono-local-date-time]
   (let [this-ep-day (-> this chrono-local-date-time/to-local-date chrono-local-date/to-epoch-day)
@@ -169,8 +129,7 @@
         (and (= this-ep-day other-ep-day)
              (< this-nano-of-day other-nano-of-day)))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoLocalDateTime.java#L573
-(def-method -is-equal ::j/boolean
+(def-method is-equal ::j/boolean
   [this ::chrono-local-date-time
    other ::chrono-local-date-time]
   (and (= (-> this chrono-local-date-time/to-local-date chrono-local-date/to-epoch-day)

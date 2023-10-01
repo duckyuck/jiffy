@@ -17,18 +17,9 @@
             [jiffy.period :as period-impl]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
             [jiffy.protocols.chrono.chrono-local-date-time :as chrono-local-date-time]
-            [jiffy.protocols.chrono.chrono-local-date-time-impl
-             :as chrono-local-date-time-impl]
-            [jiffy.protocols.chrono.chrono-period-impl :as chrono-period-impl]
             [jiffy.protocols.chrono.chrono-zoned-date-time :as chrono-zoned-date-time]
             [jiffy.protocols.chrono.era :as era]
-            [jiffy.protocols.chrono.hijrah-date :as hijrah-date]
-            [jiffy.protocols.chrono.hijrah-era :as hijrah-era]
             [jiffy.protocols.chrono.iso-era :as iso-era]
-            [jiffy.protocols.chrono.japanese-date :as japanese-date]
-            [jiffy.protocols.chrono.japanese-era :as japanese-era]
-            [jiffy.protocols.chrono.minguo-date :as minguo-date]
-            [jiffy.protocols.chrono.thai-buddhist-date :as thai-buddhist-date]
             [jiffy.protocols.clock :as clock]
             [jiffy.protocols.duration :as duration]
             [jiffy.protocols.format.parsed :as parsed]
@@ -220,10 +211,6 @@
     (fn [] (gen/one-of (map s/gen [
                                    :jiffy.local-date/local-date
                                    ;; :jiffy.chrono.chrono-local-date-impl/chrono-local-date-impl
-                                   ;; :jiffy.chrono.hijrah-date/hijrah-date
-                                   ;; :jiffy.chrono.japanese-date/japanese-date
-                                   ;; :jiffy.chrono.minguo-date/minguo-date
-                                   ;; :jiffy.chrono.thai-buddhist-date/thai-buddhist-date
                                    ])))))
 
 (s/def ::chrono-local-date-time/chrono-local-date-time
@@ -248,12 +235,7 @@
                                    ;; ::chrono-zoned-date-time/chrono-zoned-date-time
                                    ;; :jiffy.chrono.chrono-local-date-impl/chrono-local-date-impl
                                    ;; :jiffy.chrono.chrono-local-date-time-impl/chrono-local-date-time-impl
-                                   ;; :jiffy.chrono.chrono-zoned-date-time-impl/chrono-zoned-date-time-impl
 
-                                   ;; :jiffy.chrono.hijrah-date/hijrah-date
-                                   ;; :jiffy.chrono.japanese-date/japanese-date
-                                   ;; :jiffy.chrono.minguo-date/minguo-date
-                                   ;; :jiffy.chrono.thai-buddhist-date/thai-buddhist-date
                                    ])))))
 
 (s/def ::temporal-query/temporal-query
@@ -291,14 +273,7 @@
                                     ;; :jiffy.chrono.chrono-local-date-time-impl/chrono-local-date-time-impl
 
                                     ;; ::era/era
-                                    ;; ::hijrah-date/hijrah-date
-                                    ;; ::hijrah-era/hijrah-era
-                                    ;; ::japanese-date/japanese-date
-                                    ;; ::japanese-era/japanese-era
-                                    ;; ::minguo-date/minguo-date
-                                    ;; ::minguo-era/minguo-era
-                                    ;; ::thai-buddhist-date/thai-buddhist-date
-                                    ;; ::thai-buddhist-era/thai-buddhist-era
+
                                     ]
                                    temporal-adjusters-impl/temporal-adjusters-specs))))))
 
@@ -325,20 +300,10 @@
                                    ;; :jiffy.chrono.chrono-local-date-time-impl/chrono-local-date-time-impl
                                    ;; ::chronology/chronology
                                    ;; ::chrono-zoned-date-time/chrono-zoned-date-time
-                                   ;; :jiffy.chrono.chrono-zoned-date-time-impl/chrono-zoned-date-time-impl
-
 
                                    ::iso-era/iso-era
 
                                    ;; ::era/era
-                                   ;; ::hijrah-era/hijrah-era
-                                   ;; ::hijrah-date/hijrah-date
-                                   ;; ::japanese-era/japanese-era
-                                   ;; ::japanese-date/japanese-date
-                                   ;; ::minguo-date/minguo-date
-                                   ;; ::minguo-era/minguo-era
-                                   ;; ::thai-buddhist-date/thai-buddhist-date
-                                   ;; ::thai-buddhist-era/thai-buddhist-era
 
                                    ;; ::parsed/parsed
                                    ])))))
@@ -384,8 +349,7 @@
       s/gen
       gen/sample
       first
-      :date-time
-      conversion/jiffy->java)
+      jiffy.protocols.chrono.chrono-zoned-date-time/get-chronology)
 
   ;; (gen/sample
   ;;  (gen'/string-from-regex

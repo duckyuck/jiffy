@@ -8,7 +8,6 @@
             [jiffy.asserts :as asserts]
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
             [jiffy.chrono.iso-chronology :as iso-chronology-impl]
-            [jiffy.protocols.chrono.iso-chronology :as iso-chronology]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.exception :refer [ex try* JavaArithmeticException DateTimeException DateTimeParseException UnsupportedTemporalTypeException]]
             [jiffy.local-date-impl :as local-date]
@@ -172,7 +171,7 @@
   (minus-days [this days-to-subtract] (minus-days this days-to-subtract))
   (to-total-months [this] (to-total-months this)))
 
-(def-method get-chronology ::iso-chronology/iso-chronology
+(def-method get-chronology ::iso-chronology-impl/iso-chronology
   [this ::period]
   iso-chronology-impl/INSTANCE)
 

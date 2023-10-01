@@ -30,39 +30,23 @@
 
 (s/def ::chrono-zoned-date-time ::chrono-zoned-date-time/chrono-zoned-date-time)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L186
-(def-method range ::value-range/value-range
-  [this ::chrono-zoned-date-time
-   field ::temporal-field/temporal-field]
-  (wip ::range))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L197
 (def-method get ::j/int
   [this ::chrono-zoned-date-time
    field ::temporal-field/temporal-field]
   (wip ::get))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L211
-(def-method get-long ::j/long
-  [this ::chrono-zoned-date-time
-   field ::temporal-field/temporal-field]
-  (wip ::get-long))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L230
 (def-method to-local-date ::chrono-local-date/chrono-local-date
   [this ::chrono-zoned-date-time]
   (-> this
       chrono-zoned-date-time/to-local-date-time
       chrono-local-date-time/to-local-date))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L242
 (def-method to-local-time ::local-time/local-time
   [this ::chrono-zoned-date-time]
   (-> this
       chrono-zoned-date-time/to-local-date-time
       chrono-local-date-time/to-local-time))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L214
 (def-method to-epoch-second ::j/long
   [this ::chrono-zoned-date-time]
   (let [epoch-day (-> this to-local-date chrono-local-date/to-epoch-day)
@@ -74,14 +58,12 @@
                              chrono-zoned-date-time/get-offset
                              zone-offset/get-total-seconds))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L264
 (def-method get-chronology ::chronology/chronology
   [this ::chrono-zoned-date-time]
   (-> this
       to-local-date
       chrono-local-date/get-chronology))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L383
 (def-method is-supported ::j/boolean
   [this ::chrono-zoned-date-time
    unit ::temporal-unit/temporal-unit]
@@ -89,32 +71,6 @@
     (not= unit chrono-unit/FOREVER)
     (and unit (temporal-unit/is-supported-by unit this))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L419
-(def-method with ::chrono-zoned-date-time
-  [this ::chrono-zoned-date-time
-   adjuster ::temporal-adjuster/temporal-adjuster]
-  (wip ::with))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L437
-(def-method plus ::chrono-zoned-date-time
-  [this ::chrono-zoned-date-time
-   amount ::temporal-amount/temporal-amount]
-  (wip ::plus))
-
-(s/def ::minus-args ::j/wip)
-(def-method minus ::chrono-zoned-date-time
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L455
-  ([this ::chrono-zoned-date-time
-    amount ::temporal-amount/temporal-amount]
-   (wip ::minus))
-
-  ;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L465
-  ([this ::chrono-zoned-date-time
-    amount-to-subtract ::j/long
-    unit ::temporal-unit/temporal-unit]
-   (wip ::minus)))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L490
 (def-method query ::temporal-query/result
   [this ::chrono-zoned-date-time
    query ::temporal-query/temporal-query]
@@ -138,13 +94,6 @@
     :else
     (temporal-query/query-from query this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L521
-(def-method format string?
-  [this ::chrono-zoned-date-time
-   formatter ::date-time-formatter/date-time-formatter]
-  (wip ::format))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/ChronoZonedDateTime.java#L537
 (def-method to-instant ::instant/instant
   [this ::chrono-zoned-date-time]
   (instant-impl/of-epoch-second

@@ -33,18 +33,3 @@
   (asserts/require-non-nil temporal "temporal")
   (or (temporal-accessor/query temporal (temporal-queries/chronology))
       iso-chronology/INSTANCE))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Chronology.java#L229
-(def-constructor of-locale ::chronology
-  [locale ::j/locale]
-  (wip ::of-locale))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Chronology.java#L254
-(def-constructor of ::chronology
-  [id string?]
-  (wip ::of))
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Chronology.java#L268
-(def-constructor get-available-chronologies (s/coll-of ::chronology)
-  []
-  (wip ::get-available-chronologies))

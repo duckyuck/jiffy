@@ -63,7 +63,7 @@
 
 (def-method is-leap-year ::j/boolean
   [this ::year-month]
-  (iso-chronology/-is-leap-year iso-chronology/INSTANCE (:year this)))
+  (iso-chronology/is-leap-year iso-chronology/INSTANCE (:year this)))
 
 (def-method length-of-month ::j/int
   [this ::year-month]

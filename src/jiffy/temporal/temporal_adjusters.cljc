@@ -6,7 +6,6 @@
             [jiffy.dev.wip :refer [wip]]
             [jiffy.day-of-week :as day-of-week]
             [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.protocols.temporal.temporal-adjusters :as temporal-adjusters]
             [jiffy.specs :as j]
             [jiffy.math :as math]
             [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]

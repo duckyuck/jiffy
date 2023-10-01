@@ -53,7 +53,12 @@
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/is-before)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/is-after)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/is-equal)
-(test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/get-chronology)
+(test-proto-fn! jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/get-chronology)
+
+(comment
+
+  (jiffy.protocols.chrono.chrono-zoned-date-time/get-chronology)
+  )
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/to-instant)
 ;; (test-proto-fn! jiffy.zoned-date-time jiffy.protocols.chrono.chrono-zoned-date-time/format)
 (test-proto-fn jiffy.zoned-date-time jiffy.protocols.temporal.temporal/with)

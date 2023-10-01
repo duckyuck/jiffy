@@ -1,7 +1,6 @@
 (ns jiffy.temporal.julian-fields
   (:require [clojure.spec.alpha :as s]
             [jiffy.dev.wip :refer [wip]]
-            [jiffy.protocols.temporal.julian-fields :as julian-fields]
             [jiffy.specs :as j]))
 
 (defrecord JulianFields [])

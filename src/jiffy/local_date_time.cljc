@@ -325,7 +325,7 @@
   [this ::local-date-time
    other ::chrono-local-date-time/chrono-local-date-time]
   (if-not (satisfies? local-date-time/ILocalDateTime other)
-    (chrono-local-date-time-defaults/-compare-to this other)
+    (chrono-local-date-time-defaults/compare-to this other)
     (let [cmp (time-comparable/compare-to (:date this) (:date other))]
       (if (zero? cmp)
         (time-comparable/compare-to (:time this) (:time other))
@@ -364,31 +364,31 @@
    other ::chrono-local-date-time/chrono-local-date-time]
   (if (satisfies? local-date-time/ILocalDateTime other)
     (pos? (--compare-to0 this other))
-    (chrono-local-date-time-defaults/-is-after this other)))
+    (chrono-local-date-time-defaults/is-after this other)))
 
 (def-method is-before ::j/boolean
   [this ::local-date-time
    other ::chrono-local-date-time/chrono-local-date-time]
   (if (satisfies? local-date-time/ILocalDateTime other)
     (neg? (--compare-to0 this other))
-    (chrono-local-date-time-defaults/-is-before this other)))
+    (chrono-local-date-time-defaults/is-before this other)))
 
 (def-method is-equal ::j/boolean
   [this ::local-date-time
    other ::chrono-local-date-time/chrono-local-date-time]
   (if (satisfies? local-date-time/ILocalDateTime other)
     (zero? (--compare-to0 this other))
-    (chrono-local-date-time-defaults/-is-equal this other)))
+    (chrono-local-date-time-defaults/is-equal this other)))
 
 (def-method to-epoch-second ::j/long
   [this ::local-date-time
    offset ::zone-offset/zone-offset]
-  (chrono-local-date-time-defaults/-to-epoch-second this offset))
+  (chrono-local-date-time-defaults/to-epoch-second this offset))
 
 (def-method to-instant ::instant/instant
   [this ::local-date-time
    offset ::zone-offset/zone-offset]
-  (chrono-local-date-time-defaults/-to-instant this offset))
+  (chrono-local-date-time-defaults/to-instant this offset))
 
 (extend-type LocalDateTime
   chrono-local-date-time/IChronoLocalDateTime
@@ -535,7 +535,7 @@
    field-or-unit (s/or :field ::temporal-field/temporal-field
                        :unit ::temporal-unit/temporal-unit)]
   (if (satisfies? temporal-unit/ITemporalUnit field-or-unit)
-    (chrono-local-date-time-defaults/-is-supported this field-or-unit)
+    (chrono-local-date-time-defaults/is-supported this field-or-unit)
     (if (chrono-field/chrono-field? field-or-unit)
       (or (chrono-field/-is-date-based field-or-unit)
           (chrono-field/-is-time-based field-or-unit))
@@ -573,7 +573,7 @@
    query ::temporal-query/temporal-query]
   (if (= query (temporal-queries/local-date))
     (:date this)
-    (chrono-local-date-time-defaults/-query this query)))
+    (chrono-local-date-time-defaults/query this query)))
 
 (extend-type LocalDateTime
   temporal-accessor/ITemporalAccessor
@@ -586,7 +586,7 @@
 (def-method adjust-into ::temporal/temporal
   [this ::local-date-time
    temporal ::temporal/temporal]
-  (chrono-local-date-time-defaults/-adjust-into this temporal))
+  (chrono-local-date-time-defaults/adjust-into this temporal))
 
 (extend-type LocalDateTime
   temporal-adjuster/ITemporalAdjuster

@@ -442,7 +442,7 @@
   [this ::local-date
    other ::chrono-local-date/chrono-local-date]
   (if-not (satisfies? chrono-local-date/IChronoLocalDate other)
-    (chrono-local-date-defaults/-compare-to this other)
+    (chrono-local-date-defaults/compare-to this other)
     (compare-to0 this other)))
 
 (extend-type LocalDate
@@ -508,21 +508,21 @@
    other ::chrono-local-date/chrono-local-date]
   (if (satisfies? local-date/ILocalDate other)
     (pos? (compare-to0 this other))
-    (chrono-local-date-defaults/-is-after this other)))
+    (chrono-local-date-defaults/is-after this other)))
 
 (def-method is-before ::j/boolean
   [this ::local-date
    other ::chrono-local-date/chrono-local-date]
   (if (satisfies? local-date/ILocalDate other)
     (neg? (compare-to0 this other))
-    (chrono-local-date-defaults/-is-before this other)))
+    (chrono-local-date-defaults/is-before this other)))
 
 (def-method is-equal ::j/boolean
   [this ::local-date
    other ::chrono-local-date/chrono-local-date]
   (if (satisfies? local-date/ILocalDate other)
     (zero? (compare-to0 this other))
-    (chrono-local-date-defaults/-is-equal this other)))
+    (chrono-local-date-defaults/is-equal this other)))
 
 (extend-type LocalDate
   chrono-local-date/IChronoLocalDate
@@ -697,7 +697,7 @@
   [this ::local-date
    field-or-unit (s/or :field ::temporal-field/temporal-field
                        :unit ::temporal-unit/temporal-unit)]
-  (chrono-local-date-defaults/-is-supported this field-or-unit))
+  (chrono-local-date-defaults/is-supported this field-or-unit))
 
 (def-method range ::value-range/value-range
   [this ::local-date
@@ -763,7 +763,7 @@
    q ::temporal-query/temporal-query]
   (if (= q (temporal-queries/local-date))
     this
-    (chrono-local-date-defaults/-query this q)))
+    (chrono-local-date-defaults/query this q)))
 
 (extend-type LocalDate
   temporal-accessor/ITemporalAccessor
@@ -777,7 +777,7 @@
 (def-method adjust-into ::temporal/temporal
   [this ::local-date
    temporal ::temporal/temporal]
-  (chrono-local-date-defaults/-adjust-into this temporal))
+  (chrono-local-date-defaults/adjust-into this temporal))
 
 (extend-type LocalDate
   temporal-adjuster/ITemporalAdjuster

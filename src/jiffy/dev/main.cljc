@@ -1,29 +1,8 @@
 (ns ^:figwheel-hooks jiffy.dev.main
   (:require jiffy.math.big-decimal
-            jiffy.chrono.abstract-chronology
-            jiffy.chrono.chrono-local-date
-            jiffy.chrono.chrono-local-date-impl
-            jiffy.chrono.chrono-local-date-time
-            jiffy.chrono.chrono-local-date-time-impl
             jiffy.chrono.chronology
-            jiffy.chrono.chrono-period
-            jiffy.chrono.chrono-period-impl
-            jiffy.chrono.chrono-zoned-date-time
-            jiffy.chrono.chrono-zoned-date-time-impl
-            jiffy.chrono.hijrah-chronology
-            jiffy.chrono.hijrah-date
-            jiffy.chrono.hijrah-era
             jiffy.chrono.iso-chronology
             jiffy.chrono.iso-era
-            jiffy.chrono.japanese-chronology
-            jiffy.chrono.japanese-date
-            jiffy.chrono.japanese-era
-            jiffy.chrono.minguo-chronology
-            jiffy.chrono.minguo-date
-            jiffy.chrono.minguo-era
-            jiffy.chrono.thai-buddhist-chronology
-            jiffy.chrono.thai-buddhist-date
-            jiffy.chrono.thai-buddhist-era
             jiffy.clock
             jiffy.clock
             jiffy.protocols.clock
@@ -78,31 +57,12 @@
 
 (comment
   jiffy.math.big-decimal/keep-me
-  jiffy.chrono.abstract-chronology/keep-me
-  jiffy.chrono.chrono-local-date/keep-me
-  jiffy.chrono.chrono-local-date-impl/keep-me
-  jiffy.chrono.chrono-local-date-time/keep-me
   jiffy.chrono.chrono-local-date-time-impl/keep-me
-  jiffy.chrono.chrono-period/keep-me
   jiffy.chrono.chrono-period-impl/keep-me
-  jiffy.chrono.chrono-zoned-date-time/keep-me
-  jiffy.chrono.chrono-zoned-date-time-impl/keep-me
   jiffy.chrono.chronology/keep-me
   jiffy.chrono.era/keep-me
-  jiffy.chrono.hijrah-chronology/keep-me
-  jiffy.chrono.hijrah-date/keep-me
-  jiffy.chrono.hijrah-era/keep-me
   jiffy.chrono.iso-chronology/keep-me
   jiffy.chrono.iso-era/keep-me
-  jiffy.chrono.japanese-chronology/keep-me
-  jiffy.chrono.japanese-date/keep-me
-  jiffy.chrono.japanese-era/keep-me
-  jiffy.chrono.minguo-chronology/keep-me
-  jiffy.chrono.minguo-date/keep-me
-  jiffy.chrono.minguo-era/keep-me
-  jiffy.chrono.thai-buddhist-chronology/keep-me
-  jiffy.chrono.thai-buddhist-date/keep-me
-  jiffy.chrono.thai-buddhist-era/keep-me
   jiffy.clock/keep-me
   jiffy.day-of-week/keep-me
   jiffy.dev.wip/keep-me
