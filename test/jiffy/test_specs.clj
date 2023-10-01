@@ -235,7 +235,7 @@
                                    :jiffy.offset-time/offset-time
                                    :jiffy.year/year
                                    :jiffy.year-month/year-month
-                                   ;; :jiffy.zoned-date-time/zoned-date-time
+                                   :jiffy.zoned-date-time/zoned-date-time
 
                                    ::chrono-local-date/chrono-local-date
                                    ::chrono-local-date-time/chrono-local-date-time
@@ -310,7 +310,7 @@
                                    ::offset-time/offset-time
                                    ::year/year
                                    ::year-month/year-month
-                                   ;; ::zoned-date-time/zoned-date-time
+                                   ::zoned-date-time/zoned-date-time
                                    ::zone-offset/zone-offset
 
                                    ::chrono-local-date/chrono-local-date
