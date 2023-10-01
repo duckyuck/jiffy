@@ -1,5 +1,9 @@
 (ns jiffy.chrono.era-defaults
+  (:refer-clojure :exclude [range get])
   (:require [clojure.spec.alpha :as s]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
+            [jiffy.exception :refer [UnsupportedTemporalTypeException ex #?(:clj try*)] #?@(:cljs [:refer-macros [try*]])]
             [jiffy.specs :as j]
             [jiffy.dev.wip :refer [wip]]
             [jiffy.protocols.chrono.era :as era]
@@ -9,41 +13,61 @@
             [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
             [jiffy.protocols.temporal.temporal-field :as temporal-field]
             [jiffy.temporal.temporal-query :as temporal-query]
-            [jiffy.protocols.temporal.value-range :as value-range]))
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.temporal.chrono-field :as chrono-field]
+            [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
+            [jiffy.temporal.temporal-queries :as temporal-queries]
+            [jiffy.temporal.chrono-unit :as chrono-unit]))
 
 (s/def ::era ::era/era)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Era.java#L145
-(s/def ::is-supported-args ::j/wip)
-(defn -is-supported [this field] (wip ::-is-supported))
-(s/fdef -is-supported :args ::is-supported-args :ret ::j/boolean)
+(def-method is-supported ::j/boolean
+  [this ::era
+   field ::temporal-field/temporal-field]
+  (if (chrono-field/chrono-field? field)
+    (= field chrono-field/ERA)
+    (and field (temporal-field/is-supported-by field this))))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Era.java#L178
-(s/def ::range-args ::j/wip)
-(defn -range [this field] (wip ::-range))
-(s/fdef -range :args ::range-args :ret ::value-range/value-range)
+(def-method range ::value-range/value-range
+  [this ::era
+   field ::temporal-field/temporal-field]
+  (temporal-accessor-defaults/-range this field))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Era.java#L208
-(s/def ::get-args ::j/wip)
-(defn -get [this field] (wip ::-get))
-(s/fdef -get :args ::get-args :ret ::j/int)
+(def-method get ::j/int
+  [this ::era
+   field ::temporal-field/temporal-field]
+  (if (= field chrono-field/ERA)
+    (era/get-value this)
+    (temporal-accessor-defaults/-get this field)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Era.java#L238
-(s/def ::get-long-args ::j/wip)
-(defn -get-long [this field] (wip ::-get-long))
-(s/fdef -get-long :args ::get-long-args :ret ::j/long)
+(def-method get-long ::j/long
+  [this ::era
+   field ::temporal-field/temporal-field]
+  (cond
+    (= field chrono-field/ERA)
+    (era/get-value this)
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Era.java#L268
-(s/def ::query-args ::j/wip)
-(defn -query [this query] (wip ::-query))
-(s/fdef -query :args ::query-args :ret ::j/wip)
+    (chrono-field/chrono-field? field)
+    (throw (ex UnsupportedTemporalTypeException (str "Unsupported field: " field)
+               {:this this :field field}))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Era.java#L300
-(s/def ::adjust-into-args ::j/wip)
-(defn -adjust-into [this temporal] (wip ::-adjust-into))
-(s/fdef -adjust-into :args ::adjust-into-args :ret ::temporal/temporal)
+    :default
+    (temporal-field/get-from field this)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/Era.java#L320
-(s/def ::get-display-name-args ::j/wip)
-(defn -get-display-name [this style locale] (wip ::-get-display-name))
-(s/fdef -get-display-name :args ::get-display-name-args :ret string?)
+(def-method query ::j/wip
+  [this ::era
+   query ::temporal-query/temporal-query]
+  (if (= query (temporal-queries/precision))
+    chrono-unit/ERAS
+    (temporal-accessor-defaults/-query this query)))
+
+(def-method adjust-into ::temporal/temporal
+  [this ::era
+   temporal ::temporal/temporal]
+  (temporal/with temporal chrono-field/ERA (era/get-value this)))
+
+(def-method get-display-name string?
+  [this ::era
+   style ::text-style/text-style
+   locale ::j/locale]
+  (wip ::-get-display-name))

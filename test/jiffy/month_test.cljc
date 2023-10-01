@@ -21,8 +21,7 @@
 
 (test-proto-fn jiffy.month jiffy.protocols.temporal.temporal-adjuster/adjust-into)
 
-;; TODO: fix test of value-of. currently tests invalid values (i.e. random strings)
 (test-static-fn jiffy.month/value-of)
 (test-static-fn jiffy.month/values)
 (test-static-fn jiffy.month/of)
-(test-static-fn jiffy.month/from)
+(test-static-fn! jiffy.month/from)

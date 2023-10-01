@@ -1,6 +1,7 @@
 (ns jiffy.test-specs
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
+            [jiffy.chrono.iso-era :as iso-era-impl]
             [jiffy.clock :as clock-impl]
             [jiffy.conversion :as conversion]
             [jiffy.day-of-week :as day-of-week]
@@ -23,6 +24,7 @@
             [jiffy.protocols.chrono.era :as era]
             [jiffy.protocols.chrono.hijrah-date :as hijrah-date]
             [jiffy.protocols.chrono.hijrah-era :as hijrah-era]
+            [jiffy.protocols.chrono.iso-era :as iso-era]
             [jiffy.protocols.chrono.japanese-date :as japanese-date]
             [jiffy.protocols.chrono.japanese-era :as japanese-era]
             [jiffy.protocols.chrono.minguo-date :as minguo-date]
@@ -187,23 +189,15 @@
   (s/with-gen #(satisfies? clock/IClock %)
     (fn [] (gen/one-of [(s/gen ::clock-impl/fixed-clock)]))))
 
-(s/def ::temporal-field/temporal-field
-  (s/with-gen #(satisfies? temporal-field/ITemporalField %)
-    (fn [] (gen/one-of (map gen/return (chrono-field/values))))))
-
-(s/def ::chrono-unit/chrono-unit
-  (s/with-gen chrono-unit/chrono-unit?
-    (fn [] (gen/one-of (map gen/return (chrono-unit/values))))))
-
-(s/def ::month/month
-  (s/with-gen month-impl/month?
-    (fn [] (gen/one-of (map gen/return (month-impl/values))))))
+(s/def ::temporal-field/temporal-field (set (chrono-field/values)))
+(s/def ::chrono-unit/chrono-unit (set (chrono-unit/values)))
+(s/def ::month/month (set (month-impl/values)))
+(s/def ::iso-era/iso-era (set (iso-era-impl/values)))
+(s/def ::iso-era-impl/iso-era ::iso-era/iso-era)
 
 (s/def ::month-impl/month ::month/month)
 
-(s/def ::day-of-week/day-of-week
-  (s/with-gen day-of-week/day-of-week?
-    (fn [] (gen/one-of (map gen/return (day-of-week/values))))))
+(s/def ::day-of-week/day-of-week (set (day-of-week/values)))
 
 (s/def ::temporal-unit/temporal-unit ::chrono-unit/chrono-unit)
 
@@ -282,15 +276,15 @@
                                     ::year/year
                                     ::year-month/year-month
                                     ::zone-offset/zone-offset
-                                    ;; ::iso-era/iso-era
+                                    ::iso-era/iso-era
 
                                     ::chrono-local-date/chrono-local-date
                                     ::chrono-local-date-time/chrono-local-date-time
-                                    ;; ::era/era
 
                                     ;; :jiffy.chrono.chrono-local-date-impl/chrono-local-date-impl
                                     ;; :jiffy.chrono.chrono-local-date-time-impl/chrono-local-date-time-impl
 
+                                    ;; ::era/era
                                     ;; ::hijrah-date/hijrah-date
                                     ;; ::hijrah-era/hijrah-era
                                     ;; ::japanese-date/japanese-date
@@ -327,9 +321,10 @@
                                    ;; ::chrono-zoned-date-time/chrono-zoned-date-time
                                    ;; :jiffy.chrono.chrono-zoned-date-time-impl/chrono-zoned-date-time-impl
 
-                                   ;; ::era/era
-                                   ;; ::iso-era/iso-era
 
+                                   ::iso-era/iso-era
+
+                                   ;; ::era/era
                                    ;; ::hijrah-era/hijrah-era
                                    ;; ::hijrah-date/hijrah-date
                                    ;; ::japanese-era/japanese-era
@@ -351,13 +346,21 @@
 
 (comment
 
-  (-> #'jiffy.duration/parse
+  (-> #'jiffy.month/from
       s/get-spec
       :args
       s/gen
       gen/sample)
 
-  (-> ::offset-date-time/offset-date-time
+  (-> #'jiffy.chrono.iso-era/query
+      s/get-spec
+      :args
+      s/gen
+      gen/sample)
+
+
+
+  (-> ::iso-era/iso-era
       s/gen
       gen/sample)
 

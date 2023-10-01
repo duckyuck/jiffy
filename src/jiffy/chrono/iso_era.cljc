@@ -1,50 +1,86 @@
 (ns jiffy.chrono.iso-era
+  (:refer-clojure :exclude [range get])
   (:require [clojure.spec.alpha :as s]
-            [jiffy.dev.wip :refer [wip]]
+            #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
+            #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
             [jiffy.enums #?@(:clj [:refer [defenum]]) #?@(:cljs [:refer-macros [defenum]])]
-            [jiffy.protocols.chrono.era :as era]
             [jiffy.protocols.chrono.iso-era :as iso-era]
+            [jiffy.chrono.era-defaults :as era-defaults]
+            [jiffy.specs :as j]
+            [jiffy.protocols.chrono.era :as era]
             [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
             [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
-            [jiffy.specs :as j]))
+            [jiffy.protocols.temporal.temporal-field :as temporal-field]
+            [jiffy.protocols.temporal.value-range :as value-range]
+            [jiffy.temporal.temporal-query :as temporal-query]
+            [jiffy.protocols.temporal.temporal :as temporal]
+            [jiffy.protocols.format.text-style :as text-style]))
 
-(defrecord IsoEra [ordinal enum-name])
+(def-record IsoEra ::iso-era
+  [ordinal ::j/long
+   enum-name string?])
 
-(s/def ::create-args (s/tuple ::j/int string?))
-(def create ->IsoEra)
-(def iso-era-spec (j/constructor-spec IsoEra create ::create-args))
-(s/def ::iso-era iso-era-spec)
-(s/fdef create :args ::create-args :ret ::iso-era)
-
-(defenum create
+(defenum ->IsoEra
   [BCE []
    CE []])
 
-(defmacro args [& x] `(s/tuple ::iso-era ~@x))
+(def-constructor values (s/coll-of (partial satisfies? iso-era/IIsoEra))
+  []
+  (sort-by :ordinal (vals @enums)))
 
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/IsoEra.java#L99
-(s/def ::get-value-args (args))
-(defn -get-value [this] (wip ::-get-value))
-(s/fdef -get-value :args ::get-value-args :ret ::j/int)
+(def-method get-value ::j/int
+  [this ::iso-era]
+  (:ordinal this))
+
+(def-method is-supported ::j/boolean
+  [this ::iso-era
+   field ::temporal-field/temporal-field]
+  (era-defaults/is-supported this field))
+
+(def-method range ::value-range/value-range
+  [this ::iso-era
+   field ::temporal-field/temporal-field]
+  (era-defaults/range this field))
+
+(def-method get ::j/int
+  [this ::iso-era
+   field ::temporal-field/temporal-field]
+  (era-defaults/get this field))
+
+(def-method get-long ::j/long
+  [this ::iso-era
+   field ::temporal-field/temporal-field]
+  (era-defaults/get-long this field))
+
+(def-method query ::j/wip
+  [this ::iso-era
+   query ::temporal-query/temporal-query]
+  (era-defaults/query this query))
+
+(def-method adjust-into ::temporal/temporal
+  [this ::iso-era
+   temporal ::temporal/temporal]
+  (era-defaults/adjust-into this temporal))
+
+(def-method get-display-name string?
+  [this ::iso-era
+   style ::text-style/text-style
+   locale ::j/locale]
+  (era-defaults/get-display-name this style locale))
 
 (extend-type IsoEra
   era/IEra
-  (get-value [this] (-get-value this)))
+  (get-value [this] (get-value this))
+  (get-display-name [this style locale] (get-display-name this style locale)))
 
-;; FIXME: no implementation found from inherited class interface java.time.temporal.TemporalAccessor
+(extend-type IsoEra
+  temporal-accessor/ITemporalAccessor
+  (is-supported [this field] (is-supported this field))
+  (range [this field] (range this field))
+  (get [this field] (get this field))
+  (get-long [this field] (get-long this field))
+  (query [this q] (query this q)))
 
-;; FIXME: no implementation found from inherited class interface java.time.temporal.TemporalAdjuster
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/IsoEra.java
-(s/def ::value-of-args (args string?))
-(defn value-of [value-of--unknown-param-name] (wip ::value-of))
-(s/fdef value-of :args ::value-of-args :ret ::iso-era)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/IsoEra.java
-(defn values [] (wip ::values))
-(s/fdef values :ret ::j/wip)
-
-;; https://github.com/unofficial-openjdk/openjdk/tree/cec6bec2602578530214b2ce2845a863da563c3d/src/java.base/share/classes/java/time/chrono/IsoEra.java#L130
-(s/def ::of-args (args ::j/int))
-(defn of [iso-era] (wip ::of))
-(s/fdef of :args ::of-args :ret ::iso-era)
+(extend-type IsoEra
+  temporal-adjuster/ITemporalAdjuster
+  (adjust-into [this temporal] (adjust-into this temporal)))
