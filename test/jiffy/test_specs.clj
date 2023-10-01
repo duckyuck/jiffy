@@ -281,7 +281,7 @@
                                     ::offset-time/offset-time
                                     ::year/year
                                     ::year-month/year-month
-                                    ;; ::zone-offset/zone-offset
+                                    ::zone-offset/zone-offset
                                     ;; ::iso-era/iso-era
 
                                     ::chrono-local-date/chrono-local-date
@@ -317,8 +317,7 @@
                                    ::year/year
                                    ::year-month/year-month
                                    ;; ::zoned-date-time/zoned-date-time
-                                   ;; TODO: See method ZoneId#toTemporal
-                                   ;; ::zone-offset/zone-offset
+                                   ::zone-offset/zone-offset
 
                                    ::chrono-local-date/chrono-local-date
                                    ;; :jiffy.chrono.chrono-local-date-impl/chrono-local-date-impl
