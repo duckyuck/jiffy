@@ -16,7 +16,7 @@
             [jiffy.offset-date-time]
             [jiffy.offset-time-impl #?@(:cljs [:refer [OffsetTime]])]
             [jiffy.offset-time]
-            [jiffy.zone-region-impl #?@(:cljs [:refer [ZonedRegion]])]
+            [jiffy.zone-region-impl #?@(:cljs [:refer [ZoneRegion]])]
             [jiffy.month #?@(:cljs [:refer [Month]])]
             [jiffy.month-day #?@(:cljs [:refer [MonthDay]])]
             [jiffy.year-month #?@(:cljs [:refer [YearMonth]])]
