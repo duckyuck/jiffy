@@ -1,4 +1,5 @@
 (ns jiffy.chrono.iso-chronology
+  (:refer-clojure :exclude [range])
   (:require [clojure.spec.alpha :as s]
             #?(:clj [jiffy.dev.defs-clj :refer [def-record def-method def-constructor]])
             #?(:cljs [jiffy.dev.defs-cljs :refer-macros [def-record def-method def-constructor]])
