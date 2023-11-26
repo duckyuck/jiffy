@@ -24,9 +24,11 @@
   [BCE []
    CE []])
 
-(def-constructor values (s/coll-of (partial satisfies? iso-era/IIsoEra))
+(def-constructor values (s/coll-of #(satisfies? iso-era/IIsoEra %))
   []
   (sort-by :ordinal (vals @enums)))
+
+(defn value-of [enum-name] (@enums enum-name))
 
 (def-method get-value ::j/int
   [this ::iso-era]

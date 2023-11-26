@@ -38,7 +38,8 @@
             [jiffy.temporal.temporal-accessor-defaults :as temporal-accessor-defaults]
             [jiffy.clock :as clock-impl]
             [jiffy.protocols.zone.zone-rules :as zone-rules]
-            [jiffy.protocols.string :as string])
+            [jiffy.protocols.string :as string]
+            [jiffy.pattern :as pattern])
   #?(:clj (:import [jiffy.offset_time_impl OffsetTime])))
 
 (s/def ::offset-time ::impl/offset-time)
@@ -269,16 +270,17 @@
 (def-method with ::offset-time
   ([this ::offset-time
     adjuster ::temporal-adjuster/temporal-adjuster]
-   (condp satisfies? adjuster
-     local-time/ILocalTime
+   (cond
+     (satisfies? local-time/ILocalTime adjuster)
      (--with this adjuster (:offset this))
 
-     zone-offset/IZoneOffset
+     (satisfies? zone-offset/IZoneOffset adjuster)
      (--with this (:time this) adjuster)
 
-     offset-time/IOffsetTime
+     (satisfies? offset-time/IOffsetTime adjuster)
      adjuster
 
+     :default
      (temporal-adjuster/adjust-into adjuster this)))
 
   ([this ::offset-time
@@ -359,14 +361,14 @@
   [this ::offset-time
    field-or-unit (s/or :field ::temporal-field/temporal-field
                        :unit ::temporal-unit/temporal-unit)]
-  (condp satisfies? field-or-unit
-    temporal-field/ITemporalField
+  (cond
+    (satisfies? temporal-field/ITemporalField field-or-unit)
     (if (chrono-field/chrono-field? field-or-unit)
       (or (temporal-field/is-time-based field-or-unit)
           (= field-or-unit chrono-field/OFFSET_SECONDS))
       (and field-or-unit (temporal-field/is-supported-by field-or-unit this)))
 
-    temporal-unit/ITemporalUnit
+    (satisfies? temporal-unit/ITemporalUnit field-or-unit)
     (if (chrono-unit/chrono-unit? field-or-unit)
       (temporal-unit/is-time-based field-or-unit)
       (and field-or-unit (temporal-unit/is-supported-by field-or-unit this)))))
@@ -470,9 +472,11 @@
 
   ([clock-or-zone-id (s/or :clock ::clock/clock
                            :zone-id ::zone-id/zone-id)]
-   (condp satisfies? clock-or-zone-id
-     zone-id/IZoneId (now (clock-impl/system clock-or-zone-id))
-     clock/IClock
+   (cond
+     (satisfies? zone-id/IZoneId clock-or-zone-id)
+     (now (clock-impl/system clock-or-zone-id))
+
+     (satisfies? clock/IClock clock-or-zone-id)
      (do
        (asserts/require-non-nil clock-or-zone-id "clock")
        (let [now (clock/instant clock-or-zone-id)]
@@ -496,8 +500,10 @@
 (s/def ::string string?)
 
 (def PATTERN
-  (delay (re-pattern (str "(" @local-time-impl/PATTERN ")"
-                          (str #"(([+-][\d:]*)|(Z))")))))
+  (delay
+    (pattern/combine
+     "(" @local-time-impl/PATTERN ")"
+     #"(([+-][\d:]*)|(Z))")))
 
 (def-constructor parse ::offset-time
   ([text ::string]
@@ -513,8 +519,8 @@
   ;;  (wip ::parse))
   )
 
-(def MIN (local-time/at-offset local-time-impl/MIN zone-offset-impl/MAX))
-(def MAX (local-time/at-offset local-time-impl/MAX zone-offset-impl/MIN))
+(def MIN (impl/of local-time-impl/MIN zone-offset-impl/MAX))
+(def MAX (impl/of local-time-impl/MAX zone-offset-impl/MIN))
 
 (def-method to-string string?
   [{:keys [time offset]} ::offset-time]

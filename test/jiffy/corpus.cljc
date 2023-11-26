@@ -1,6 +1,6 @@
 (ns jiffy.corpus
   (:require [clojure.string :as str]
-            [jiffy.edn-cljs]
+            [jiffy.all]
             [jiffy.helper.macros :refer [load-edn-file] :refer-macros [load-edn-file] :include-macros true]))
 
 (def corpus #?(:cljs (load-edn-file "dev-resources/regression-corpus.edn")))
@@ -22,7 +22,10 @@
   (let [fn-sym (if (var? f)
                  (symbol f)
                  (fn->symbol f))]
-    (filter #(= (:fn %) fn-sym) corpus)))
+    (let [data (filter #(= (:fn %) fn-sym) corpus)]
+      ;; (println "found" (count data) "corpus for fn-sym" fn-sym)
+      data)))
+
 
 (comment
 
@@ -33,6 +36,10 @@
     {:cljs (apply f (:args corpus))
      :clj (:result corpus)})
 
+  (clojure.edn/read-string
+   {:readers jiffy.edn.readers/data-readers}
+   (str "[" (slurp "dev-resources/regression-corpus.edn") "]"))
+  
   )
 
 

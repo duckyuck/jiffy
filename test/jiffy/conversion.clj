@@ -9,8 +9,8 @@
             [jiffy.local-date-impl]
             [jiffy.local-date-time-impl]
             [jiffy.local-time-impl]
-            [jiffy.month]
             [jiffy.month-day]
+            [jiffy.month]
             [jiffy.offset-date-time-impl]
             [jiffy.offset-time-impl]
             [jiffy.period]
@@ -19,16 +19,15 @@
             [jiffy.temporal.chrono-unit]
             [jiffy.temporal.temporal-query]
             [jiffy.temporal.value-range]
-            [jiffy.year]
             [jiffy.year-month]
-            [jiffy.zoned-date-time-impl]
+            [jiffy.year]
             [jiffy.zone-offset-impl]
             [jiffy.zone-region-impl]
             [jiffy.zone.zone-offset-transition-impl]
             [jiffy.zone.zone-offset-transition-rule]
-            [jiffy.zone.zone-rules])
-  (:import java.lang.reflect.Constructor
-           (jiffy.chrono.iso_chronology IsoChronology)
+            [jiffy.zone.zone-rules]
+            [jiffy.zoned-date-time-impl])
+  (:import (jiffy.chrono.iso_chronology IsoChronology)
            (jiffy.chrono.iso_era IsoEra)
            (jiffy.clock FixedClock SystemClock)
            (jiffy.day_of_week DayOfWeek)
@@ -48,12 +47,13 @@
            (jiffy.temporal.value_range ValueRange)
            (jiffy.year Year)
            (jiffy.year_month YearMonth)
-           (jiffy.zoned_date_time_impl ZonedDateTime)
-           (jiffy.zone_offset_impl ZoneOffset)
-           (jiffy.zone_region_impl ZoneRegion)
            (jiffy.zone.zone_offset_transition_impl ZoneOffsetTransition)
            (jiffy.zone.zone_offset_transition_rule ZoneOffsetTransitionRule TimeDefinition)
-           (jiffy.zone.zone_rules_impl ZoneRules)))
+           (jiffy.zone.zone_rules_impl ZoneRules)
+           (jiffy.zone_offset_impl ZoneOffset)
+           (jiffy.zone_region_impl ZoneRegion)
+           (jiffy.zoned_date_time_impl ZonedDateTime)
+           java.lang.reflect.Constructor))
 
 (defmulti jiffy->java* type)
 
@@ -79,7 +79,7 @@
     (stream-seq java-object)
     java-object))
 
-(def max-coll-result-size 10)
+(def max-coll-result-size 15)
 
 (defn make-comparable [coll]
   (if (set? coll)

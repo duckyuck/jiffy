@@ -413,17 +413,18 @@
   [this ::local-time
    field-or-unit (s/or :field ::temporal-field/temporal-field
                        :unit ::temporal-unit/temporal-unit)]
-  (condp satisfies? field-or-unit
-    temporal-field/ITemporalField
+  (cond
+    (satisfies? temporal-field/ITemporalField field-or-unit)
     (if (chrono-field/chrono-field? field-or-unit)
       (temporal-field/is-time-based field-or-unit)
       (and field-or-unit (temporal-field/is-supported-by field-or-unit this)))
 
-    temporal-unit/ITemporalUnit
+    (satisfies? temporal-unit/ITemporalUnit field-or-unit)
     (if (chrono-unit/chrono-unit? field-or-unit)
       (temporal-unit/is-time-based field-or-unit)
       (and field-or-unit (temporal-unit/is-supported-by field-or-unit this)))
 
+    :default
     (throw (ex-info "Unsupported field or unit" {:instant this :field-or-unit field-or-unit}))))
 
 (def-method range ::value-range/value-range
@@ -526,10 +527,13 @@
 
   ([clock-or-zone-id (s/or :clock ::clock/clock
                            :zone-id ::zone-id/zone-id)]
-   (condp satisfies? clock-or-zone-id
-     zone-id/IZoneId (now (clock-impl/system clock-or-zone-id))
-     clock/IClock (of-instant (clock/instant clock-or-zone-id)
-                              (clock/get-zone clock-or-zone-id)))))
+   (cond
+     (satisfies? zone-id/IZoneId clock-or-zone-id)
+     (now (clock-impl/system clock-or-zone-id))
+
+     (satisfies? clock/IClock clock-or-zone-id)
+     (of-instant (clock/instant clock-or-zone-id)
+                 (clock/get-zone clock-or-zone-id)))))
 
 (def-constructor of ::local-time
   ([hour ::j/hour-of-day

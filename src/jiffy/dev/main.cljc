@@ -53,7 +53,11 @@
             jiffy.zone.zone-offset-transition-rule
             jiffy.zone.zone-rules
             jiffy.zone.zone-rules-provider
-            [jiffy.edn-cljs :include-macros true]))
+            ;; [jiffy.edn-cljs :include-macros true]
+            ;; [jiffy.edn-2 :include-macros true]
+            [jiffy.edn.readers]
+            [jiffy.edn.writers]
+            [jiffy.zone.zone-rules-loader]))
 
 (comment
   jiffy.math.big-decimal/keep-me
@@ -66,7 +70,8 @@
   jiffy.clock/keep-me
   jiffy.day-of-week/keep-me
   jiffy.dev.wip/keep-me
-  jiffy.edn-cljs/keep-me
+  jiffy.edn.readers/keep-me
+  jiffy.edn.writers/keep-me
   jiffy.duration/keep-me
   jiffy.exception/keep-me
   jiffy.format.date-time-formatter
@@ -85,7 +90,7 @@
   jiffy.local-date-time/keep-me
   jiffy.local-time/keep-me
   jiffy.math/keep-me
-  jiffy.month/keep-me
+  jiffy.month/keep-pme
   jiffy.month-day/keep-me
   jiffy.offset-date-time/keep-me
   jiffy.offset-time/keep-me
@@ -127,6 +132,12 @@
   (do
     (require '[flow-storm.api :as fs-api])
     (fs-api/local-connect))
+
+  #jiffy/lt "12:00"
+
+  (jiffy.local-time/now)
+  
+  (jiffy.zoned-date-time/now)  
 
   )
 

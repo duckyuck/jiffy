@@ -13,15 +13,18 @@
         }
  :aliases {:nrepl {:extra-deps {nrepl/nrepl {:mvn/version "0.4.5"}}
                    :extra-paths ["src" "test"]}
-           :dev {:classpath-overrides {org.clojure/clojure nil}
-                 :main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]
-                 :jvm-opts ["-XX:-OmitStackTraceInFastThrow"
-                            "-Dclojure.storm.instrumentEnable=true"
-                            "-Dclojure.storm.instrumentOnlyPrefixes=jiffy."]
-                 :extra-deps {com.github.jpmonettas/clojure {:mvn/version "RELEASE"}
-                              com.github.jpmonettas/flow-storm-dbg {:mvn/version "RELEASE"}
-                              com.bhauman/figwheel-main {:mvn/version "0.2.18"}
-                              com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}}
+           :dev {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]
+                 :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
+                 :extra-deps {com.bhauman/figwheel-main {:mvn/version "0.2.18"}
+                              com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+                              http-kit/http-kit {:mvn/version "2.7.0"}}}
+           :flow-storm {:classpath-overrides {org.clojure/clojure nil}
+                        :jvm-opts ["-XX:-OmitStackTraceInFastThrow"
+                                   "-Dclojure.storm.instrumentEnable=true"
+                                   "-Dclojure.storm.instrumentOnlyPrefixes=jiffy."]
+                        :extra-deps {com.github.flow-storm/clojure {:mvn/version "1.12.0-alpha4_7"}
+                                     com.github.flow-storm/flow-storm-dbg {:mvn/version "3.8.5"}}}
+           :server {:extra-deps {http-kit/http-kit {:mvn/version "2.7.0"}}}
            :test-clj {:extra-paths ["test"]
                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.85.1342"}}
                       :main-opts ["-m" "kaocha.runner"]}

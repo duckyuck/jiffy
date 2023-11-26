@@ -22,7 +22,8 @@
             [jiffy.protocols.time-comparable :as time-comparable]
             [jiffy.protocols.duration :as duration]
             [jiffy.protocols.string :as string]
-            [jiffy.local-time-impl :as local-time])
+            [jiffy.local-time-impl :as local-time]
+            [clojure.string :as str])
   #?(:clj (:import [jiffy.duration_impl Duration])))
 
 (def ZERO impl/ZERO)
@@ -515,7 +516,7 @@
   (try*
    (math/multiply-exact (or (math/parse-long s) 0) multiplier)
    (catch :default e
-     (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text s :multiplier multiplier})))))
+     (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text s :multiplier multiplier} e)))))
 
 (s/def ::string string?)
 
@@ -524,7 +525,8 @@
 (def-constructor parse ::duration
   [text ::string]
   (let [matches (re-matches @PATTERN text)]
-    (if-not matches
+    (if (or (not matches)
+            (= 2 (->> matches (filter some?) count)))
       (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text text}))
       (let [[_ prefix days T hours minutes seconds fraction :as more] matches
             nums [days hours minutes seconds fraction]
@@ -537,26 +539,26 @@
             [d h m s f :as parts] (map #(%1 %2) multiplicands nums)]
         (when (and T (not (some some? nums)))
           (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text text :error-index 0})))
-        (create (neg? factor) d h m s (if (neg? s) (- f) f))))))
+        (create (neg? factor) d h m s (if (some-> seconds (str/starts-with? "-")) (- f) f))))))
 
 (def-constructor between ::duration
   [start-inclusive ::temporal/temporal
    end-exclusive ::temporal/temporal]
   (try*
-   (-> start-inclusive (temporal/until end-exclusive NANOS) of-nanos)
-   (catch :default e
-     (let [secs (-> start-inclusive (temporal/until end-exclusive SECONDS))
-           [secs nanos] (try*
-                         (let [n (- (temporal-accessor/get-long end-exclusive NANO_OF_SECOND)
-                                    (temporal-accessor/get-long start-inclusive NANO_OF_SECOND))
-                               s (cond-> secs
-                                   (and (pos? secs) (neg? n))
-                                   inc
-                                   (and (neg? secs) (pos? n))
-                                   dec)]
-                           [s n])
-                         (catch :default e [secs 0]))]
-       (of-seconds secs nanos)))))
+    (-> start-inclusive (temporal/until end-exclusive NANOS) of-nanos)
+    (catch :default e
+      (let [secs (-> start-inclusive (temporal/until end-exclusive SECONDS))
+            [secs nanos] (try*
+                           (let [n (- (temporal-accessor/get-long end-exclusive NANO_OF_SECOND)
+                                      (temporal-accessor/get-long start-inclusive NANO_OF_SECOND))
+                                 s (cond-> secs
+                                     (and (pos? secs) (neg? n))
+                                     inc
+                                     (and (neg? secs) (pos? n))
+                                     dec)]
+                             [s n])
+                           (catch :default e [secs 0]))]
+        (of-seconds secs nanos)))))
 
 (defn set-char-at [s ch idx]
   (let [[a b] (split-at idx s)]

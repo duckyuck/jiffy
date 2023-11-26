@@ -8,8 +8,7 @@
             [jiffy.month :as month]
             [jiffy.zone-offset :as zone-offset]
             [jiffy.zone.zone-offset-transition-rule :as transition-rule]
-            [jiffy.zone.zone-rules-impl :as zone-rules-impl]
-            [jiffy.zone.zone-rules-store :as rules-store]))
+            [jiffy.zone.zone-rules-impl :as zone-rules-impl]))
 
 (defn get-private-field [obj field-name]
   (let [field (.getDeclaredField (class obj) field-name)]
@@ -20,7 +19,7 @@
 
 (defmethod java->jiffy :default
   [java-object]
-  (throw (ex-info (str "Shit! We're missing implementation of multimethod 'jiffy.conversion/java->jiffy' for class "
+  (throw (ex-info (str "Shit! We're missing implementation of multimethod 'jiffy.zone.zone-rules-conversion/java->jiffy' for class "
                        (type java-object) ". Please do some more programming!") {})))
 
 (defmethod java->jiffy clojure.lang.PersistentVector [coll]
@@ -44,7 +43,6 @@
                 midnightEndOfDay
                 localTime
                 month
-                class
                 dayOfMonthIndicator
                 dayOfWeek
                 standardOffset
@@ -77,17 +75,7 @@
      (zipmap (keys props)
              (map java->jiffy (vals props))))))
 
-(defn load-zone-rules []
-  (let [zone-ids (java.time.zone.ZoneRulesProvider/getAvailableZoneIds)]
-    (zipmap zone-ids
-            (map #(-> (java.time.zone.ZoneRulesProvider/getRules % false)
-                      java->jiffy
-                      (assoc :zone-id %))
-                 zone-ids))))
 
-(do
-  (reset! rules-store/zone-id->rules (load-zone-rules))
-  nil)
 
 (comment
 

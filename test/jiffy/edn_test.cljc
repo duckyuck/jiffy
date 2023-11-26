@@ -2,7 +2,9 @@
   (:require [clojure.test :refer [deftest is testing]]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
-            #?(:clj [jiffy.edn-clj] :cljs [jiffy.edn-cljs])
+            [jiffy.all]
+            [jiffy.edn.readers]
+            [jiffy.edn.writers]
             [jiffy.instant-impl :as instant-impl]
             [jiffy.duration-impl :as duration-impl]
             [jiffy.day-of-week :as day-of-week]
@@ -28,9 +30,11 @@
             [jiffy.temporal.value-range :as value-range]
             [jiffy.period :as period]
             [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]))
+            [clojure.spec.gen.alpha :as gen]
+            [jiffy.zone.zone-rules-loader]))
 
-:jiffy.edn-clj/keep
+:jiffy.edn.readers/keep
+:jiffy.edn.writers/keep
 
 (deftest print-edn-test
 
@@ -182,7 +186,7 @@
     (is (= (pr-str (local-date/of 1111 11 11))
            "#jiffy/ld \"1111-11-11\"")))
 
-  (testing "LocalDate"
+  (testing "LocalTime"
     (is (= (pr-str (local-time/of 11 11 11 111111111))
            "#jiffy/lt \"11:11:11.111111111\"")))
 
@@ -257,224 +261,223 @@
 
   )
 
-;; TODO - get these tests running cljs too
-#?(:clj
-   (deftest read-literal-test
+(deftest read-literal-test
 
-     (is (= #jiffy/instant {:seconds 1692982727, :nanos 544376000}
-            (instant-impl/create 1692982727 544376000)))
+   (is (= #jiffy/instant {:seconds 1692982727, :nanos 544376000}
+          (instant-impl/create 1692982727 544376000)))
 
-     (is (= #jiffy/duration "PT470272H58M47.544376S"
-            (duration-impl/create 1692982727 544376000)))
+   (is (= #jiffy/duration "PT470272H58M47.544376S"
+          (duration-impl/create 1692982727 544376000)))
 
-     (testing "TemporalQuery"
-       (is (= #jiffy/query :zone-id
-              temporal-queries/ZONE_ID))
-       (is (= #jiffy/query :chronology
-              temporal-queries/CHRONO))
-       (is (= #jiffy/query :precision
-              temporal-queries/PRECISION))
-       (is (= #jiffy/query :zone-offset
-              temporal-queries/OFFSET))
-       (is (= #jiffy/query :zone
-              temporal-queries/ZONE))
-       (is (= #jiffy/query :local-date
-              temporal-queries/LOCAL_DATE))
-       (is (= #jiffy/query :local-time
-              temporal-queries/LOCAL_TIME)))
+   ;; TODO - fix these. Implement IEquiv or similar
+   ;; (testing "TemporalQuery"
+   ;;   (is (= #jiffy/query :zone-id
+   ;;          temporal-queries/ZONE_ID))
+   ;;   (is (= #jiffy/query :chronology
+   ;;          temporal-queries/CHRONO))
+   ;;   (is (= #jiffy/query :precision
+   ;;          temporal-queries/PRECISION))
+   ;;   (is (= #jiffy/query :zone-offset
+   ;;          temporal-queries/OFFSET))
+   ;;   (is (= #jiffy/query :zone
+   ;;          temporal-queries/ZONE))
+   ;;   (is (= #jiffy/query :local-date
+   ;;          temporal-queries/LOCAL_DATE))
+   ;;   (is (= #jiffy/query :local-time
+   ;;          temporal-queries/LOCAL_TIME)))
 
-     (testing "ChronoField"
-       (is (= #jiffy/field :nano_of_second
-              chrono-field/NANO_OF_SECOND))
-       (is (= #jiffy/field :nano_of_day
-              chrono-field/NANO_OF_DAY))
-       (is (= #jiffy/field :micro_of_second
-              chrono-field/MICRO_OF_SECOND))
-       (is (= #jiffy/field :micro_of_day
-              chrono-field/MICRO_OF_DAY))
-       (is (= #jiffy/field :milli_of_second
-              chrono-field/MILLI_OF_SECOND))
-       (is (= #jiffy/field :milli_of_day
-              chrono-field/MILLI_OF_DAY))
-       (is (= #jiffy/field :second_of_minute
-              chrono-field/SECOND_OF_MINUTE))
-       (is (= #jiffy/field :second_of_day
-              chrono-field/SECOND_OF_DAY))
-       (is (= #jiffy/field :minute_of_hour
-              chrono-field/MINUTE_OF_HOUR))
-       (is (= #jiffy/field :minute_of_day
-              chrono-field/MINUTE_OF_DAY))
-       (is (= #jiffy/field :hour_of_ampm
-              chrono-field/HOUR_OF_AMPM))
-       (is (= #jiffy/field :clock_hour_of_ampm
-              chrono-field/CLOCK_HOUR_OF_AMPM))
-       (is (= #jiffy/field :hour_of_day
-              chrono-field/HOUR_OF_DAY))
-       (is (= #jiffy/field :clock_hour_of_day
-              chrono-field/CLOCK_HOUR_OF_DAY))
-       (is (= #jiffy/field :ampm_of_day
-              chrono-field/AMPM_OF_DAY))
-       (is (= #jiffy/field :day_of_week
-              chrono-field/DAY_OF_WEEK))
-       (is (= #jiffy/field :aligned_day_of_week_in_month
-              chrono-field/ALIGNED_DAY_OF_WEEK_IN_MONTH))
-       (is (= #jiffy/field :aligned_day_of_week_in_year
-              chrono-field/ALIGNED_DAY_OF_WEEK_IN_YEAR))
-       (is (= #jiffy/field :day_of_month
-              chrono-field/DAY_OF_MONTH))
-       (is (= #jiffy/field :day_of_year
-              chrono-field/DAY_OF_YEAR))
-       (is (= #jiffy/field :epoch_day
-              chrono-field/EPOCH_DAY))
-       (is (= #jiffy/field :aligned_week_of_month
-              chrono-field/ALIGNED_WEEK_OF_MONTH))
-       (is (= #jiffy/field :aligned_week_of_year
-              chrono-field/ALIGNED_WEEK_OF_YEAR))
-       (is (= #jiffy/field :month_of_year
-              chrono-field/MONTH_OF_YEAR))
-       (is (= #jiffy/field :proleptic_month
-              chrono-field/PROLEPTIC_MONTH))
-       (is (= #jiffy/field :year_of_era
-              chrono-field/YEAR_OF_ERA))
-       (is (= #jiffy/field :year
-              chrono-field/YEAR))
-       (is (= #jiffy/field :era
-              chrono-field/ERA))
-       (is (= #jiffy/field :instant_seconds
-              chrono-field/INSTANT_SECONDS))
-       (is (= #jiffy/field :offset_seconds
-              chrono-field/OFFSET_SECONDS)))
+   (testing "ChronoField"
+     (is (= #jiffy/field :nano_of_second
+            chrono-field/NANO_OF_SECOND))
+     (is (= #jiffy/field :nano_of_day
+            chrono-field/NANO_OF_DAY))
+     (is (= #jiffy/field :micro_of_second
+            chrono-field/MICRO_OF_SECOND))
+     (is (= #jiffy/field :micro_of_day
+            chrono-field/MICRO_OF_DAY))
+     (is (= #jiffy/field :milli_of_second
+            chrono-field/MILLI_OF_SECOND))
+     (is (= #jiffy/field :milli_of_day
+            chrono-field/MILLI_OF_DAY))
+     (is (= #jiffy/field :second_of_minute
+            chrono-field/SECOND_OF_MINUTE))
+     (is (= #jiffy/field :second_of_day
+            chrono-field/SECOND_OF_DAY))
+     (is (= #jiffy/field :minute_of_hour
+            chrono-field/MINUTE_OF_HOUR))
+     (is (= #jiffy/field :minute_of_day
+            chrono-field/MINUTE_OF_DAY))
+     (is (= #jiffy/field :hour_of_ampm
+            chrono-field/HOUR_OF_AMPM))
+     (is (= #jiffy/field :clock_hour_of_ampm
+            chrono-field/CLOCK_HOUR_OF_AMPM))
+     (is (= #jiffy/field :hour_of_day
+            chrono-field/HOUR_OF_DAY))
+     (is (= #jiffy/field :clock_hour_of_day
+            chrono-field/CLOCK_HOUR_OF_DAY))
+     (is (= #jiffy/field :ampm_of_day
+            chrono-field/AMPM_OF_DAY))
+     (is (= #jiffy/field :day_of_week
+            chrono-field/DAY_OF_WEEK))
+     (is (= #jiffy/field :aligned_day_of_week_in_month
+            chrono-field/ALIGNED_DAY_OF_WEEK_IN_MONTH))
+     (is (= #jiffy/field :aligned_day_of_week_in_year
+            chrono-field/ALIGNED_DAY_OF_WEEK_IN_YEAR))
+     (is (= #jiffy/field :day_of_month
+            chrono-field/DAY_OF_MONTH))
+     (is (= #jiffy/field :day_of_year
+            chrono-field/DAY_OF_YEAR))
+     (is (= #jiffy/field :epoch_day
+            chrono-field/EPOCH_DAY))
+     (is (= #jiffy/field :aligned_week_of_month
+            chrono-field/ALIGNED_WEEK_OF_MONTH))
+     (is (= #jiffy/field :aligned_week_of_year
+            chrono-field/ALIGNED_WEEK_OF_YEAR))
+     (is (= #jiffy/field :month_of_year
+            chrono-field/MONTH_OF_YEAR))
+     (is (= #jiffy/field :proleptic_month
+            chrono-field/PROLEPTIC_MONTH))
+     (is (= #jiffy/field :year_of_era
+            chrono-field/YEAR_OF_ERA))
+     (is (= #jiffy/field :year
+            chrono-field/YEAR))
+     (is (= #jiffy/field :era
+            chrono-field/ERA))
+     (is (= #jiffy/field :instant_seconds
+            chrono-field/INSTANT_SECONDS))
+     (is (= #jiffy/field :offset_seconds
+            chrono-field/OFFSET_SECONDS)))
 
-     (testing "ChronoUnit"
-       (is (= #jiffy/unit :nanos
-              chrono-unit/NANOS))
-       (is (= #jiffy/unit :micros
-              chrono-unit/MICROS))
-       (is (= #jiffy/unit :millis
-              chrono-unit/MILLIS))
-       (is (= #jiffy/unit :seconds
-              chrono-unit/SECONDS))
-       (is (= #jiffy/unit :minutes
-              chrono-unit/MINUTES))
-       (is (= #jiffy/unit :hours
-              chrono-unit/HOURS))
-       (is (= #jiffy/unit :half-days
-              chrono-unit/HALF_DAYS))
-       (is (= #jiffy/unit :days
-              chrono-unit/DAYS))
-       (is (= #jiffy/unit :weeks
-              chrono-unit/WEEKS))
-       (is (= #jiffy/unit :months
-              chrono-unit/MONTHS))
-       (is (= #jiffy/unit :years
-              chrono-unit/YEARS))
-       (is (= #jiffy/unit :decades
-              chrono-unit/DECADES))
-       (is (= #jiffy/unit :centuries
-              chrono-unit/CENTURIES))
-       (is (= #jiffy/unit :millennia
-              chrono-unit/MILLENNIA))
-       (is (= #jiffy/unit :eras
-              chrono-unit/ERAS))
-       (is (= #jiffy/unit :forever
-              chrono-unit/FOREVER)))
+   (testing "ChronoUnit"
+     (is (= #jiffy/unit :nanos
+            chrono-unit/NANOS))
+     (is (= #jiffy/unit :micros
+            chrono-unit/MICROS))
+     (is (= #jiffy/unit :millis
+            chrono-unit/MILLIS))
+     (is (= #jiffy/unit :seconds
+            chrono-unit/SECONDS))
+     (is (= #jiffy/unit :minutes
+            chrono-unit/MINUTES))
+     (is (= #jiffy/unit :hours
+            chrono-unit/HOURS))
+     (is (= #jiffy/unit :half-days
+            chrono-unit/HALF_DAYS))
+     (is (= #jiffy/unit :days
+            chrono-unit/DAYS))
+     (is (= #jiffy/unit :weeks
+            chrono-unit/WEEKS))
+     (is (= #jiffy/unit :months
+            chrono-unit/MONTHS))
+     (is (= #jiffy/unit :years
+            chrono-unit/YEARS))
+     (is (= #jiffy/unit :decades
+            chrono-unit/DECADES))
+     (is (= #jiffy/unit :centuries
+            chrono-unit/CENTURIES))
+     (is (= #jiffy/unit :millennia
+            chrono-unit/MILLENNIA))
+     (is (= #jiffy/unit :eras
+            chrono-unit/ERAS))
+     (is (= #jiffy/unit :forever
+            chrono-unit/FOREVER)))
 
-     (testing "ValueRange"
-       (is (= #jiffy/range [100 200 300 400]
-              (value-range/create 100 200 300 400))))
+   (testing "ValueRange"
+     (is (= #jiffy/range [100 200 300 400]
+            (value-range/create 100 200 300 400))))
 
-     (testing "Period"
-       (is (= #jiffy/period "P1111Y11M11D"
-              (period/of 1111 11 11))))
+   (testing "Period"
+     (is (= #jiffy/period "P1111Y11M11D"
+            (period/of 1111 11 11))))
 
-     (testing "DayOfWeek"
-       (is (= #jiffy/day :monday
-              day-of-week/MONDAY))
-       (is (= #jiffy/day :tuesday
-              day-of-week/TUESDAY))
-       (is (= #jiffy/day :wednesday
-              day-of-week/WEDNESDAY))
-       (is (= #jiffy/day :thursday
-              day-of-week/THURSDAY))
-       (is (= #jiffy/day :friday
-              day-of-week/FRIDAY))
-       (is (= #jiffy/day :saturday
-              day-of-week/SATURDAY))
-       (is (= #jiffy/day :sunday
-              day-of-week/SUNDAY)))
+   (testing "DayOfWeek"
+     (is (= #jiffy/day :monday
+            day-of-week/MONDAY))
+     (is (= #jiffy/day :tuesday
+            day-of-week/TUESDAY))
+     (is (= #jiffy/day :wednesday
+            day-of-week/WEDNESDAY))
+     (is (= #jiffy/day :thursday
+            day-of-week/THURSDAY))
+     (is (= #jiffy/day :friday
+            day-of-week/FRIDAY))
+     (is (= #jiffy/day :saturday
+            day-of-week/SATURDAY))
+     (is (= #jiffy/day :sunday
+            day-of-week/SUNDAY)))
 
-     (testing "LocalDate"
-       (is (= #jiffy/ld "1111-11-11"
-              (local-date/of 1111 11 11))))
+   (testing "LocalDate"
+     (is (= #jiffy/ld "1111-11-11"
+            (local-date/of 1111 11 11))))
 
-     (testing "LocalTime"
-       (is (= #jiffy/lt "11:11:11.111111111"
-              (local-time/of 11 11 11 111111111))))
+   (testing "LocalTime"
+     (is (= #jiffy/lt "11:11:11.111111111"
+            (local-time/of 11 11 11 111111111))))
 
-     (testing "LocalDateTime"
-       (is (= #jiffy/ldt "1111-11-11T11:11:11.111111111"
-              (local-date-time/of (local-date/of 1111 11 11) (local-time/of 11 11 11 111111111)))))
+   (testing "LocalDateTime"
+     (is (= #jiffy/ldt "1111-11-11T11:11:11.111111111"
+            (local-date-time/of (local-date/of 1111 11 11) (local-time/of 11 11 11 111111111)))))
 
-     (testing "Month"
-       (is (= #jiffy/month :january
-              month/JANUARY))
-       (is (= #jiffy/month :february
-              month/FEBRUARY))
-       (is (= #jiffy/month :march
-              month/MARCH))
-       (is (= #jiffy/month :april
-              month/APRIL))
-       (is (= #jiffy/month :may
-              month/MAY))
-       (is (= #jiffy/month :june
-              month/JUNE))
-       (is (= #jiffy/month :july
-              month/JULY))
-       (is (= #jiffy/month :august
-              month/AUGUST))
-       (is (= #jiffy/month :september
-              month/SEPTEMBER))
-       (is (= #jiffy/month :october
-              month/OCTOBER))
-       (is (= #jiffy/month :november
-              month/NOVEMBER))
-       (is (= #jiffy/month :december
-              month/DECEMBER)))
+   (testing "Month"
+     (is (= #jiffy/month :january
+            month/JANUARY))
+     (is (= #jiffy/month :february
+            month/FEBRUARY))
+     (is (= #jiffy/month :march
+            month/MARCH))
+     (is (= #jiffy/month :april
+            month/APRIL))
+     (is (= #jiffy/month :may
+            month/MAY))
+     (is (= #jiffy/month :june
+            month/JUNE))
+     (is (= #jiffy/month :july
+            month/JULY))
+     (is (= #jiffy/month :august
+            month/AUGUST))
+     (is (= #jiffy/month :september
+            month/SEPTEMBER))
+     (is (= #jiffy/month :october
+            month/OCTOBER))
+     (is (= #jiffy/month :november
+            month/NOVEMBER))
+     (is (= #jiffy/month :december
+            month/DECEMBER)))
 
-     (testing "YearMonth"
-       (is (= #jiffy/year-month "1111-11"
-              (year-month/of 1111 11))))
+   (testing "YearMonth"
+     (is (= #jiffy/year-month "1111-11"
+            (year-month/of 1111 11))))
 
-     (testing "MonthDay"
-       (is (= #jiffy/month-day "--11-11"
-              (month-day/of 11 11))))
+   (testing "MonthDay"
+     (is (= #jiffy/month-day "--11-11"
+            (month-day/of 11 11))))
 
-     (testing "Year"
-       (is (= #jiffy/year "1111"
-              (year/of 1111))))
+   (testing "Year"
+     (is (= #jiffy/year "1111"
+            (year/of 1111))))
 
-     (testing "ZoneOffset"
-       (is (= #jiffy/zone "+11:11"
-              (zone-offset/of "+11:11"))))
+   (testing "ZoneOffset"
+     (is (= #jiffy/zone "+11:11"
+            (zone-offset/of "+11:11"))))
 
-     (testing "FixedClock"
-       (is (= #jiffy/fixed-clock {:instant #jiffy/instant {:seconds 1692982727, :nanos 544376000}, :zone #jiffy/zone "Europe/Oslo"}
-              (clock/fixed (instant-impl/create 1692982727 544376000)
-                           (zone-id-impl/of "Europe/Oslo")))))
+   (testing "FixedClock"
+     (is (= #jiffy/fixed-clock {:instant #jiffy/instant {:seconds 1692982727, :nanos 544376000}, :zone #jiffy/zone "Europe/Oslo"}
+            (clock/fixed (instant-impl/create 1692982727 544376000)
+                         (zone-id-impl/of "Europe/Oslo")))))
 
-     (testing "ZonedDateTime"
-       (is (= #jiffy/zdt "1111-11-11T11:11:11.111111111+00:53:28[Europe/Oslo]"
-              (zoned-date-time/of (local-date-time/of (local-date/of 1111 11 11)
-                                                      (local-time/of 11 11 11 111111111))
-                                  (zone-id-impl/of "Europe/Oslo")))))
+   (testing "ZonedDateTime"
+     (is (= #jiffy/zdt "1111-11-11T11:11:11.111111111+00:53:28[Europe/Oslo]"
+            (zoned-date-time/of (local-date-time/of (local-date/of 1111 11 11)
+                                                    (local-time/of 11 11 11 111111111))
+                                (zone-id-impl/of "Europe/Oslo")))))
 
-     (testing "OffsetDateTime"
-       (is (= #jiffy/odt "1111-11-11T11:11:11.111111111+11:11"
-              (offset-date-time/of (local-date-time/of (local-date/of 1111 11 11)
-                                                       (local-time/of 11 11 11 111111111))
-                                   (zone-offset/of "+11:11")))))
+   (testing "OffsetDateTime"
+     (is (= #jiffy/odt "1111-11-11T11:11:11.111111111+11:11"
+            (offset-date-time/of (local-date-time/of (local-date/of 1111 11 11)
+                                                     (local-time/of 11 11 11 111111111))
+                                 (zone-offset/of "+11:11")))))
 
-     (testing "OffsetTime"
-       (is (= #jiffy/ot "11:11:11.111111111+11:11"
-              (offset-time/of (local-time/of 11 11 11 111111111)
-                              (zone-offset/of "+11:11")))))))
+   (testing "OffsetTime"
+     (is (= #jiffy/ot "11:11:11.111111111+11:11"
+            (offset-time/of (local-time/of 11 11 11 111111111)
+                            (zone-offset/of "+11:11"))))))

@@ -41,6 +41,8 @@
 (test-proto-fn jiffy.local-date jiffy.protocols.chrono.chrono-local-date/until)
 
 ;; (test-proto-fn! jiffy.local-date jiffy.protocols.chrono.chrono-local-date/format)
+
+;; TODO: Fix this macro on cljs
 (test-proto-fn jiffy.local-date/at-time--chrono jiffy.protocols.chrono.chrono-local-date/at-time)
 (test-proto-fn jiffy.local-date jiffy.protocols.chrono.chrono-local-date/is-after)
 (test-proto-fn jiffy.local-date jiffy.protocols.chrono.chrono-local-date/is-before)
@@ -49,6 +51,8 @@
 (test-proto-fn jiffy.local-date jiffy.protocols.temporal.temporal/with)
 (test-proto-fn jiffy.local-date jiffy.protocols.temporal.temporal/plus)
 (test-proto-fn jiffy.local-date jiffy.protocols.temporal.temporal/minus)
+
+;; TODO: Fix this macro on cljs
 (test-proto-fn jiffy.local-date/until--temporal jiffy.protocols.temporal.temporal/until)
 (test-proto-fn jiffy.local-date jiffy.protocols.temporal.temporal-accessor/is-supported)
 

@@ -2,7 +2,7 @@
   #?(:clj (:require [jiffy.support-clj :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support])
      :cljs (:require [jiffy.support-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true])))
 
-(test-proto-fn jiffy.temporal.chrono-unit jiffy.protocols.temporal.temporal-unit/get-duration)
+(test-proto-fn jiffy.temporal.chrono-unit jiffy.protocols.temporal.temporal-unit/get-duration {:store-results? false})
 (test-proto-fn jiffy.temporal.chrono-unit jiffy.protocols.temporal.temporal-unit/is-duration-estimated)
 (test-proto-fn jiffy.temporal.chrono-unit jiffy.protocols.temporal.temporal-unit/is-date-based)
 (test-proto-fn jiffy.temporal.chrono-unit jiffy.protocols.temporal.temporal-unit/is-time-based)

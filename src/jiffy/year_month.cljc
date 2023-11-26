@@ -339,8 +339,8 @@
   [this ::year-month
    field-or-unit (s/or ::temporal-field/temporal-field
                        ::temporal-unit/temporal-unit)]
-  (condp satisfies? field-or-unit
-    temporal-field/ITemporalField
+  (cond
+    (satisfies? temporal-field/ITemporalField field-or-unit)
     (if (chrono-field/chrono-field? field-or-unit)
       (some? (#{chrono-field/YEAR
                 chrono-field/MONTH_OF_YEAR
@@ -349,7 +349,7 @@
                 chrono-field/ERA} field-or-unit))
       (and field-or-unit (temporal-field/is-supported-by field-or-unit this)))
 
-    temporal-unit/ITemporalUnit
+    (satisfies? temporal-unit/ITemporalUnit field-or-unit)
     (if (chrono-unit/chrono-unit? field-or-unit)
       (some? (#{chrono-unit/MONTHS
                 chrono-unit/YEARS
@@ -426,9 +426,11 @@
 
   ([clock-or-zone-id (s/or :clock ::clock/clock
                            :zone-id ::zone-id/zone-id)]
-   (condp satisfies? clock-or-zone-id
-     zone-id/IZoneId (now (clock-impl/system clock-or-zone-id))
-     clock/IClock
+   (cond
+     (satisfies? zone-id/IZoneId clock-or-zone-id)
+     (now (clock-impl/system clock-or-zone-id))
+
+     (satisfies? clock/IClock clock-or-zone-id)
      (let [local-date (local-date-impl/now clock-or-zone-id)]
        (of (local-date/get-year local-date)
            (local-date/get-month local-date))))))

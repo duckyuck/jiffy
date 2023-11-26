@@ -45,7 +45,8 @@
             [jiffy.protocols.chrono.chrono-local-date :as chrono-local-date]
             [jiffy.clock :as clock-impl]
             [jiffy.asserts :as asserts]
-            [jiffy.protocols.string :as string])
+            [jiffy.protocols.string :as string]
+            [jiffy.pattern :as pattern])
   #?(:clj (:import [jiffy.offset_date_time_impl OffsetDateTime])))
 
 (s/def ::offset-date-time ::impl/offset-date-time)
@@ -545,12 +546,12 @@
   [this ::offset-date-time
    field-or-unit (s/or :field ::temporal-field/temporal-field
                        :unit ::temporal-unit/temporal-unit)]
-  (condp satisfies? field-or-unit
-    temporal-field/ITemporalField
+  (cond
+    (satisfies? temporal-field/ITemporalField field-or-unit)
     (or (chrono-field/chrono-field? field-or-unit)
         (and field-or-unit (temporal-field/is-supported-by field-or-unit this)))
 
-    temporal-unit/ITemporalUnit
+    (satisfies? temporal-unit/ITemporalUnit field-or-unit)
     (if (chrono-unit/chrono-unit? field-or-unit)
       (not= field-or-unit chrono-unit/FOREVER)
       (and field-or-unit (temporal-unit/is-supported-by field-or-unit this)))))
@@ -650,9 +651,11 @@
 
   ([clock-or-zone-id (s/or :clock ::clock/clock
                            :zone-id ::zone-id/zone-id)]
-   (condp satisfies? clock-or-zone-id
-     zone-id/IZoneId (now (clock-impl/system clock-or-zone-id))
-     clock/IClock
+   (cond
+     (satisfies? zone-id/IZoneId clock-or-zone-id)
+     (now (clock-impl/system clock-or-zone-id))
+
+     (satisfies? clock/IClock clock-or-zone-id)
      (do
        (asserts/require-non-nil clock-or-zone-id "clock")
        (let [now (clock/instant clock-or-zone-id)]
@@ -709,8 +712,10 @@
 (s/def ::string string?)
 
 (def PATTERN
-  (delay (re-pattern (str "(" @local-date-time-impl/PATTERN ")"
-                          (str #"(([+-][\d:]*)|(Z))")))))
+  (delay
+    (pattern/combine
+     "(" @local-date-time-impl/PATTERN ")"
+     #"(([+-][\d:]*)|(Z))")))
 
 (def-constructor parse ::offset-date-time
   ([text ::string]

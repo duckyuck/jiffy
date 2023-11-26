@@ -1,7 +1,8 @@
 (ns jiffy.support-cljs
   (:require [cljs.test :refer [deftest is testing]]
             [clojure.string :as str]
-            [jiffy.edn-cljs]
+            [jiffy.edn.readers]
+            [jiffy.edn.writers]
             [jiffy.exception :refer [ex try*]]
             [jiffy.corpus :as corpus]))
 
@@ -27,10 +28,18 @@
        x))
    data))
 
+;; See jiffy.conversion/max-coll-result-size
+(def max-coll-result-size 15)
+
+(defn limit-actual [actual]
+  (if (seq? actual)
+    (take max-coll-result-size actual)
+    actual))
+
 (defn run-test [f {:keys [args result] :as data}]
   (let [actual (try-call f args)]
     (merge (dissoc data :result)
-           {:same? (same? actual result)
+           {:same? (same? (limit-actual actual) result)
             :same-data? (= (to-data actual) (to-data result))
             :actual actual
             :expected result})))
@@ -54,25 +63,39 @@
 
 (defn test-static-fn! [& args] (apply test-fn! args))
 
-(defmacro test-proto-fn [jiffy-ns proto-fn]
+(defn symbol-ns [x]
+  (symbol (or (namespace x)
+              (name x))))
+
+(defn resolve-impl-fn [impl-fn proto-fn]
+  (if (namespace impl-fn)
+    impl-fn
+    (symbol (str impl-fn)
+            (name proto-fn))))
+
+
+(defmacro test-proto-fn [impl-ns proto-fn & _rest]
   `(do
-     (require '~(symbol jiffy-ns))
-     (require '~(symbol (namespace proto-fn)))
+     (require 'jiffy.corpus)
+     (require '~(symbol-ns proto-fn))
+     (require '~(symbol-ns impl-ns))
+
      (deftest ~(gensym)
        (let [res# (test-fn! ~proto-fn)]
          (if (:failure (first res#))
            (throw (ex-info "Test failed" res#))
            (if-not (pos? (first res#))
-             (throw (ex-info "No tests run" {:fn ~proto-fn}))
+             (throw (ex-info "No tests run" {:fn ~proto-fn :corpus-count (count corpus/corpus)}))
              (is (pos? (first res#)))))))))
 
-(defmacro test-static-fn [fn]
+(defmacro test-static-fn [fn & _rest]
   `(do
+     (require 'jiffy.corpus)
      (require '~(symbol (namespace fn)))
      (deftest ~(gensym)
        (let [res# (test-fn! ~fn)]
          (if (:failure (first res#))
            (throw (ex-info "Test failed" res#))
            (if-not (pos? (first res#))
-             (throw (ex-info "No tests run" {:fn ~fn}))
+             (throw (ex-info "No tests run" {:fn ~fn :corpus-count (count corpus/corpus)}))
              (is (pos? (first res#)))))))))

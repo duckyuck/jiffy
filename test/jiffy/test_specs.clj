@@ -32,21 +32,21 @@
             [jiffy.protocols.offset-date-time :as offset-date-time]
             [jiffy.protocols.offset-time :as offset-time]
             [jiffy.protocols.period :as period]
+            [jiffy.protocols.temporal.temporal :as temporal]
             [jiffy.protocols.temporal.temporal-accessor :as temporal-accessor]
             [jiffy.protocols.temporal.temporal-adjuster :as temporal-adjuster]
             [jiffy.protocols.temporal.temporal-amount :as temporal-amount]
-            [jiffy.protocols.temporal.temporal :as temporal]
             [jiffy.protocols.temporal.temporal-field :as temporal-field]
             [jiffy.protocols.temporal.temporal-unit :as temporal-unit]
             [jiffy.protocols.year :as year]
             [jiffy.protocols.year-month :as year-month]
-            [jiffy.protocols.zoned-date-time :as zoned-date-time]
             [jiffy.protocols.zone-id :as zone-id]
             [jiffy.protocols.zone-offset :as zone-offset]
             [jiffy.protocols.zone-region :as zone-region]
             [jiffy.protocols.zone.zone-offset-transition :as zone-offset-transition]
             [jiffy.protocols.zone.zone-offset-transition-rule :as zone-offset-transition-rule]
             [jiffy.protocols.zone.zone-rules :as zone-rules]
+            [jiffy.protocols.zoned-date-time :as zoned-date-time]
             [jiffy.specs :as j]
             [jiffy.temporal.chrono-field :as chrono-field]
             [jiffy.temporal.chrono-unit :as chrono-unit]
@@ -55,16 +55,16 @@
             [jiffy.temporal.temporal-query :as temporal-query]
             [jiffy.year :as year-impl]
             [jiffy.year-month :as year-month-impl]
-            [jiffy.zoned-date-time :as zoned-date-time-impl]
             [jiffy.zone-offset :as zone-offset-impl]
             [jiffy.zone-region :as zone-region-impl]
             [jiffy.zone.zone-offset-transition-impl :as zone-offset-transition-impl]
             [jiffy.zone.zone-offset-transition-rule :as transition-rule-impl]
             [jiffy.zone.zone-rules :as zone-rules-impl]
-            [jiffy.zone.zone-rules-conversion]
-            [jiffy.zone.zone-rules-store :as zone-rules-store]))
+            [jiffy.zone.zone-rules-loader]
+            [jiffy.zone.zone-rules-store :as zone-rules-store]
+            [jiffy.zoned-date-time :as zoned-date-time-impl]))
 
-:jiffy.zone.zone-rules-conversion/keep
+:jiffy.zone.zone-rules-loader/keep
 
 (s/def ::duration/duration ::duration-impl/duration)
 (s/def ::period/period ::period-impl/period)
@@ -77,16 +77,15 @@
 (s/def ::zoned-date-time/zoned-date-time ::zoned-date-time-impl/zoned-date-time)
 (s/def ::offset-date-time/offset-date-time ::offset-date-time-impl/offset-date-time)
 (s/def ::zone-offset-transition/zone-offset-transition ::zone-offset-transition-impl/zone-offset-transition)
-(s/def ::zone-offset-transition-rule/zone-offset-transition-rule (->> @zone-rules-store/zone-id->rules
-                                                                      vals
+(s/def ::zone-offset-transition-rule/zone-offset-transition-rule (->> (zone-rules-store/get-all-rules)
                                                                       (mapcat :last-rules)
                                                                       set))
-(s/def ::zone-rules-impl/zone-rules (set (vals @zone-rules-store/zone-id->rules)))
+(s/def ::zone-rules-impl/zone-rules (zone-rules-store/get-all-rules))
 (s/def ::zone-rules/zone-rules ::zone-rules-impl/zone-rules)
 (s/def ::month-day/month-day ::month-day-impl/month-day)
 (s/def ::year-month/year-month ::year-month-impl/year-month)
 (s/def ::year/year ::year-impl/year)
-(s/def ::j/zone-id (set (keys @zone-rules-store/zone-id->rules)))
+(s/def ::j/zone-id (zone-rules-store/get-all-zone-ids))
 
 (s/def ::transition-rule-impl/time-definition (set (vals @transition-rule-impl/enums)))
 
@@ -174,8 +173,7 @@
                        (.appendValue java.time.temporal.ChronoField/YEAR 4 10 java.time.format.SignStyle/EXCEEDS_PAD)))))
 
 (s/def ::transition-rule-impl/zone-offset-transition-rule
-  (->> @zone-rules-store/zone-id->rules
-       vals
+  (->> (zone-rules-store/get-all-rules)
        (mapcat :last-rules)
        set))
 
@@ -331,19 +329,28 @@
 
 
 
-  (-> ::month-day/month-day
+  (-> ::duration-impl/string
       s/gen
       gen/sample)
+
+  (def durations
+    (-> ::duration/duration
+        s/gen
+        gen/sample))
+
+
+
 
   (-> ::zone-id/zone-id
       s/gen
       gen/sample)
 
-  (-> #'jiffy.local-date/of-instant
-      s/get-spec
-      :args
-      s/gen
-      gen/sample)
+  (for [s (-> #'jiffy.duration/parse
+              s/get-spec
+              :args
+              s/gen
+              gen/sample)]
+    [s (jiffy.duration/parse (first s))])
 
   (-> :jiffy.zoned-date-time/zoned-date-time
       s/gen

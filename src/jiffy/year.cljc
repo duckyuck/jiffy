@@ -258,15 +258,15 @@
   [this ::year
    field-or-unit (s/or :field ::temporal-field/temporal-field
                        :unit ::temporal-unit/temporal-unit)]
-  (condp satisfies? field-or-unit
-    temporal-field/ITemporalField
+  (cond
+    (satisfies? temporal-field/ITemporalField field-or-unit)
     (if (chrono-field/chrono-field? field-or-unit)
       (some? (#{chrono-field/YEAR
                 chrono-field/YEAR_OF_ERA
                 chrono-field/ERA} field-or-unit))
       (and field-or-unit (temporal-field/is-supported-by field-or-unit this)))
 
-    temporal-unit/ITemporalUnit
+    (satisfies? temporal-unit/ITemporalUnit field-or-unit)
     (if (chrono-unit/chrono-unit? field-or-unit)
       (some? (#{chrono-unit/YEARS
                 chrono-unit/DECADES
@@ -349,9 +349,12 @@
 
   ([clock-or-zone-id (s/or :clock ::clock/clock
                            :zone-id ::zone-id/zone-id)]
-   (condp satisfies? clock-or-zone-id
-     zone-id/IZoneId (-> clock-or-zone-id clock-impl/system now)
-     clock/IClock (-> clock-or-zone-id local-date-impl/now local-date/get-year of))))
+   (cond
+     (satisfies? zone-id/IZoneId clock-or-zone-id)
+     (-> clock-or-zone-id clock-impl/system now)
+
+     (satisfies? clock/IClock clock-or-zone-id)
+     (-> clock-or-zone-id local-date-impl/now local-date/get-year of))))
 
 (def-constructor of ::year
   [iso-year ::j/int]

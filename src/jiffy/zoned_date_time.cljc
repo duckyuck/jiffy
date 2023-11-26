@@ -51,7 +51,8 @@
             [jiffy.zone-id :as zone-id-impl]
             [jiffy.zone-offset :as zone-offset-impl]
             [jiffy.protocols.chrono.chronology :as chronology]
-            [jiffy.protocols.string :as string])
+            [jiffy.protocols.string :as string]
+            [jiffy.pattern :as pattern])
   #?(:clj (:import [jiffy.zoned_date_time_impl ZonedDateTime])))
 
 (s/def ::zoned-date-time ::impl/zoned-date-time)
@@ -543,12 +544,12 @@
   [this ::zoned-date-time
    field-or-unit (s/or :field ::temporal-field/temporal-field
                        :unit ::temporal-unit/temporal-unit)]
-  (condp satisfies? field-or-unit
-    temporal-field/ITemporalField
+  (cond
+    (satisfies? temporal-field/ITemporalField field-or-unit)
     (or (chrono-field/chrono-field? field-or-unit)
         (and field-or-unit (temporal-field/is-supported-by field-or-unit this)))
 
-    temporal-unit/ITemporalUnit
+    (satisfies? temporal-unit/ITemporalUnit field-or-unit)
     (chrono-zoned-date-time-defaults/is-supported this field-or-unit)))
 
 (def-method range ::value-range/value-range
@@ -612,11 +613,11 @@
 
   ([clock-or-zone-id (s/or :clock ::clock/clock
                            :zone-id ::zone-id/zone-id)]
-   (condp satisfies? clock-or-zone-id
-     zone-id/IZoneId
+   (cond
+     (satisfies? zone-id/IZoneId clock-or-zone-id)
      (now (clock-impl/system clock-or-zone-id))
 
-     clock/IClock
+     (satisfies? clock/IClock clock-or-zone-id)
      (do
        (asserts/require-non-nil clock-or-zone-id "clock")
        (of-instant (clock/instant clock-or-zone-id) (clock/get-zone clock-or-zone-id))))))
@@ -696,8 +697,10 @@
 (s/def ::string string?)
 
 (def PATTERN
-  (delay (re-pattern (str "(" @local-date-time-impl/PATTERN ")"
-                          (str #"(([+-][\d:]*)|(Z))(\[(.*)\])?")))))
+  (delay
+    (pattern/combine
+     "(" @local-date-time-impl/PATTERN ")"
+     #"(([+-][\d:]*)|(Z))(\[(.*)\])?")))
 
 (def-constructor parse ::zoned-date-time
   ([text ::string]

@@ -99,7 +99,7 @@
 
 (s/def ::string string?)
 
-(def PATTERN (delay  #"([+-]?\d*)-(\d{2})-(\d{2})*"))
+(def PATTERN (delay #"([+-]?\d*)-(\d{2})-(\d{2})*"))
 
 (def-constructor parse ::local-date
   ([text ::string]

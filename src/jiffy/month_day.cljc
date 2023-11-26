@@ -221,9 +221,11 @@
 
   ([clock-or-zone-id (s/or :clock ::clock/clock
                            :zone-id ::zone-id/zone-id)]
-   (condp satisfies? clock-or-zone-id
-     zone-id/IZoneId (now (clock-impl/system clock-or-zone-id))
-     clock/IClock
+   (cond
+     (satisfies? zone-id/IZoneId clock-or-zone-id)
+     (now (clock-impl/system clock-or-zone-id))
+
+     (satisfies? clock/IClock clock-or-zone-id)
      (let [local-date (local-date-impl/now clock-or-zone-id)]
        (of (local-date/get-month local-date)
            (local-date/get-day-of-month local-date))))))

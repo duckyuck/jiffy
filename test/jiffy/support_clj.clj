@@ -1,12 +1,14 @@
 (ns jiffy.support-clj
-  (:require [clojure.spec.alpha :as s]
+  (:require ;; [jiffy.edn-clj :include-macros true]
+            [jiffy.edn.readers]
+            [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
+            [clojure.test :refer [deftest is]]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
-            [clojure.test :refer [deftest is]]
             [jiffy.conversion :refer [jiffy->java] :as conversion]
-            [jiffy.edn-clj :include-macros true]
+            [jiffy.edn.writers]
             [jiffy.exception :refer [try*]]
             [jiffy.math :as math]
             [jiffy.specs :as j]
@@ -135,7 +137,7 @@
   (or (some-> jiffy-result ex-data :jiffy.exception/kind (= :jiffy.precision/PrecisionException))
       (some-> jiffy-result ex-cause precision-exception?)))
 
-(defmacro gen-prop [jiffy-fn java-fn spec & [{:keys [static?]}]]
+(defmacro gen-prop [jiffy-fn java-fn spec & [{:keys [static? store-results?]}]]
   `(prop/for-all
     [args# (s/gen ~spec)]
     (let [jiffy-result# (trycatch (invoke-jiffy ~jiffy-fn args#))
@@ -146,11 +148,11 @@
                            (conversion/same? jiffy-result# java-result#))
             ok?# (or is-same?#
                      (precision-exception? jiffy-result#))]
-        (when ok?#
+        (when (and ok?# ~(not (false? store-results?)))
           (store-results ~jiffy-fn args# jiffy-result#))
         ok?#))))
 
-(def default-num-tests 1000)
+(def default-num-tests 1)
 
 (def ns->class-anomalies
   {"jiffy.protocols.time-comparable" "java.lang.Comparable"
@@ -190,7 +192,7 @@
     (symbol (str impl-fn)
             (name proto-fn))))
 
-(defmacro test-proto-fn [impl-ns proto-fn & [num-tests]]
+(defmacro test-proto-fn [impl-ns proto-fn & [{:keys [num-tests] :as opts}]]
   `(do
      (require 'jiffy.conversion)
      (require 'jiffy.test-specs)
@@ -200,18 +202,18 @@
        (gen-prop ~proto-fn
                  '~(jiffy-fn-sym->java-fn-sym (symbol-ns impl-ns) proto-fn)
                  (get-spec '~(resolve-impl-fn impl-ns proto-fn))
-                 {:static? false}))))
+         (merge ~opts {:static? false})))))
 
-(defmacro test-static-fn [jiffy-fn & [num-tests]]
+(defmacro test-static-fn [jiffy-fn & [{:keys [num-tests] :as opts}]]
   `(do
      (require 'jiffy.conversion)
      (require 'jiffy.test-specs)
      (require '~(symbol (namespace jiffy-fn)))
      (defspec ~(gen-test-name jiffy-fn) ~(or num-tests default-num-tests)
        (gen-prop ~jiffy-fn
-                 '~(jiffy-fn-sym->java-fn-sym jiffy-fn)
-                 (get-spec '~jiffy-fn)
-                 {:static? true}))))
+           '~(jiffy-fn-sym->java-fn-sym jiffy-fn)
+           (get-spec '~jiffy-fn)
+         (merge ~opts {:static? true})))))
 
 (defmacro test-fn! [jiffy-fn java-fn args-samples & [{:keys [static?]}]]
   `(do

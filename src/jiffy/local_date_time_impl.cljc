@@ -13,6 +13,7 @@
             [jiffy.math :as math]
             [jiffy.asserts :as asserts]
             [jiffy.temporal.chrono-field :as chrono-field]
+            [jiffy.pattern :as pattern]
             [jiffy.month :as month]
             [jiffy.protocols.format.date-time-formatter :as date-time-formatter]))
 
@@ -77,10 +78,10 @@
 (s/def ::string string?)
 
 (def PATTERN
-  (delay (re-pattern
-          (str "(" @local-date-impl/PATTERN ")"
-               "T"
-               "(" @local-time-impl/PATTERN ")"))))
+  (delay (pattern/combine
+          "(" @local-date-impl/PATTERN ")"
+          "T"
+          "(" @local-time-impl/PATTERN ")")))
 
 (def-constructor parse ::local-date-time
   ([text ::string]

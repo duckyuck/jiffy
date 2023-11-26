@@ -48,7 +48,7 @@
    NOVEMBER []
    DECEMBER []])
 
-(def-constructor values (s/coll-of (partial satisfies? month/IMonth))
+(def-constructor values (s/coll-of #(satisfies? month/IMonth %))
   []
   (sort-by :ordinal (vals @enums)))
 

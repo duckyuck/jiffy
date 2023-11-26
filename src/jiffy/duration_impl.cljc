@@ -11,7 +11,7 @@
             [jiffy.specs :as j]))
 
 (def-record Duration ::duration
-  [seconds ::j/pos-long
+  [seconds ::j/long
    nanos ::j/nano-of-second])
 
 (def ZERO (->Duration 0 0))

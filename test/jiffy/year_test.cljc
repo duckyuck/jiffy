@@ -3,7 +3,10 @@
      :cljs (:require [jiffy.support-cljs :refer [test-proto-fn test-proto-fn! test-static-fn test-static-fn!] :as support :include-macros true])))
 
 (test-proto-fn jiffy.year jiffy.protocols.year/get-value)
+
+;; TODO: Fix this macro on cljs
 (test-proto-fn jiffy.year/is-leap--proto jiffy.protocols.year/is-leap)
+
 (test-proto-fn jiffy.year jiffy.protocols.year/is-valid-month-day)
 (test-proto-fn jiffy.year jiffy.protocols.year/length)
 (test-proto-fn jiffy.year jiffy.protocols.year/plus-years)

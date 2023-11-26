@@ -60,4 +60,4 @@
 
 (defn parse-long [s]
   (when (string? s)
-    (js/parseLong s 10)))
+    (js/parseInt s 10)))
