@@ -15,6 +15,8 @@
             [jiffy.test-specs]))
 
 :jiffy.edn-clj/keep
+:clojure.test.check.clojure-test/keep
+:clojure.test.check.properties/keep
 
 (defn partition-between
   [pred? coll]
@@ -152,7 +154,7 @@
           (store-results ~jiffy-fn args# jiffy-result#))
         ok?#))))
 
-(def default-num-tests 1)
+(def default-num-tests 1000)
 
 (def ns->class-anomalies
   {"jiffy.protocols.time-comparable" "java.lang.Comparable"
