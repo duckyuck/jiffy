@@ -18,9 +18,11 @@
                  :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
                  :extra-deps {com.bhauman/figwheel-main {:mvn/version "0.2.18"}
                               com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
-                              http-kit/http-kit {:mvn/version "2.7.0"}}}
+                              http-kit/http-kit {:mvn/version "2.7.0"}
+                              ring/ring-core {:mvn/version "1.12.2"}}}
            :server {:exec-fn jiffy.server/run
-                    :extra-deps {http-kit/http-kit {:mvn/version "2.7.0"}}}
+                    :extra-deps {http-kit/http-kit {:mvn/version "2.7.0"}
+                                 ring/ring-core {:mvn/version "1.12.2"}}}
            :flow-storm {:classpath-overrides {org.clojure/clojure nil}
                         :jvm-opts ["-XX:-OmitStackTraceInFastThrow"
                                    "-Dclojure.storm.instrumentEnable=true"

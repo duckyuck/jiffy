@@ -85,7 +85,7 @@
          (if (:failure (first res#))
            (throw (ex-info "Test failed" res#))
            (if-not (pos? (first res#))
-             (throw (ex-info "No tests run" {:fn ~proto-fn :corpus-count (count corpus/corpus)}))
+             (throw (ex-info "No tests run" {:fn ~proto-fn}))
              (is (pos? (first res#)))))))))
 
 (defmacro test-static-fn [fn & _rest]
@@ -97,5 +97,5 @@
          (if (:failure (first res#))
            (throw (ex-info "Test failed" res#))
            (if-not (pos? (first res#))
-             (throw (ex-info "No tests run" {:fn ~fn :corpus-count (count corpus/corpus)}))
+             (throw (ex-info "No tests run" {:fn ~fn}))
              (is (pos? (first res#)))))))))
