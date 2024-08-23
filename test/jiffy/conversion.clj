@@ -16,6 +16,7 @@
             [jiffy.period]
             [jiffy.precision :as precision]
             [jiffy.temporal.chrono-field]
+            [jiffy.temporal.chrono-unit :as chrono-unit]
             [jiffy.temporal.chrono-unit]
             [jiffy.temporal.temporal-query]
             [jiffy.temporal.value-range]
@@ -180,11 +181,12 @@
   (.withNanos (java.time.Duration/ofSeconds seconds) nanos))
 
 (defmethod same?* Duration [jiffy-object java-object]
-  (and (or (= (:seconds jiffy-object) (.getSeconds java-object))
-           (and (= (:seconds jiffy-object) precision/min-safe-integer)
-                (> (:seconds jiffy-object) (.getSeconds java-object)))
-           (and (= (:seconds jiffy-object) precision/max-safe-integer)
-                (< (:seconds jiffy-object) (.getSeconds java-object))))))
+  (or (and (= (:nanos jiffy-object) (.getNano java-object))
+             (or (= (:seconds jiffy-object) (.getSeconds java-object))
+                 (and (= (:seconds jiffy-object) precision/min-safe-integer)
+                      (> (:seconds jiffy-object) (.getSeconds java-object)))
+                 (and (= (:seconds jiffy-object) precision/max-safe-integer)
+                      (< (:seconds jiffy-object) (.getSeconds java-object)))))))
 
 (defmethod jiffy->java* DayOfWeek [{:keys [enum-name]}]
   (java.time.DayOfWeek/valueOf enum-name))
