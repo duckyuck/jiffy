@@ -8,7 +8,8 @@
             [jiffy.exception :refer [ex JavaArithmeticException]]
             [jiffy.local-time-constants :refer [MINUTES_PER_HOUR NANOS_PER_DAY NANOS_PER_MILLI NANOS_PER_SECOND SECONDS_PER_DAY SECONDS_PER_HOUR SECONDS_PER_MINUTE]]
             [jiffy.math :as math]
-            [jiffy.specs :as j]))
+            [jiffy.specs :as j]
+            [jiffy.precision :as precision]))
 
 (def-record Duration ::duration
   [seconds ::j/long
@@ -25,8 +26,9 @@
                    (big-decimal/move-point-right 9)
                    (big-decimal/to-big-integer-exact))
          [div rem] (big-integer/divide-and-reminder nanos BI_NANOS_PER_SECOND)]
-     (when (> (big-integer/bit-length div) 63)
-       (throw (ex JavaArithmeticException (str "Exceeds capacity of Duration: " nanos)
+     (when (> (big-integer/bit-length div) 53)
+       (throw (ex precision/PrecisionException
+                  (str "Exceeds capacity of Duration: " nanos)
                   {:big-decimal-seconds big-decimal-seconds :nanos nanos})))
      (of-seconds (big-integer/long-value div)
                  (big-integer/int-value rem))))
