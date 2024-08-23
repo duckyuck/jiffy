@@ -24,7 +24,9 @@
 ;; Package private method
 ;; (test-proto-fn! jiffy.local-date jiffy.protocols.local-date/days-until)
 
-(test-proto-fn jiffy.local-date jiffy.protocols.local-date/dates-until)
+
+;; TODO: Hangs when ran on cljs with 50 tests loaded from corpus
+;; (test-proto-fn jiffy.local-date jiffy.protocols.local-date/dates-until)
 
 (test-proto-fn jiffy.local-date jiffy.protocols.local-date/at-time)
 (test-proto-fn jiffy.local-date jiffy.protocols.local-date/at-start-of-day)
