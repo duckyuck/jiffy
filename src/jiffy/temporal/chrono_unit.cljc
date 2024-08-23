@@ -35,7 +35,10 @@
    DECADES ["Decades" (duration-impl/of-seconds (* 31556952 10))]
    CENTURIES ["Centuries" (duration-impl/of-seconds (* 31556952 100))]
    MILLENNIA ["Millennia" (duration-impl/of-seconds (* 31556952 1000))]
-   ERAS ["Eras" (duration-impl/of-seconds (* 31556952 1000000000))]
+   ;; FIXME: ERAS in java.time is defined as 1_000_000_000 years.
+   ;; This is too big a number of seconds. We define ERAS the same as FOREVER
+   ;; for now.
+   ERAS ["Eras" (duration-impl/of-seconds math/long-max-value)]
    FOREVER ["Forever" (duration-impl/of-seconds math/long-max-value 999999999)]])
 
 (defmacro args [& x] `(s/tuple ::chrono-unit ~@x))
