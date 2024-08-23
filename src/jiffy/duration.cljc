@@ -503,20 +503,20 @@
   (let [trailing-zeros (- 9 (num-digits n))]
    (* n (reduce * (repeat trailing-zeros 10)))))
 
-(defn parse-fraction [s]
+(defn parse-fraction [text s]
   (let [n (or (math/parse-int s) 0)
         leading-zeros (- (count s) (num-digits n))
         trailing-zeros (- 9 leading-zeros (num-digits n))]
     (try*
       (math/multiply-exact n (math/to-int-exact (reduce * (repeat trailing-zeros 10))))
       (catch :default e
-        (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text s}))))))
+        (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text text :s s}))))))
 
-(defn parse-number [multiplier s]
+(defn parse-number [text multiplier s]
   (try*
    (math/multiply-exact (or (math/parse-long s) 0) multiplier)
    (catch :default e
-     (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text s :multiplier multiplier} e)))))
+     (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text text :s s :multiplier multiplier} e)))))
 
 (s/def ::string string?)
 
@@ -531,11 +531,11 @@
       (let [[_ prefix days T hours minutes seconds fraction :as more] matches
             nums [days hours minutes seconds fraction]
             factor (if (= "-" prefix) -1 1)
-            multiplicands [(partial parse-number SECONDS_PER_DAY)
-                           (partial parse-number SECONDS_PER_HOUR)
-                           (partial parse-number SECONDS_PER_MINUTE)
-                           (partial parse-number 1)
-                           (partial parse-fraction)]
+            multiplicands [(partial parse-number text SECONDS_PER_DAY)
+                           (partial parse-number text SECONDS_PER_HOUR)
+                           (partial parse-number text SECONDS_PER_MINUTE)
+                           (partial parse-number text 1)
+                           (partial parse-fraction text)]
             [d h m s f :as parts] (map #(%1 %2) multiplicands nums)]
         (when (and T (not (some some? nums)))
           (throw (ex DateTimeParseException "Text cannot be parsed to a Duration" {:text text :error-index 0})))
